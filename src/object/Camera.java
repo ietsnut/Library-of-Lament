@@ -1,5 +1,7 @@
 package object;
 
+import engine.Renderer;
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Matrix4f;
@@ -18,10 +20,17 @@ public class Camera {
     private static float pitchAngle = 0;
     private static float bearingAngle = 0;
     private static float rollAngle = 0;
-    private static Quaternion pitch = new Quaternion();;
-    private static Quaternion bearing = new Quaternion();;
-    private static Quaternion roll = new Quaternion();;
-    private static Quaternion rotation  = new Quaternion();;
+    private static final Quaternion pitch = new Quaternion();;
+    private static final Quaternion bearing = new Quaternion();;
+    private static final Quaternion roll = new Quaternion();;
+    private static final Quaternion rotation  = new Quaternion();;
+
+    private static Vector3f rotationalVelocity = new Vector3f();
+    private static final float rotationalfriction = 0.8f;
+
+    private static float bobbingSpeed = 0.01f;
+    private static final float bobbingAmount = 0.15f;
+    private static double timeSinceStart = 0f;
 
     public static void reorient()
     {
@@ -54,14 +63,28 @@ public class Camera {
     }
 
     public static void move(Terrain terrain) {
-        bearing(Mouse.getDX() / 5f);
-        pitch(Mouse.getDY() / -5f);
+        if (Mouse.isButtonDown(1)) {
+            Mouse.setGrabbed(false);
+        }
+        if (Mouse.isButtonDown(0)) {
+            Mouse.setGrabbed(true);
+        }
+        if (!Mouse.isGrabbed()) {
+            return;
+        }
+        rotationalVelocity.x += Mouse.getDY() / -30f;
+        rotationalVelocity.y += Mouse.getDX() / 30f;
         if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
             roll(0.5f);
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
             roll(-0.5f);
         }
+        rotationalVelocity.scale(rotationalfriction);
+        bearing(rotationalVelocity.y);
+        pitch(rotationalVelocity.x);
+        if (Math.abs(rotationalVelocity.x) < 0.001f) rotationalVelocity.x = 0;
+        if (Math.abs(rotationalVelocity.y) < 0.001f) rotationalVelocity.y = 0;
         if (Math.signum(rollAngle) == 0) {
             rollAngle = 0;
             roll.setFromAxisAngle(new Vector4f(0f, 0f, 1f, rollAngle * PI_OVER_180));
@@ -78,27 +101,34 @@ public class Camera {
             roll.setFromAxisAngle(new Vector4f(0f, 0f, 1f, rollAngle * PI_OVER_180));
         }
         reorient();
+        float currentHeight = terrain.getHeightOfTerrain(position.x, position.z);
+        Vector3f movementDirection = new Vector3f(0, 0, 0);
         if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-            position.z -= direction.z / 4;
-            position.x += direction.x / 4;
-            //position.y = (float) (Math.sin(System.currentTimeMillis() / 1000.0) * 0.1f);
+            movementDirection.z -= direction.z / 16;
+            movementDirection.x += direction.x / 16;
         } else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-            position.z -= -direction.z / 4;
-            position.x -= direction.x / 4;
-            //position.y = (float) (Math.sin(System.currentTimeMillis() / 1000.0) * 0.1f);
+            movementDirection.z += direction.z / 16;
+            movementDirection.x -= direction.x / 16;
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
             Vector3f cross = Vector3f.cross(direction, new Vector3f(0,1,0), null);
-            position.z += cross.z / 4;
-            position.x -= cross.x / 4;
+            movementDirection.z += cross.z / 16;
+            movementDirection.x -= cross.x / 16;
         } else if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
             Vector3f cross = Vector3f.cross(direction, new Vector3f(0,1,0), null);
-            position.z -= cross.z / 4;
-            position.x += cross.x / 4;
+            movementDirection.z -= cross.z / 16;
+            movementDirection.x += cross.x / 16;
         }
-        position.y = terrain.getHeightOfTerrain(position.x, position.z) + 1.8f;
-        if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-            Mouse.setGrabbed(false);
+        Vector3f nextPosition = new Vector3f(position.x + movementDirection.x, 0, position.z + movementDirection.z);
+        float nextHeight = terrain.getHeightOfTerrain(nextPosition.x, nextPosition.z);
+        float heightDifference = nextHeight - currentHeight;
+        float speedAdjustmentFactor = 1 - heightDifference * 16;
+        position.x += movementDirection.x * speedAdjustmentFactor;
+        position.z += movementDirection.z * speedAdjustmentFactor;
+        float localbobbingSpeed = bobbingSpeed * speedAdjustmentFactor;
+        if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_D)) {
+            timeSinceStart += Renderer.delta * localbobbingSpeed;
+            position.y = currentHeight + 1.8f + (float) Math.sin(timeSinceStart) * bobbingAmount;
         }
     }
 

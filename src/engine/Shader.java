@@ -4,25 +4,30 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 import object.Camera;
 import object.Light;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.util.vector.Matrix;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 public abstract class Shader {
 
-    private int programID;
-    private int vertexShaderID;
-    private int fragmentShaderID;
+    public static final ArrayList<Shader> ALL = new ArrayList<>();
 
-    private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+    private final int programID;
+    private final int vertexShaderID;
+    private final int fragmentShaderID;
+
+    private static final FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
     private int location_projectionMatrix;
     private int location_viewMatrix;
+    private int location_modelMatrix;
 
     public Shader(String type) {
         vertexShaderID = loadShader("resource/shader/" + type + "Vertex.glsl", GL20.GL_VERTEX_SHADER);
@@ -37,11 +42,13 @@ public abstract class Shader {
         start();
         loadMatrix(location_projectionMatrix, Renderer.getProjectionMatrix());
         stop();
+        ALL.add(this);
     }
 
     protected void getAllUniformLocations() {
         location_projectionMatrix = getUniformLocation("projectionMatrix");
         location_viewMatrix = getUniformLocation("viewMatrix");
+        location_modelMatrix = getUniformLocation("modelMatrix");
     }
 
     protected int getUniformLocation(String uniformName){
@@ -56,13 +63,15 @@ public abstract class Shader {
         GL20.glUseProgram(0);
     }
 
-    public void clean() {
-        stop();
-        GL20.glDetachShader(programID, vertexShaderID);
-        GL20.glDetachShader(programID, fragmentShaderID);
-        GL20.glDeleteShader(vertexShaderID);
-        GL20.glDeleteShader(fragmentShaderID);
-        GL20.glDeleteProgram(programID);
+    public static void clean() {
+        for (Shader shader : Shader.ALL) {
+            shader.stop();
+            GL20.glDetachShader(shader.programID, shader.vertexShaderID);
+            GL20.glDetachShader(shader.programID, shader.fragmentShaderID);
+            GL20.glDeleteShader(shader.vertexShaderID);
+            GL20.glDeleteShader(shader.fragmentShaderID);
+            GL20.glDeleteProgram(shader.programID);
+        }
     }
 
     protected abstract void bindAttributes();
@@ -103,8 +112,8 @@ public abstract class Shader {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
             while((line = reader.readLine())!=null){
-                if (line.startsWith("#define MAX_LIGHTS")) {
-                    line = "#define MAX_LIGHTS " + Light.ALL.size();
+                if (line.startsWith("#define LIGHTS")) {
+                    line = "#define LIGHTS " + Light.ALL.size();
                 }
                 shaderSource.append(line).append("//\n");
             }
@@ -124,12 +133,14 @@ public abstract class Shader {
         return shaderID;
     }
 
-    public void loadViewMatrix() {
-        loadMatrix(location_viewMatrix, Camera.getViewMatrix());
+    protected void loadViewMatrix(Matrix4f matrix) {
+        loadMatrix(location_viewMatrix, matrix);
     }
 
-    public void loadViewMatrix(Matrix4f matrix4f) {
-        loadMatrix(location_viewMatrix, matrix4f);
+    protected void loadModelMatrix(Matrix4f matrix) {
+        loadMatrix(location_modelMatrix, matrix);
     }
+
+    protected void loadProjectionMatrix(Matrix4f matrix) { loadMatrix(location_projectionMatrix, matrix); }
 
 }

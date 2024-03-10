@@ -2,26 +2,25 @@ package object;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.net.IDN;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
 
 public abstract class Entity {
 
-    public static final ArrayList<Entity> ALL = new ArrayList<>();
+    public static final Map<Class<?>, List<Entity>> ALL = new HashMap<Class<?>, List<Entity>>();
 
-    public int ID;
     public int vaoID;
     public List<Integer> vboIDs = new ArrayList<Integer>();
 
@@ -30,8 +29,11 @@ public abstract class Entity {
     public float[] normals;
     public float[] texCoords;
 
+    public Vector3f position = new Vector3f(0, 0, 0);
+    public Vector3f rotation = new Vector3f(0, 0, 0);
+    public Vector3f scale = new Vector3f(1, 1, 1);
+
     public Entity(String name) {
-        this.ID = ALL.size();
         vaoID = glGenVertexArrays();
         glBindVertexArray(vaoID);
         load(name);
@@ -48,7 +50,10 @@ public abstract class Entity {
             bindFloatBuffer(2, 3, normals);
         }
         glBindVertexArray(0);
-        ALL.add(this);
+        if (!ALL.containsKey(getClass())) {
+            ALL.put(getClass(), new ArrayList<>());
+        }
+        ALL.get(getClass()).add(this);
     }
 
     protected abstract void load(String name);
@@ -73,6 +78,35 @@ public abstract class Entity {
         glVertexAttribPointer(attributeNumber, coordinateSize, GL_FLOAT, false, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         vboIDs.add(vboID);
+    }
+
+    public static void clean() {
+        for (List<Entity> entities : Entity.ALL.values()) {
+            for (Entity entity : entities) {
+                glDeleteVertexArrays(entity.vaoID);
+                for (int vbo : entity.vboIDs) {
+                    glDeleteBuffers(vbo);
+                }
+                if (entity instanceof Sky sky) {
+                    glDeleteTextures(sky.texID);
+                }
+            }
+        }
+    }
+
+    public static final Vector3f AXIS_X = new Vector3f(1, 0, 0);
+    public static final Vector3f AXIS_Y = new Vector3f(0, 1, 0);
+    public static final Vector3f AXIS_Z = new Vector3f(0, 0, 1);
+
+    public Matrix4f getModelMatrix() {
+        Matrix4f matrix = new Matrix4f();
+        matrix.setIdentity();
+        matrix.translate(position);
+        matrix.rotate((float) Math.toRadians(rotation.x), AXIS_X);
+        matrix.rotate((float) Math.toRadians(rotation.y), AXIS_Y);
+        matrix.rotate((float) Math.toRadians(rotation.z), AXIS_Z);
+        matrix.scale(new Vector3f(scale.x, scale.y, scale.z));
+        return matrix;
     }
 
 }

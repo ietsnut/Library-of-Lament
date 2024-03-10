@@ -1,45 +1,28 @@
 #version 400 core
+#define LIGHTS 2
 
-in vec3 position;
-in vec2 textureCoordinates;
-in vec3 normal;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 uv;
+layout(location = 2) in vec3 normal;
 
-out vec2 pass_textureCoordinates;
-out vec3 surfaceNormal;
-out vec3 toLightVector[4];
-out vec3 toCameraVector;
+out vec2 textureCoord;
 out float visibility;
+out vec3 fragPosition;
 
-uniform mat4 transformationMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform vec3 lightPosition[4];
-uniform float useFakeLighting;
 
-const float density = 0.007;
-const float gradient = 1.5;
+const float fogDensity = 0.007;
+const float fogGradient = 1.5;
 
-void main(void){
-
-	vec4 worldPosition = transformationMatrix * vec4(position,1.0);
+void main(void) {
+	vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+	fragPosition = worldPosition.xyz;
 	vec4 positionRelativeToCam = viewMatrix * worldPosition;
 	gl_Position = projectionMatrix * positionRelativeToCam;
-	pass_textureCoordinates = textureCoordinates;
-
-	/*
-	vec3 actualNormal = normal;
-	if (useFakeLighting > 0.5) {
-	    actualNormal = vec3(0.0, 1.0, 0.0);
-	}
-
-	surfaceNormal = (transformationMatrix * vec4(actualNormal, 0.0)).xyz;
-	for (int i = 0; i < 4; i++) {
-	    toLightVector[i] = lightPosition[i] - worldPosition.xyz;
-	}
-	toCameraVector = (inverse(viewMatrix) * vec4(0.0,0.0,0.0,1.0)).xyz - worldPosition.xyz;
-
-    float distance = length(positionRelativeToCam.xyz);
-    visibility = exp(-pow((distance*density), gradient));
-    visibility = clamp(visibility, 0.0, 1.0);*/
-
+	textureCoord = uv;
+	float distance = length(positionRelativeToCam.xyz);
+	visibility = exp(-pow((distance * fogDensity), fogGradient));
+	visibility = clamp(visibility, 0.0, 1.0);
 }

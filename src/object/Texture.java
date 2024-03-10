@@ -19,13 +19,11 @@ import static org.lwjgl.opengl.GL14.GL_GENERATE_MIPMAP;
 public class Texture {
 
     public static final ArrayList<Texture> ALL = new ArrayList<>();
-    public final int ID;
     public final int textureID;
     public final BufferedImage image;
     public ByteBuffer buffer;
 
     public Texture(String name) {
-        this.ID = ALL.size();
         try {
             image = ImageIO.read(new FileInputStream(name));
         } catch (IOException e) {
@@ -62,6 +60,12 @@ public class Texture {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
         ALL.add(this);
+    }
+
+    public static void clean() {
+        for (Texture texture : Texture.ALL) {
+            glDeleteTextures(texture.textureID);
+        }
     }
 
 }

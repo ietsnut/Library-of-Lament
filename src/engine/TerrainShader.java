@@ -18,12 +18,8 @@ import static org.lwjgl.opengl.GL13.*;
 
 public class TerrainShader extends Shader {
 
-    private int location_transformationMatrix;
     private int[] location_lightPosition;
-    private int[] location_lightIntensity;
-    private int location_shineDamper;
-    private int location_reflectivity;
-    private int location_skyColour;
+    private int[] location_lightAttenuation;
     private int location_backgroundTexture;
     private int location_rTexture;
     private int location_gTexture;
@@ -58,12 +54,11 @@ public class TerrainShader extends Shader {
         glBindTexture(GL_TEXTURE_2D, terrain.textureB.textureID);
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, terrain.blendMap.textureID);
-        loadShineVariables(1, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        super.loadMatrix(location_transformationMatrix, terrain.getTransformationMatrix());
+        loadModelMatrix(terrain.getModelMatrix());
         GL11.glDrawElements(GL11.GL_TRIANGLES, terrain.indices.length, GL11.GL_UNSIGNED_INT, 0);
         GL20.glDisableVertexAttribArray(0);
         GL20.glDisableVertexAttribArray(1);
@@ -74,25 +69,21 @@ public class TerrainShader extends Shader {
     @Override
     protected void bindAttributes() {
         super.bindAttribute(0, "position");
-        super.bindAttribute(1, "textureCoordinates");
+        super.bindAttribute(1, "uv");
         super.bindAttribute(2, "normal");
     }
 
     @Override
     protected void getAllUniformLocations() {
         super.getAllUniformLocations();
-        location_transformationMatrix = super.getUniformLocation("transformationMatrix");
         location_lightPosition = new int[Light.ALL.size()];
-        location_lightIntensity = new int[Light.ALL.size()];
+        location_lightAttenuation = new int[Light.ALL.size()];
         for (int i = 0; i < Light.ALL.size(); i++) {
             location_lightPosition[i] = super.getUniformLocation("lightPosition[" + i + "]");
         }
         for (int i = 0; i < Light.ALL.size(); i++) {
-            location_lightIntensity[i] = super.getUniformLocation("attenuation[" + i + "]");
+            location_lightAttenuation[i] = super.getUniformLocation("lightAttenuation[" + i + "]");
         }
-        location_shineDamper = super.getUniformLocation("shineDamper");
-        location_reflectivity = super.getUniformLocation("reflectivity");
-        location_skyColour = super.getUniformLocation("skyColour");
         location_backgroundTexture = super.getUniformLocation("backgroundTexture");
         location_rTexture = super.getUniformLocation("rTexture");
         location_gTexture = super.getUniformLocation("gTexture");
@@ -100,25 +91,11 @@ public class TerrainShader extends Shader {
         location_blendMap = super.getUniformLocation("blendMap");
     }
 
-    public void loadSkyColour(float r, float g, float b) {
-        super.loadVector(location_skyColour, new Vector3f(r, g, b));
-    }
-
+    //TODO: REPLACE WITH SCENE SPECIFIC ARRAYS
     public void loadLights(List<Light> lights) {
         for (int i = 0; i < Light.ALL.size(); i++) {
-            if (i < lights.size()) {
-                super.loadVector(location_lightPosition[i], lights.get(i).position);
-                super.loadVector(location_lightIntensity[i], lights.get(i).intensity);
-            } else {
-                super.loadVector(location_lightPosition[i], new Vector3f(0, 0, 0));
-                super.loadVector(location_lightIntensity[i], new Vector3f(1, 0, 0));
-            }
+            super.loadVector(location_lightPosition[i], lights.get(i).position);
+            super.loadVector(location_lightAttenuation[i], lights.get(i).attenuation);
         }
     }
-
-    public void loadShineVariables(float damper, float reflectivity) {
-        super.loadFloat(location_shineDamper, damper);
-        super.loadFloat(location_reflectivity, reflectivity);
-    }
-
 }

@@ -21,19 +21,12 @@ public class Model extends Entity {
     public Obj obj;
 
     public Texture texture;
-
-    public Vector3f position = new Vector3f(0, 0, 0);
-    public Vector3f rotation = new Vector3f(0, 0, 0);
-    public Vector3f scale = new Vector3f(1, 1, 1);
     public float collider;
 
     public Model(String name) {
         super(name);
         texture = new Texture("resource/texture/" + name + ".png");
-        System.out.println(Arrays.toString(texCoords));
-        System.out.println(texture.image.getHeight());
     }
-
 
     @Override
     protected void load(String name) {
@@ -71,21 +64,6 @@ public class Model extends Entity {
     public Model collider(float radius) {
         this.collider = radius;
         return this;
-    }
-
-    public static final Vector3f AXIS_X = new Vector3f(1, 0, 0);
-    public static final Vector3f AXIS_Y = new Vector3f(0, 1, 0);
-    public static final Vector3f AXIS_Z = new Vector3f(0, 0, 1);
-
-    public Matrix4f getTransformationMatrix() {
-        Matrix4f matrix = new Matrix4f();
-        matrix.setIdentity();
-        matrix.translate(position);
-        matrix.rotate((float) Math.toRadians(rotation.x), AXIS_X);
-        matrix.rotate((float) Math.toRadians(rotation.y), AXIS_Y);
-        matrix.rotate((float) Math.toRadians(rotation.z), AXIS_Z);
-        matrix.scale(new Vector3f(scale.x, scale.y, scale.z));
-        return matrix;
     }
 
 }

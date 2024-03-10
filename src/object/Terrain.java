@@ -23,12 +23,10 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class Terrain extends Entity {
 
-    public static final float SIZE = 800;
-    public static final float MAX_HEIGHT = 40;
+    public static final float SIZE = 128;
+    public static final float MAX_HEIGHT = 8;
     public static final float MAX_PIXEL_COLOUR = 256 * 256 * 256;
 
-    private float x;
-    private float z;
     public final Texture textureR;
     public final Texture textureG;
     public final Texture textureB;
@@ -39,8 +37,8 @@ public class Terrain extends Entity {
 
     public Terrain(String name) {
         super(name);
-        this.x = -1 * SIZE;
-        this.z = -1 * SIZE;
+        this.position.x = (SIZE / -2);
+        this.position.z = (SIZE / -2);
         this.blendMap = new Texture("resource/terrain/" + name + "_blendMap.png");
         this.texture = new Texture("resource/terrain/" + name + ".png");
         this.textureR = new Texture("resource/terrain/" + name + "_R.png");
@@ -103,8 +101,8 @@ public class Terrain extends Entity {
     }
 
     public float getHeightOfTerrain(float worldX, float worldZ) {
-        float terrainX = worldX - this.x;
-        float terrainZ = worldZ - this.z;
+        float terrainX = worldX - this.position.x;
+        float terrainZ = worldZ - this.position.z;
         float gridSquareSize = SIZE / ((float) heights.length - 1);
         int gridX = (int) Math.floor(terrainX / gridSquareSize);
         int gridZ = (int) Math.floor(terrainZ / gridSquareSize);
@@ -128,11 +126,11 @@ public class Terrain extends Entity {
         return l1 * p1.y + l2 * p2.y + l3 * p3.y;
     }
 
-    public Matrix4f getTransformationMatrix() {
+    @Override
+    public Matrix4f getModelMatrix() {
         Matrix4f matrix = new Matrix4f();
         matrix.setIdentity();
-        matrix.translate(new Vector3f(x, 0, z));
-        matrix.scale(new Vector3f(1, 1, 1));
+        matrix.translate(new Vector3f(position.x, 0, position.z));
         return matrix;
     }
 

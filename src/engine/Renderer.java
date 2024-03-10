@@ -1,71 +1,62 @@
 package engine;
 
 import object.*;
+import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 
 public class Renderer {
 
     private static final float NEAR_PLANE = 0.01f;
-    private static final float FAR_PLANE = 1000;
-
-    private static final float RED = 0.5444f;
-    private static final float GREEN = 0.62f;
-    private static final float BLUE = 0.69f;
+    private static final float FAR_PLANE = 2000;
 
     private final ModelShader modelShader;
     private final TerrainShader terrainShader;
-    private final SkyboxShader skyBoxShader;
+    private final SkyShader skyShader;
+
+    public static float delta;
+    private static float lastTime;
 
     public Renderer() {
         //GL11.glEnable(GL11.GL_CULL_FACE);
         //GL11.glCullFace(GL11.GL_BACK);
-
         modelShader = new ModelShader();
         terrainShader = new TerrainShader();
-        skyBoxShader = new SkyboxShader();
+        skyShader = new SkyShader();
     }
 
     public void render(List<Light> lights, List<Model> models, Terrain terrain, Sky sky) {
+        float currentFrameTime = (Sys.getTime() * 1000f) / Sys.getTimerResolution();
+        delta = currentFrameTime - lastTime;
+        lastTime = currentFrameTime;
+        Camera.move(terrain);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        GL11.glClearColor(RED, GREEN, BLUE, 1);
+        GL11.glClearColor(0, 0, 0, 1);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         modelShader.start();
-        modelShader.loadSkyColour(RED, GREEN, BLUE);
         modelShader.loadLights(lights);
-        modelShader.loadViewMatrix();
+        modelShader.loadViewMatrix(Camera.getViewMatrix());
         modelShader.render(models);
         modelShader.stop();
         terrainShader.start();
-        terrainShader.loadSkyColour(RED, GREEN, BLUE);
         terrainShader.loadLights(lights);
-        terrainShader.loadViewMatrix();
+        terrainShader.loadViewMatrix(Camera.getViewMatrix());
         terrainShader.render(terrain);
         terrainShader.stop();
-        skyBoxShader.render(sky);
+        skyShader.render(sky);
     }
 
     public void clean() {
-        for (Entity entity : Entity.ALL) {
-            glDeleteVertexArrays(entity.vaoID);
-            for (int vbo : entity.vboIDs) {
-                glDeleteBuffers(vbo);
-            }
-        }
-        for (Texture texture : Texture.ALL) {
-            glDeleteTextures(texture.textureID);
-        }
-        modelShader.clean();
-        terrainShader.clean();
-        skyBoxShader.clean();
+        Entity.clean();
+        Texture.clean();
+        Shader.clean();
     }
 
     public static Matrix4f getProjectionMatrix() {
