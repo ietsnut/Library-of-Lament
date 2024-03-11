@@ -1,14 +1,14 @@
 #version 400 core
 
-in vec3 textureCoord;
+in vec2 textureCoord;
 
 out vec4 color;
 
-uniform samplerCube cubeMap;
+uniform sampler2D modelTexture;
 
 void main(void){
 
-    color = texture(cubeMap, textureCoord);
+    color = texture(modelTexture, textureCoord);
     if (color.a < 0.5) {
         discard;
     }

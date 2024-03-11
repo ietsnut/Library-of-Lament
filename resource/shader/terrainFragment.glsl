@@ -33,4 +33,5 @@ void main(void) {
     }
 
     color = vec4(baseColor.rgb * lightEffect, baseColor.a) * visibility;
+
 }

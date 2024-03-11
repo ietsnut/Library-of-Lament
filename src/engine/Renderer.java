@@ -46,6 +46,7 @@ public class Renderer {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        skyShader.render(sky);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         modelShader.start();
         modelShader.loadLights(lights);
@@ -57,7 +58,7 @@ public class Renderer {
         terrainShader.loadViewMatrix(Camera.getViewMatrix());
         terrainShader.render(terrain);
         terrainShader.stop();
-        skyShader.render(sky);
+
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
         GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
         fboShader.render();

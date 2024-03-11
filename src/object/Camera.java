@@ -128,7 +128,7 @@ public class Camera {
         float localbobbingSpeed = bobbingSpeed * speedAdjustmentFactor;
         if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_D)) {
             timeSinceStart += Renderer.delta * localbobbingSpeed;
-            position.y = currentHeight + 1.8f + (float) Math.sin(timeSinceStart) * bobbingAmount;
+            position.y = currentHeight + 2.4f + (float) Math.sin(timeSinceStart) * bobbingAmount;
         }
     }
 

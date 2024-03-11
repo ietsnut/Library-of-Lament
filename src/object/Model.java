@@ -18,17 +18,21 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Model extends Entity {
 
-    public Obj obj;
-
     public float collider;
 
     public Model(String name) {
         super(name);
-        texture = new Texture("resource/texture/" + name + ".png");
+        this.texture = new Texture("resource/texture/" + name + ".png");
+    }
+
+    public Model(String name, String texture) {
+        super(name);
+        this.texture = new Texture(texture);
     }
 
     @Override
     protected void load(String name) {
+        Obj obj;
         try {
             obj = ObjUtils.convertToRenderable(ObjReader.read(new FileInputStream("resource/model/" + name + ".obj")));
         } catch (IOException e) {

@@ -36,21 +36,26 @@ public class Game {
 
         Terrain terrain1 = new Terrain("1");
         Model model1 = new Model("cottage");
-        model1.position(0, terrain1.getHeightOfTerrain(0, 0), 0);
+        model1.position(50, terrain1.getHeightOfTerrain(50, 50), 50);
+
+
         Decal billboard = new Decal("1");
         billboard.scale(3);
         //light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.14f, 0.007f));
-        //Light light2 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.14f, 0.007f));
-        Light light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.1f, 0.01f));
+        Light light2 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.1f, 0.01f));
+        light2.position = new Vector3f(billboard.position).translate(0, 2, 0);
+        Light light3 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.1f, 0.01f));
+        light3.position = new Vector3f(model1.position).translate(0, 20, 0);
+        Light light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.01f, 0.001f));
         Sky sky1 = new Sky("1");
 
         Renderer renderer = new Renderer();
         Mouse.setGrabbed(true);
 
         while (!Display.isCloseRequested()) {
-            sky1.rotation.y += 0.01f;
+            //sky1.rotation.y += 0.01f;
             light1.position = new Vector3f(Camera.position);
-            renderer.render(List.of(light1), List.of(billboard), terrain1, sky1);
+            renderer.render(List.of(light1, light2, light3), List.of(billboard, model1), terrain1, sky1);
             Display.sync(FPS_CAP);
             Display.update();
         }
