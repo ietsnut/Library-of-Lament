@@ -65,7 +65,7 @@ public class Dither {
         return closest;
     }
 
-    public static void floydSteinbergDithering(BufferedImage img) {
+    public static BufferedImage floydSteinbergDithering(BufferedImage img) {
 
         C3[] palette = new C3[] {
                 new C3(  0,   0,   0), // black
@@ -115,6 +115,6 @@ public class Dither {
                 }
             }
         }
-
+        return img;
     }
 }

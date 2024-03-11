@@ -30,16 +30,18 @@ public class Game {
             Display.setTitle(TITLE);
             Display.setVSyncEnabled(true);
         } catch (LWJGLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         GL11.glViewport(0, 0, WIDTH, HEIGHT);
 
         Terrain terrain1 = new Terrain("1");
         Model model1 = new Model("cottage");
         model1.position(0, terrain1.getHeightOfTerrain(0, 0), 0);
-        Light light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.14f, 0.07f));
-        Light light2 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.14f, 0.07f));
-        light2.position = new Vector3f(model1.position).translate(0, 1, 0);
+        Decal billboard = new Decal("1");
+        billboard.scale(3);
+        //light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.14f, 0.007f));
+        //Light light2 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.14f, 0.007f));
+        Light light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.1f, 0.01f));
         Sky sky1 = new Sky("1");
 
         Renderer renderer = new Renderer();
@@ -48,7 +50,7 @@ public class Game {
         while (!Display.isCloseRequested()) {
             sky1.rotation.y += 0.01f;
             light1.position = new Vector3f(Camera.position);
-            renderer.render(List.of(light1, light2), List.of(model1), terrain1, sky1);
+            renderer.render(List.of(light1), List.of(billboard), terrain1, sky1);
             Display.sync(FPS_CAP);
             Display.update();
         }

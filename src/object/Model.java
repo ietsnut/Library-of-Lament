@@ -20,7 +20,6 @@ public class Model extends Entity {
 
     public Obj obj;
 
-    public Texture texture;
     public float collider;
 
     public Model(String name) {
@@ -39,26 +38,6 @@ public class Model extends Entity {
         vertices = ObjData.getVerticesArray(obj);
         texCoords = ObjData.getTexCoordsArray(obj, 2, true);
         normals = ObjData.getNormalsArray(obj);
-    }
-
-    public Model position(float x, float y, float z) {
-        this.position = new Vector3f(x, y, z);
-        return this;
-    }
-
-    public Model rotation(float x, float y, float z) {
-        this.rotation = new Vector3f(x, y, z);
-        return this;
-    }
-
-    public Model scale(float x, float y, float z) {
-        this.scale = new Vector3f(x, y, z);
-        return this;
-    }
-
-    public Model scale(float s) {
-        this.scale = new Vector3f(s, s, s);
-        return this;
     }
 
     public Model collider(float radius) {

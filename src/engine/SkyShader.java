@@ -22,7 +22,7 @@ public class SkyShader extends Shader {
         GL30.glBindVertexArray(sky.vaoID);
         GL20.glEnableVertexAttribArray(0);
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
-        GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, sky.texID);
+        GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, sky.texture.ID);
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, sky.vertices.length / 3);
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);

@@ -1,6 +1,7 @@
 package object;
 
 import org.lwjgl.opengl.GL11;
+import tool.Dither;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,20 +17,20 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL14.GL_GENERATE_MIPMAP;
 
-public class Texture {
+public class Texture  {
 
     public static final ArrayList<Texture> ALL = new ArrayList<>();
-    public final int textureID;
-    public final BufferedImage image;
+    public final int ID;
     public ByteBuffer buffer;
+    public BufferedImage image;
 
     public Texture(String name) {
-        try {
-            image = ImageIO.read(new FileInputStream(name));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this(load(name));
+    }
+
+    public Texture(BufferedImage image) {
         int[] pixels = null;
+        this.image = image;
         int width = image.getWidth();
         int height = image.getHeight();
         pixels = new int[width * height];
@@ -48,10 +49,10 @@ public class Texture {
             data[i] = a << 24 | b << 16 | g << 8 | r;
         }
         buffer.flip();
-        this.textureID = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, this.textureID);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        this.ID = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, this.ID);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
@@ -62,10 +63,21 @@ public class Texture {
         ALL.add(this);
     }
 
-    public static void clean() {
-        for (Texture texture : Texture.ALL) {
-            glDeleteTextures(texture.textureID);
+    public Texture() {
+        this.ID = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, this.ID);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        ALL.add(this);
+    }
+
+    private static BufferedImage load(String name) {
+        BufferedImage image;
+        try {
+            image = ImageIO.read(new FileInputStream(name));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        return image;
     }
 
 }

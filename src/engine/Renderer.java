@@ -2,14 +2,15 @@ package engine;
 
 import object.*;
 import org.lwjgl.Sys;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.*;
 import org.lwjgl.util.vector.Matrix4f;
 
 import java.util.List;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
 
 public class Renderer {
 
@@ -19,9 +20,12 @@ public class Renderer {
     private final ModelShader modelShader;
     private final TerrainShader terrainShader;
     private final SkyShader skyShader;
+    private final FBOShader fboShader;
 
     public static float delta;
     private static float lastTime;
+
+    public static final FBO fbo = new FBO(Display.getWidth(), Display.getHeight());
 
     public Renderer() {
         //GL11.glEnable(GL11.GL_CULL_FACE);
@@ -29,16 +33,19 @@ public class Renderer {
         modelShader = new ModelShader();
         terrainShader = new TerrainShader();
         skyShader = new SkyShader();
+        fboShader = new FBOShader();
     }
 
-    public void render(List<Light> lights, List<Model> models, Terrain terrain, Sky sky) {
+    public void render(List<Light> lights, List<Entity> models, Terrain terrain, Sky sky) {
         float currentFrameTime = (Sys.getTime() * 1000f) / Sys.getTimerResolution();
         delta = currentFrameTime - lastTime;
         lastTime = currentFrameTime;
         Camera.move(terrain);
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbo.frameBuffer);
+        GL11.glViewport(0, 0, fbo.width, fbo.height);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        GL11.glClearColor(0, 0, 0, 1);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         modelShader.start();
         modelShader.loadLights(lights);
@@ -51,11 +58,27 @@ public class Renderer {
         terrainShader.render(terrain);
         terrainShader.stop();
         skyShader.render(sky);
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+        GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+        fboShader.render();
     }
 
     public void clean() {
-        Entity.clean();
-        Texture.clean();
+        for (List<Entity> entities : Entity.ALL.values()) {
+            for (Entity entity : entities) {
+                glDeleteVertexArrays(entity.vaoID);
+                for (int vbo : entity.vboIDs) {
+                    glDeleteBuffers(vbo);
+                }
+                if (entity instanceof FBO fbo) {
+                    glDeleteFramebuffers(fbo.frameBuffer);
+                    glDeleteRenderbuffers(fbo.depthBuffer);
+                }
+            }
+        }
+        for (Texture texture : Texture.ALL) {
+            glDeleteTextures(texture.ID);
+        }
         Shader.clean();
     }
 

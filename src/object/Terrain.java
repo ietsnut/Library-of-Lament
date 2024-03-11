@@ -31,7 +31,6 @@ public class Terrain extends Entity {
     public final Texture textureG;
     public final Texture textureB;
     public final Texture blendMap;
-    public final Texture texture;
     public Texture heightMap;
     public float[][] heights;
 

@@ -1,12 +1,8 @@
 package object;
 
-import java.util.Arrays;
+public class Billboard extends Entity {
 
-public class Quad extends Entity {
-
-    public Texture texture;
-
-    public Quad(String name) {
+    public Billboard(String name) {
         super(name);
         texture = new Texture("resource/texture/" + name + ".png");
     }

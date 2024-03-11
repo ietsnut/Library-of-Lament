@@ -19,7 +19,7 @@ public abstract class Shader {
 
     public static final ArrayList<Shader> ALL = new ArrayList<>();
 
-    private final int programID;
+    final int programID;
     private final int vertexShaderID;
     private final int fragmentShaderID;
 

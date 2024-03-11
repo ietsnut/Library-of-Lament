@@ -22,8 +22,9 @@ void main(void) {
     for(int i = 0; i < LIGHTS; i++) {
         float distance = length(fragPosition  - lightPosition[i]);
         float attenuation = 1.0 / (lightAttenuation[i].x + lightAttenuation[i].y * distance + lightAttenuation[i].z * distance * distance);
-        lightEffect += vec3(attenuation); // Since light color is white
+        lightEffect += vec3(attenuation);
     }
 
     color = vec4(baseColor.rgb * lightEffect, baseColor.a) * visibility;
+
 }

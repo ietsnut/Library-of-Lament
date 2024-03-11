@@ -1,14 +1,12 @@
 package engine;
 
-import object.Camera;
+import object.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
-import object.Light;
-import object.Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,15 +23,15 @@ public class ModelShader extends Shader {
         super("model");
     }
 
-    public void render(List<Model> models) {
-        for (Model model : models) {
+    public void render(List<Entity> models) {
+        for (Entity model : models) {
             GL30.glBindVertexArray(model.vaoID);
             GL20.glEnableVertexAttribArray(0);
             GL20.glEnableVertexAttribArray(1);
             GL20.glEnableVertexAttribArray(2);
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
             glEnable(GL_TEXTURE_2D);
-            GL11.glBindTexture(GL_TEXTURE_2D, model.texture.textureID);
+            GL11.glBindTexture(GL_TEXTURE_2D, model.texture.ID);
             loadModelMatrix(model.getModelMatrix());
             GL11.glDrawElements(GL11.GL_TRIANGLES, model.indices.length, GL11.GL_UNSIGNED_INT, 0);
             GL20.glDisableVertexAttribArray(0);

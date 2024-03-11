@@ -14,8 +14,8 @@ public class Camera {
     private final static float PI_OVER_180 = 0.0174532925f;
 
     public static float FOV = 70;
-    public static Vector3f position = new Vector3f();
-    public static Vector3f direction = new Vector3f();
+    public static Vector3f position = new Vector3f(0, 0, 0);
+    public static Vector3f direction = new Vector3f(0, 0, 0);
 
     private static float pitchAngle = 0;
     private static float bearingAngle = 0;
@@ -122,7 +122,7 @@ public class Camera {
         Vector3f nextPosition = new Vector3f(position.x + movementDirection.x, 0, position.z + movementDirection.z);
         float nextHeight = terrain.getHeightOfTerrain(nextPosition.x, nextPosition.z);
         float heightDifference = nextHeight - currentHeight;
-        float speedAdjustmentFactor = 1 - heightDifference * 16;
+        float speedAdjustmentFactor = 1 - heightDifference * 8;
         position.x += movementDirection.x * speedAdjustmentFactor;
         position.z += movementDirection.z * speedAdjustmentFactor;
         float localbobbingSpeed = bobbingSpeed * speedAdjustmentFactor;
