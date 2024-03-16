@@ -74,16 +74,12 @@ public class Sky {
         public Layer(String name) {
             super(name);
             texture = new Texture("resource/sky/" + name + ".png");
-            glBindTexture(GL_TEXTURE_2D, texture.ID);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         @Override
         protected void load(String name) {
 
-            float radius = Terrain.SIZE * (layers.size() * 2 + 1);
+            float radius = Terrain.SIZE + (layers.size() * (Terrain.SIZE/12) + 1);
             height = (float) (2 * radius * Math.sin(Math.PI / sides));
             position.y = height / 2;
 

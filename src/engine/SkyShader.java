@@ -19,8 +19,10 @@ public class SkyShader extends Shader {
     }
 
     public void render(Sky sky) {
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
         start();
-        for (Sky.Layer layer : sky.layers) {
+        for (int i = sky.layers.size() - 1; i >= 0; i--) {
+            Sky.Layer layer = sky.layers.get(i);
             GL30.glBindVertexArray(layer.vaoID);
             GL20.glEnableVertexAttribArray(0);
             GL20.glEnableVertexAttribArray(1);
@@ -37,6 +39,7 @@ public class SkyShader extends Shader {
             GL30.glBindVertexArray(0);
         }
         stop();
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
     }
 
     @Override
@@ -45,4 +48,12 @@ public class SkyShader extends Shader {
         super.bindAttribute(1, "uv");
     }
 
+    @Override
+    protected void loadViewMatrix(Matrix4f matrix) {
+        Matrix4f viewMatrix = new Matrix4f(matrix);
+        matrix.m30 = 0;
+        matrix.m31 = 0;
+        matrix.m32 = 0;
+        super.loadViewMatrix(viewMatrix);
+    }
 }

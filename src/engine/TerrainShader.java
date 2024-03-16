@@ -20,6 +20,7 @@ public class TerrainShader extends Shader {
 
     private int[] location_lightPosition;
     private int[] location_lightAttenuation;
+    private int[] location_lightIntensity;
     private int location_backgroundTexture;
     private int location_rTexture;
     private int location_gTexture;
@@ -75,11 +76,11 @@ public class TerrainShader extends Shader {
         super.getAllUniformLocations();
         location_lightPosition = new int[Light.ALL.size()];
         location_lightAttenuation = new int[Light.ALL.size()];
+        location_lightIntensity = new int[Light.ALL.size()];
         for (int i = 0; i < Light.ALL.size(); i++) {
             location_lightPosition[i] = super.getUniformLocation("lightPosition[" + i + "]");
-        }
-        for (int i = 0; i < Light.ALL.size(); i++) {
             location_lightAttenuation[i] = super.getUniformLocation("lightAttenuation[" + i + "]");
+            location_lightIntensity[i] = super.getUniformLocation("lightIntensity[" + i + "]");
         }
         location_backgroundTexture = super.getUniformLocation("backgroundTexture");
         location_rTexture = super.getUniformLocation("rTexture");
@@ -93,6 +94,7 @@ public class TerrainShader extends Shader {
         for (int i = 0; i < Light.ALL.size(); i++) {
             super.loadVector(location_lightPosition[i], lights.get(i).position);
             super.loadVector(location_lightAttenuation[i], lights.get(i).attenuation);
+            super.loadFloat(location_lightIntensity[i], lights.get(i).intensity);
         }
     }
 }

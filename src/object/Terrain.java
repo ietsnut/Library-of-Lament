@@ -38,11 +38,11 @@ public class Terrain extends Entity {
         super(name);
         this.position.x = (SIZE / -2);
         this.position.z = (SIZE / -2);
-        this.blendMap = new Texture("resource/terrain/" + name + "_blendMap.png");
-        this.texture = new Texture("resource/terrain/" + name + ".png");
-        this.textureR = new Texture("resource/terrain/" + name + "_R.png");
-        this.textureG = new Texture("resource/terrain/" + name + "_G.png");
-        this.textureB = new Texture("resource/terrain/" + name + "_B.png");
+        this.blendMap = new Texture("resource/terrain/" + name + "_blendMap.png").repeat();
+        this.texture = new Texture("resource/terrain/" + name + ".png").repeat();
+        this.textureR = new Texture("resource/terrain/" + name + "_R.png").repeat();
+        this.textureG = new Texture("resource/terrain/" + name + "_G.png").repeat();
+        this.textureB = new Texture("resource/terrain/" + name + "_B.png").repeat();
     }
 
     @Override

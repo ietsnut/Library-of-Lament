@@ -32,6 +32,9 @@ public class Camera {
     private static final float bobbingAmount = 0.15f;
     private static double timeSinceStart = 0f;
 
+    private static float lastTime;
+    public static float delta;
+
     public static void reorient()
     {
         Quaternion.mul(roll, pitch, rotation);
@@ -126,8 +129,11 @@ public class Camera {
         position.x += movementDirection.x * speedAdjustmentFactor;
         position.z += movementDirection.z * speedAdjustmentFactor;
         float localbobbingSpeed = bobbingSpeed * speedAdjustmentFactor;
+        float currentFrameTime = (Sys.getTime() * 1000f) / Sys.getTimerResolution();
+        delta = currentFrameTime - lastTime;
+        lastTime = currentFrameTime;
         if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_D)) {
-            timeSinceStart += Renderer.delta * localbobbingSpeed;
+            timeSinceStart += delta * localbobbingSpeed;
             position.y = currentHeight + 2.4f + (float) Math.sin(timeSinceStart) * bobbingAmount;
         }
     }
