@@ -1,7 +1,9 @@
 package engine;
 
+import game.Game;
+import game.Scene;
 import object.*;
-import org.lwjgl.Sys;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.vector.Matrix4f;
 
@@ -14,58 +16,54 @@ import static org.lwjgl.opengl.GL30.*;
 public class Renderer {
 
     public static final float NEAR_PLANE = 0.1f;
-    public static final float FAR_PLANE = Terrain.SIZE * 8;
+    public static final float FAR_PLANE = Terrain.SIZE * 4;
 
     private final ModelShader modelShader;
     private final TerrainShader terrainShader;
     private final SkyShader skyShader;
+    private final FBOShader fboShader;
+    private final AABBShader aabbShader;
 
-    private final FBOShader0 fboShader0;
+    public static final Camera camera = new Camera();
 
     public Renderer() {
-        //GL11.glEnable(GL11.GL_CULL_FACE);
-        //GL11.glCullFace(GL11.GL_BACK);
-        FBO fbo1 = new FBO(Display.getWidth(), Display.getHeight());
         modelShader = new ModelShader();
         terrainShader = new TerrainShader();
         skyShader = new SkyShader();
-        fboShader0 = new FBOShader0(fbo1);
+        fboShader = new FBOShader();
+        aabbShader = new AABBShader();
     }
 
-    public void render(List<Light> lights, List<Entity> models, Terrain terrain, Sky sky) {
-        Camera.move(terrain);
-        fboShader0.bind();
+    public void render(Scene scene) {
+        if (Mouse.isButtonDown(1)) {
+            Mouse.setGrabbed(false);
+        }
+        if (Mouse.isButtonDown(0)) {
+            Mouse.setGrabbed(true);
+        }
+        camera.update(scene);
+        fboShader.bind();
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        skyShader.render(sky);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        modelShader.start();
-        modelShader.loadLights(lights);
-        modelShader.loadViewMatrix(Camera.getViewMatrix());
-        modelShader.render(models);
-        modelShader.stop();
-        terrainShader.start();
-        terrainShader.loadLights(lights);
-        terrainShader.loadViewMatrix(Camera.getViewMatrix());
-        terrainShader.render(terrain);
-        terrainShader.stop();
-        fboShader0.unbind();
-        fboShader0.render();
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        aabbShader.render(scene);
+        modelShader.render(scene);
+        terrainShader.render(scene);
+        skyShader.render(scene);
+        fboShader.unbind();
+        fboShader.render(scene);
     }
 
     public void clean() {
-        for (List<Entity> entities : Entity.ALL.values()) {
-            for (Entity entity : entities) {
-                glDeleteVertexArrays(entity.vaoID);
-                for (int vbo : entity.vboIDs) {
-                    glDeleteBuffers(vbo);
-                }
-                if (entity instanceof FBO fbo) {
-                    glDeleteFramebuffers(fbo.frameBuffer);
-                    glDeleteFramebuffers(fbo.drawBuffers);
-                    glDeleteRenderbuffers(fbo.depthBuffer);
-                }
+        for (Entity entity : Entity.ALL) {
+            glDeleteVertexArrays(entity.vaoID);
+            for (int vbo : entity.vboIDs) {
+                glDeleteBuffers(vbo);
+            }
+            if (entity instanceof FBO fbo) {
+                glDeleteFramebuffers(fbo.frameBuffer);
+                glDeleteFramebuffers(fbo.drawBuffers);
+                glDeleteRenderbuffers(fbo.depthBuffer);
             }
         }
         for (Texture texture : Texture.ALL) {
@@ -74,9 +72,9 @@ public class Renderer {
         Shader.clean();
     }
 
-    public static Matrix4f getProjectionMatrix() {
+    public static Matrix4f projection() {
         float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
-        float y_scale = (float) ((1f / Math.tan(Math.toRadians(Camera.FOV / 2f))) * aspectRatio);
+        float y_scale = (float) ((1f / Math.tan(Math.toRadians(camera.FOV / 2f))) * aspectRatio);
         float x_scale = y_scale / aspectRatio;
         float frustum_length = FAR_PLANE - NEAR_PLANE;
         Matrix4f projectionMatrix = new Matrix4f();

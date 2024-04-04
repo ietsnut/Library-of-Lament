@@ -5,6 +5,7 @@ import org.lwjgl.Sys;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import property.Transformation;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -27,63 +28,67 @@ public class Terrain extends Entity {
     public static final float MAX_HEIGHT = 8;
     public static final float MAX_PIXEL_COLOUR = 256 * 256 * 256;
 
-    public final Texture textureR;
-    public final Texture textureG;
-    public final Texture textureB;
-    public final Texture blendMap;
-    public Texture heightMap;
     public float[][] heights;
 
     public Terrain(String name) {
         super(name);
-        this.position.x = (SIZE / -2);
-        this.position.z = (SIZE / -2);
-        this.blendMap = new Texture("resource/terrain/" + name + "_blendMap.png").repeat();
-        this.texture = new Texture("resource/terrain/" + name + ".png").repeat();
-        this.textureR = new Texture("resource/terrain/" + name + "_R.png").repeat();
-        this.textureG = new Texture("resource/terrain/" + name + "_G.png").repeat();
-        this.textureB = new Texture("resource/terrain/" + name + "_B.png").repeat();
+        this.transformation = new Transformation() {
+            @Override
+            public Matrix4f model() {
+                Matrix4f matrix = new Matrix4f();
+                matrix.setIdentity();
+                matrix.translate(new Vector3f(transformation.position.x, 0, transformation.position.z));
+                return matrix;
+            }
+        };
+        this.transformation.position.x = (SIZE / -2);
+        this.transformation.position.z = (SIZE / -2);
+        texture("resource/terrain/" + name + ".png").repeat();
+        texture("resource/terrain/" + name + "_R.png").repeat();
+        texture("resource/terrain/" + name + "_G.png").repeat();
+        texture("resource/terrain/" + name + "_B.png").repeat();
+        texture("resource/terrain/" + name + "_blendMap.png");
     }
 
     @Override
-    protected void load(String name) {
-        this.heightMap = new Texture("resource/terrain/" + name + "_heightMap.png");
-        int VERTEX_COUNT = heightMap.image.getHeight();
-        heights = new float[VERTEX_COUNT][VERTEX_COUNT];
-        int count = VERTEX_COUNT * VERTEX_COUNT;
-        vertices = new float[count * 3];
-        normals = new float[count * 3];
-        texCoords = new float[count*2];
-        indices = new int[6*(VERTEX_COUNT-1)*(VERTEX_COUNT-1)];
+    protected void load(Object... args) {
+        BufferedImage hMap = new Texture("resource/terrain/" + args[0] + "_heightMap.png").image;
+        int VERTEXS = hMap.getHeight();
+        heights     = new float[VERTEXS][VERTEXS];
+        int count   = VERTEXS * VERTEXS;
+        vertices    = new float[count * 3];
+        normals     = new float[count * 3];
+        texCoords   = new float[count*2];
+        indices     = new int[6*(VERTEXS-1)*(VERTEXS-1)];
         int vertexPointer = 0;
-        for(int i=0;i<VERTEX_COUNT;i++){
-            for(int j=0;j<VERTEX_COUNT;j++){
-                vertices[vertexPointer*3] = (float)j/((float)VERTEX_COUNT - 1) * SIZE;
-                float height = getHeight(j, i, heightMap.image);
-                heights[j][i] = height;
+        for(int i=0;i<VERTEXS;i++){
+            for(int j=0;j<VERTEXS;j++){
+                vertices[vertexPointer*3]   = (float)j/((float) VERTEXS - 1) * SIZE;
+                float height                = getHeight(j, i, hMap);
+                heights[j][i]               = height;
                 vertices[vertexPointer*3+1] = height;
-                vertices[vertexPointer*3+2] = (float)i/((float)VERTEX_COUNT - 1) * SIZE;
-                normals[vertexPointer*3] = 0;
-                normals[vertexPointer*3+1] = 1;
-                normals[vertexPointer*3+2] = 0;
-                texCoords[vertexPointer*2] = (float)j/((float)VERTEX_COUNT - 1);
-                texCoords[vertexPointer*2+1] = (float)i/((float)VERTEX_COUNT - 1);
+                vertices[vertexPointer*3+2] = (float)i/((float) VERTEXS - 1) * SIZE;
+                normals[vertexPointer*3]    = 0;
+                normals[vertexPointer*3+1]  = 1;
+                normals[vertexPointer*3+2]  = 0;
+                texCoords[vertexPointer*2]  = (float)j/((float) VERTEXS - 1);
+                texCoords[vertexPointer*2+1]= (float)i/((float) VERTEXS - 1);
                 vertexPointer++;
             }
         }
         int pointer = 0;
-        for(int gz=0;gz<VERTEX_COUNT-1;gz++){
-            for(int gx=0;gx<VERTEX_COUNT-1;gx++){
-                int topLeft = (gz*VERTEX_COUNT)+gx;
-                int topRight = topLeft + 1;
-                int bottomLeft = ((gz+1)*VERTEX_COUNT)+gx;
-                int bottomRight = bottomLeft + 1;
-                indices[pointer++] = topLeft;
-                indices[pointer++] = bottomLeft;
-                indices[pointer++] = topRight;
-                indices[pointer++] = topRight;
-                indices[pointer++] = bottomLeft;
-                indices[pointer++] = bottomRight;
+        for(int gz=0;gz<VERTEXS-1;gz++){
+            for(int gx=0;gx<VERTEXS-1;gx++){
+                int topLeft         = (gz*VERTEXS)+gx;
+                int topRight        = topLeft + 1;
+                int bottomLeft      = ((gz+1)*VERTEXS)+gx;
+                int bottomRight     = bottomLeft + 1;
+                indices[pointer++]  = topLeft;
+                indices[pointer++]  = bottomLeft;
+                indices[pointer++]  = topRight;
+                indices[pointer++]  = topRight;
+                indices[pointer++]  = bottomLeft;
+                indices[pointer++]  = bottomRight;
             }
         }
     }
@@ -100,8 +105,8 @@ public class Terrain extends Entity {
     }
 
     public float getHeightOfTerrain(float worldX, float worldZ) {
-        float terrainX = worldX - this.position.x;
-        float terrainZ = worldZ - this.position.z;
+        float terrainX = worldX - this.transformation.position.x;
+        float terrainZ = worldZ - this.transformation.position.z;
         float gridSquareSize = SIZE / ((float) heights.length - 1);
         int gridX = (int) Math.floor(terrainX / gridSquareSize);
         int gridZ = (int) Math.floor(terrainZ / gridSquareSize);
@@ -118,20 +123,20 @@ public class Terrain extends Entity {
     }
 
     private float barryCentric(Vector3f p1, Vector3f p2, Vector3f p3, Vector2f pos) {
-        float det = (p2.z - p3.z) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.z - p3.z);
-        float l1 = ((p2.z - p3.z) * (pos.x - p3.x) + (p3.x - p2.x) * (pos.y - p3.z)) / det;
-        float l2 = ((p3.z - p1.z) * (pos.x - p3.x) + (p1.x - p3.x) * (pos.y - p3.z)) / det;
-        float l3 = 1.0f - l1 - l2;
+        float det   = (p2.z - p3.z) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.z - p3.z);
+        float l1    = ((p2.z - p3.z) * (pos.x - p3.x) + (p3.x - p2.x) * (pos.y - p3.z)) / det;
+        float l2    = ((p3.z - p1.z) * (pos.x - p3.x) + (p1.x - p3.x) * (pos.y - p3.z)) / det;
+        float l3    = 1.0f - l1 - l2;
         return l1 * p1.y + l2 * p2.y + l3 * p3.y;
     }
-
+/*
     @Override
-    public Matrix4f getModelMatrix() {
+    public Matrix4f getModel() {
         Matrix4f matrix = new Matrix4f();
         matrix.setIdentity();
-        matrix.translate(new Vector3f(position.x, 0, position.z));
+        matrix.translate(new Vector3f(transformation.position.x, 0, transformation.position.z));
         return matrix;
-    }
+    }*/
 
 }
 

@@ -1,14 +1,35 @@
 package object;
 
+import engine.Renderer;
+import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
+import property.Transformation;
+
 public class Billboard extends Entity {
 
     public Billboard(String name) {
         super(name);
-        texture = new Texture("resource/texture/" + name + ".png");
+
+        this.transformation = new Transformation() {
+            @Override
+            public Matrix4f model() {
+                Matrix4f matrix = super.model();
+                matrix.setIdentity();
+                matrix.translate(position);
+                Vector3f directionToCamera = Vector3f.sub(Renderer.camera.transformation.position, position, null);
+                if (directionToCamera.lengthSquared() > 0) {
+                    directionToCamera.normalise();
+                    matrix.rotate((float) Math.atan2(directionToCamera.x, directionToCamera.z), AXIS_Y);
+                }
+                matrix.scale(new Vector3f(scale.x, scale.y, scale.z));
+                return matrix;
+            }
+        };
+        texture("resource/texture/" + name + ".png");
     }
 
     @Override
-    protected void load(String name) {
+    protected void load(Object... args) {
         vertices = new float[] {
                 -0.5f, 0.5f, 0,
                 -0.5f, -0.5f, 0,
@@ -32,4 +53,5 @@ public class Billboard extends Entity {
                 0.0f, 0.0f, 1.0f
         };
     }
+
 }

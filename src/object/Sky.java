@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.glu.Cylinder;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+import property.Transformation;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -40,32 +41,11 @@ public class Sky {
     public List<Layer> layers = new ArrayList<>();
     private static final int sides = 12;
 
-    public Sky(String name) {
-        for (int i = 0; i < 3; i++) {
+    public Sky(String name, int rings) {
+        for (int i = 0; i < rings; i++) {
             layers.add(new Layer(name + "_" + i));
         }
     }
-
-    /*
-    public Sky(String name) {
-        super(name);
-        texture = new Texture("resource/sky/" + name + ".png");
-        GL13.glActiveTexture(GL13.GL_TEXTURE0);
-        GL11.glBindTexture(GL_TEXTURE_CUBE_MAP, texture.ID);
-        for (int i = 0; i < 6; i++) {
-            GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, texture.image.getWidth(), texture.image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.buffer);
-        }
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    }
-
-    @Override
-    protected void load(String name) {
-        vertices = new float[] { -SIZE, SIZE, -SIZE, -SIZE, -SIZE, -SIZE, SIZE, -SIZE, -SIZE, SIZE, -SIZE, -SIZE, SIZE, SIZE, -SIZE, -SIZE, SIZE, -SIZE, -SIZE, -SIZE, SIZE, -SIZE, -SIZE, -SIZE, -SIZE, SIZE, -SIZE, -SIZE, SIZE, -SIZE, -SIZE, SIZE, SIZE, -SIZE, -SIZE, SIZE, SIZE, -SIZE, -SIZE, SIZE, -SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, -SIZE, SIZE, -SIZE, -SIZE, -SIZE, -SIZE, SIZE, -SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, -SIZE, SIZE, -SIZE, -SIZE, SIZE, -SIZE, SIZE, -SIZE, SIZE, SIZE, -SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, SIZE, -SIZE, SIZE, SIZE, -SIZE, SIZE, -SIZE, -SIZE, -SIZE, -SIZE, -SIZE, -SIZE, SIZE, SIZE, -SIZE, -SIZE, SIZE, -SIZE, -SIZE, -SIZE, -SIZE, SIZE, SIZE, -SIZE, SIZE };
-    }
-    */
 
     public class Layer extends Entity {
 
@@ -73,15 +53,33 @@ public class Sky {
 
         public Layer(String name) {
             super(name);
-            texture = new Texture("resource/sky/" + name + ".png");
+            this.transformation = new Transformation() {
+                @Override
+                public Matrix4f model() {
+                    if (layers.indexOf(Layer.this) % 2 == 0) {
+                        transformation.rotation.y += (float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(Layer.this) + 1);
+                    } else {
+                        transformation.rotation.y -= (float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(Layer.this) + 1);
+                    }
+                    Matrix4f matrix = new Matrix4f();
+                    matrix.setIdentity();
+                    matrix.translate(transformation.position);
+                    matrix.rotate((float) Math.toRadians(transformation.rotation.x), AXIS_X);
+                    matrix.rotate((float) Math.toRadians(transformation.rotation.y), AXIS_Y);
+                    matrix.rotate((float) Math.toRadians(transformation.rotation.z), AXIS_Z);
+                    matrix.scale(new Vector3f(transformation.scale.x, -transformation.scale.y, transformation.scale.z));
+                    return matrix;
+                }
+            };
+            texture("resource/sky/" + name + ".png");
         }
 
         @Override
-        protected void load(String name) {
+        protected void load(Object... args) {
 
-            float radius = Terrain.SIZE + (layers.size() * (Terrain.SIZE/12) + 1);
+            float radius = Terrain.SIZE + (layers.size() * (Terrain.SIZE/12));
             height = (float) (2 * radius * Math.sin(Math.PI / sides));
-            position.y = height / 2;
+            transformation.position.y = height / 4;
 
             double angleStep = 2.0 * Math.PI / sides;
 
@@ -92,7 +90,6 @@ public class Sky {
             for (int i = 0; i < sides; i++) {
                 double currentAngle = i * angleStep;
                 double nextAngle = (i + 1) * angleStep;
-
 
                 float x0 = (float)(radius * Math.cos(currentAngle));
                 float z0 = (float)(radius * Math.sin(currentAngle));
@@ -134,22 +131,6 @@ public class Sky {
 
             }
 
-        }
-
-        public Matrix4f getModelMatrix() {
-            if (layers.indexOf(this) % 2 == 0) {
-                rotation.y += (float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(this) + 1);
-            } else {
-                rotation.y -= (float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(this) + 1);
-            }
-            Matrix4f matrix = new Matrix4f();
-            matrix.setIdentity();
-            matrix.translate(position);
-            matrix.rotate((float) Math.toRadians(rotation.x), AXIS_X);
-            matrix.rotate((float) Math.toRadians(rotation.y), AXIS_Y);
-            matrix.rotate((float) Math.toRadians(rotation.z), AXIS_Z);
-            matrix.scale(new Vector3f(scale.x, -scale.y, scale.z));
-            return matrix;
         }
 
     }

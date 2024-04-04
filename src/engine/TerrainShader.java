@@ -1,8 +1,13 @@
 package engine;
 
+import game.Game;
+import game.Scene;
+import object.Camera;
 import object.Light;
 import object.Model;
 import object.Terrain;
+import org.lwjgl.Sys;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
@@ -18,83 +23,27 @@ import static org.lwjgl.opengl.GL13.*;
 
 public class TerrainShader extends Shader {
 
-    private int[] location_lightPosition;
-    private int[] location_lightAttenuation;
-    private int[] location_lightIntensity;
-    private int location_backgroundTexture;
-    private int location_rTexture;
-    private int location_gTexture;
-    private int location_bTexture;
-    private int location_blendMap;
-
     public TerrainShader() {
-        super("terrain");
+        super("terrain", "position", "uv", "normal");
         start();
-        super.loadInt(location_backgroundTexture, 0);
-        super.loadInt(location_rTexture, 1);
-        super.loadInt(location_gTexture, 2);
-        super.loadInt(location_bTexture, 3);
-        super.loadInt(location_blendMap, 4);
+        uniform("backgroundTexture", 0);
+        uniform("rTexture", 1);
+        uniform("gTexture", 2);
+        uniform("bTexture", 3);
+        uniform("blendMap", 4);
+        uniform("projection",   Renderer.projection());
         stop();
     }
 
-    public void render(Terrain terrain) {
-        GL30.glBindVertexArray(terrain.vaoID);
-        GL20.glEnableVertexAttribArray(0);
-        GL20.glEnableVertexAttribArray(1);
-        GL20.glEnableVertexAttribArray(2);
-        glEnable(GL_TEXTURE_2D);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, terrain.texture.ID);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, terrain.textureR.ID);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, terrain.textureG.ID);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, terrain.textureB.ID);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, terrain.blendMap.ID);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        loadModelMatrix(terrain.getModelMatrix());
-        GL11.glDrawElements(GL11.GL_TRIANGLES, terrain.indices.length, GL11.GL_UNSIGNED_INT, 0);
-        GL20.glDisableVertexAttribArray(0);
-        GL20.glDisableVertexAttribArray(1);
-        GL20.glDisableVertexAttribArray(2);
-        GL30.glBindVertexArray(0);
-    }
-
-    @Override
-    protected void bindAttributes() {
-        super.bindAttribute(0, "position");
-        super.bindAttribute(1, "uv");
-        super.bindAttribute(2, "normal");
-    }
-
-    @Override
-    protected void getAllUniformLocations() {
-        super.getAllUniformLocations();
-        location_lightPosition = new int[Light.ALL.size()];
-        location_lightAttenuation = new int[Light.ALL.size()];
-        location_lightIntensity = new int[Light.ALL.size()];
+    public void shader(Scene scene) {
+        uniform("view",         Renderer.camera.transformation.view());
+        uniform("model",        scene.terrain.transformation.model());
         for (int i = 0; i < Light.ALL.size(); i++) {
-            location_lightPosition[i] = super.getUniformLocation("lightPosition[" + i + "]");
-            location_lightAttenuation[i] = super.getUniformLocation("lightAttenuation[" + i + "]");
-            location_lightIntensity[i] = super.getUniformLocation("lightIntensity[" + i + "]");
+            uniform("lightPosition[" + i + "]",     scene.lights.get(i).position);
+            uniform("lightAttenuation[" + i + "]",  scene.lights.get(i).attenuation);
+            uniform("lightIntensity[" + i + "]",    scene.lights.get(i).intensity);
         }
-        location_backgroundTexture = super.getUniformLocation("backgroundTexture");
-        location_rTexture = super.getUniformLocation("rTexture");
-        location_gTexture = super.getUniformLocation("gTexture");
-        location_bTexture = super.getUniformLocation("bTexture");
-        location_blendMap = super.getUniformLocation("blendMap");
+        render(scene.terrain);
     }
 
-    //TODO: REPLACE WITH SCENE SPECIFIC ARRAYS
-    public void loadLights(List<Light> lights) {
-        for (int i = 0; i < Light.ALL.size(); i++) {
-            super.loadVector(location_lightPosition[i], lights.get(i).position);
-            super.loadVector(location_lightAttenuation[i], lights.get(i).attenuation);
-            super.loadFloat(location_lightIntensity[i], lights.get(i).intensity);
-        }
-    }
 }
