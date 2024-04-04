@@ -15,11 +15,11 @@ public class AABBShader extends Shader {
 
     public void shader(Scene scene) {
         for (Entity entity : scene.entities) {
-            uniform("model", entity.transformation.model());
-            uniform("projection", Renderer.projection());
-            uniform("view", Renderer.camera.transformation.view());
-            uniform("selected", entity.aabb.selected);
-            render(entity.aabb);
+            uniform("model",        entity.transformation.model());
+            uniform("projection",   Renderer.projection());
+            uniform("view",         Renderer.camera.transformation.view());
+            uniform("selected",     entity.obb.selected);
+            render(entity.obb);
         }
     }
 }

@@ -2,11 +2,9 @@ package object;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
-import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import property.Transformation;
 
-import java.net.IDN;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
@@ -33,7 +31,8 @@ public abstract class Entity {
     public List<Texture> textures = new ArrayList<>();
     public Transformation transformation = new Transformation();
     public String name;
-    public AABB aabb;
+
+    public OBB obb;
 
     public Entity(Object... args) {
         this.vaoID = glGenVertexArrays();
@@ -59,8 +58,8 @@ public abstract class Entity {
         if (args.length > 0 && args[0] instanceof String s) {
             this.name = s;
         }
-        if (!(this instanceof AABB) && !(this instanceof FBO)) {
-            aabb = new AABB(getAABBMin(), getAABBMax(), generateOBB());
+        if (args.length > 0 && !(this instanceof OBB)) {
+            this.obb = new OBB(this);
         }
         ALL.add(this);
     }
@@ -110,51 +109,5 @@ public abstract class Entity {
     public static final Vector3f AXIS_Y = new Vector3f(0, 1, 0);
     public static final Vector3f AXIS_Z = new Vector3f(0, 0, 1);
 
-    public Vector3f getAABBMin() {
-        Vector3f min = new Vector3f();
-        for (int i = 0; i < vertices.length; i += 3) {
-            min.x = Math.min(min.x, vertices[i]);
-            min.y = Math.min(min.y, vertices[i + 1]);
-            min.z = Math.min(min.z, vertices[i + 2]);
-        }
-        return min;
-    }
-
-    public Vector3f getAABBMax() {
-        Vector3f max = new Vector3f();
-        for (int i = 0; i < vertices.length; i += 3) {
-            max.x = Math.max(max.x, vertices[i]);
-            max.y = Math.max(max.y, vertices[i + 1]);
-            max.z = Math.max(max.z, vertices[i + 2]);
-        }
-        return max;
-    }
-
-    public Vector3f[] generateOBB() {
-        Vector3f[] obb = new Vector3f[8];
-        Vector3f min = getAABBMin();
-        Vector3f max = getAABBMax();
-        obb[0] = new Vector3f(min.x, min.y, min.z);
-        obb[1] = new Vector3f(max.x, min.y, min.z);
-        obb[2] = new Vector3f(max.x, max.y, min.z);
-        obb[3] = new Vector3f(min.x, max.y, min.z);
-        obb[4] = new Vector3f(min.x, min.y, max.z);
-        obb[5] = new Vector3f(max.x, min.y, max.z);
-        obb[6] = new Vector3f(max.x, max.y, max.z);
-        obb[7] = new Vector3f(min.x, max.y, max.z);
-        return obb;
-    }
-
-    /*
-    public Matrix4f getModel() {
-        Matrix4f matrix = new Matrix4f();
-        matrix.setIdentity();
-        matrix.translate(position);
-        matrix.rotate((float) Math.toRadians(rotation.x), AXIS_X);
-        matrix.rotate((float) Math.toRadians(rotation.y), AXIS_Y);
-        matrix.rotate((float) Math.toRadians(rotation.z), AXIS_Z);
-        matrix.scale(new Vector3f(scale.x, scale.y, scale.z));
-        return matrix;
-    }*/
 
 }

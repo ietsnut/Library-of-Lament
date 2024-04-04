@@ -1,27 +1,22 @@
 package engine;
 
 import java.io.*;
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.*;
 
 import game.Scene;
-import object.AABB;
+import object.OBB;
 import object.Entity;
 import object.Light;
-import object.Texture;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.*;
-import property.Transformation;
-import tool.Noise;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 public abstract class Shader {
@@ -98,12 +93,12 @@ public abstract class Shader {
         GL30.glBindVertexArray(0);
     }
 
-    protected final void render(AABB aabb) {
-        GL30.glBindVertexArray(aabb.vaoID);
+    protected final void render(OBB OBB) {
+        GL30.glBindVertexArray(OBB.vaoID);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glEnableVertexAttribArray(i);
         }
-        GL11.glDrawElements(GL11.GL_LINES, aabb.indices.length, GL11.GL_UNSIGNED_INT, 0);
+        GL11.glDrawElements(GL11.GL_LINES, OBB.indices.length, GL11.GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glDisableVertexAttribArray(i);
         }

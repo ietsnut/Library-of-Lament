@@ -116,6 +116,10 @@ public class Transformation {
         return orient();
     }
 
+    public Transformation rotation(float r) {
+        return rotation(r, r, r).orient();
+    }
+
     public Transformation rotate(float x, float y, float z) {
         this.rotation.x += x;
         this.rotation.y += y;
@@ -178,11 +182,10 @@ public class Transformation {
     }
 
 
-    public Matrix4f model() {
-        model.setIdentity();
-        Matrix4f.translate(position, model, model);
-        Matrix4f rotationMatrix = new Matrix4f();
-        rotationMatrix.setIdentity();
+    public Matrix4f rotation() {
+        norm();
+        Matrix4f rotation = new Matrix4f();
+        rotation.setIdentity();
         float xy = orientation.x * orientation.y;
         float xz = orientation.x * orientation.z;
         float xw = orientation.x * orientation.w;
@@ -192,16 +195,22 @@ public class Transformation {
         float xSquared = orientation.x * orientation.x;
         float ySquared = orientation.y * orientation.y;
         float zSquared = orientation.z * orientation.z;
-        rotationMatrix.m00 = 1 - 2 * (ySquared + zSquared);
-        rotationMatrix.m01 = 2 * (xy - zw);
-        rotationMatrix.m02 = 2 * (xz + yw);
-        rotationMatrix.m10 = 2 * (xy + zw);
-        rotationMatrix.m11 = 1 - 2 * (xSquared + zSquared);
-        rotationMatrix.m12 = 2 * (yz - xw);
-        rotationMatrix.m20 = 2 * (xz - yw);
-        rotationMatrix.m21 = 2 * (yz + xw);
-        rotationMatrix.m22 = 1 - 2 * (xSquared + ySquared);
-        Matrix4f.mul(model, rotationMatrix, model);
+        rotation.m00 = 1 - 2 * (ySquared + zSquared);
+        rotation.m01 = 2 * (xy - zw);
+        rotation.m02 = 2 * (xz + yw);
+        rotation.m10 = 2 * (xy + zw);
+        rotation.m11 = 1 - 2 * (xSquared + zSquared);
+        rotation.m12 = 2 * (yz - xw);
+        rotation.m20 = 2 * (xz - yw);
+        rotation.m21 = 2 * (yz + xw);
+        rotation.m22 = 1 - 2 * (xSquared + ySquared);
+        return rotation;
+    }
+
+    public Matrix4f model() {
+        model.setIdentity();
+        Matrix4f.translate(position, model, model);
+        Matrix4f.mul(model, rotation(), model);
         Matrix4f.scale(new Vector3f(scale.x, scale.y, scale.z), model, model);
         return model;
     }
