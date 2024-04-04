@@ -50,7 +50,7 @@ public class Scene {
         lights.getFirst().position = new Vector3f(Renderer.camera.transformation.position);
         for (Entity entity : entities) {
             if (entity instanceof Model model) {
-                model.transformation.rotation(Sys.getTime() / 1000f);
+                //model.transformation.rotation(Sys.getTime() / 1000f);
             }
         }
     }
