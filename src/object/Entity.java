@@ -172,11 +172,15 @@ public abstract class Entity {
 
     //camera is outside AABB, but ray intersects AABB
     public boolean collide(float distance) {
-        return collision() > 0 && distance() < distance;
+        return collision() > 0 && distance(distance);
     }
 
     public float distance() {
         return Vector3f.sub(Camera.transformation.position, this.transformation.position, null).length();
+    }
+
+    public boolean distance(Float distance) {
+        return distance() < distance;
     }
 
     public static Entity collides(float distance, List<Entity> entities) {
