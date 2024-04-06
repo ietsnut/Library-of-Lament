@@ -2,7 +2,6 @@ package object;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import tool.Dither;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -23,7 +22,7 @@ public class Texture extends Number {
 
     public static final ArrayList<Texture> ALL = new ArrayList<>();
     public final int ID;
-    public ByteBuffer buffer;
+    //public ByteBuffer buffer;
     public BufferedImage image;
 
     public Texture(String name) {
@@ -37,20 +36,20 @@ public class Texture extends Number {
         int height  = image.getHeight();
         pixels = new int[width * height];
         image.getRGB(0, 0, width, height, pixels, 0, width);
-        buffer = ByteBuffer.allocateDirect(4 * image.getWidth() * image.getHeight());
+        //buffer = ByteBuffer.allocateDirect(4 * image.getWidth() * image.getHeight());
         int[] data = new int[width * height];
         for (int i = 0; i < width * height; i++) {
-            buffer.put((byte) ((pixels[i] >> 16) & 0xFF)); // Red component
-            buffer.put((byte) ((pixels[i] >> 8) & 0xFF));  // Green component
-            buffer.put((byte) (pixels[i] & 0xFF));         // Blue component
-            buffer.put((byte) ((pixels[i] >> 24) & 0xFF)); // Alpha component
+            //buffer.put((byte) ((pixels[i] >> 16) & 0xFF)); // Red component
+            //buffer.put((byte) ((pixels[i] >> 8) & 0xFF));  // Green component
+            //buffer.put((byte) (pixels[i] & 0xFF));         // Blue component
+            //buffer.put((byte) ((pixels[i] >> 24) & 0xFF)); // Alpha component
             int a = (pixels[i] & 0xff000000) >> 24;
             int r = (pixels[i] & 0xff0000) >> 16;
             int g = (pixels[i] & 0xff00) >> 8;
             int b = (pixels[i] & 0xff);
             data[i] = a << 24 | b << 16 | g << 8 | r;
         }
-        buffer.flip();
+        //buffer.flip();
         this.ID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.ID);
         GL30.glGenerateMipmap(GL_TEXTURE_2D);

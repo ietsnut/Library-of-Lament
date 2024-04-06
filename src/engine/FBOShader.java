@@ -6,7 +6,6 @@ import object.FBO;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import tool.Random;
 
 public class FBOShader extends Shader {
 
@@ -19,23 +18,10 @@ public class FBOShader extends Shader {
 
     public void shader(Scene scene) {
         GL11.glDisable(GL11.GL_DEPTH_TEST);
-        //float t = (Sys.getTime() * 1000.0f) / Sys.getTimerResolution();
-        //uniform("time",         t / 1000.0f);
         uniform("width",            fbo.width);
         uniform("height",           fbo.height);
-        /*
-        float normalizedJFramePosX = (float) (Game.stone.getLocationOnScreen().getX() - Display.getX()) / Display.getWidth();
-        float normalizedJFramePosY = 1.0f - ((float)(Game.stone.getLocationOnScreen().getY() - Display.getY()) / Display.getHeight()) - (float) Game.stone.getHeight() / Display.getHeight();
-        float normalizedJFrameWidth = (float) Game.stone.getWidth() / Display.getWidth();
-        float normalizedJFrameHeight = (float) Game.stone.getHeight() / Display.getHeight();
-        uniform("stoneX",           normalizedJFramePosX);
-        uniform("stoneY",           normalizedJFramePosY);
-        uniform("stoneW",           normalizedJFrameWidth);
-        uniform("stoneH",           normalizedJFrameHeight);
-        */
         uniform("colorTexture",     0);
         uniform("normalTexture",    1);
-        uniform("noiseTexture",     2);
         render(fbo);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }

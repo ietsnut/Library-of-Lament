@@ -1,11 +1,11 @@
 package engine;
 
 import java.io.*;
+import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.*;
 
 import game.Scene;
-import object.OBB;
 import object.Entity;
 import object.Light;
 import org.lwjgl.BufferUtils;
@@ -93,12 +93,12 @@ public abstract class Shader {
         GL30.glBindVertexArray(0);
     }
 
-    protected final void render(OBB OBB) {
-        GL30.glBindVertexArray(OBB.vaoID);
+    protected final void render(Entity.Collider collider) {
+        GL30.glBindVertexArray(collider.vaoID);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glEnableVertexAttribArray(i);
         }
-        GL11.glDrawElements(GL11.GL_LINES, OBB.indices.length, GL11.GL_UNSIGNED_INT, 0);
+        GL11.glDrawElements(GL11.GL_LINES, collider.indices.length, GL11.GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glDisableVertexAttribArray(i);
         }

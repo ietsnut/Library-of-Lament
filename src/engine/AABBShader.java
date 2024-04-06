@@ -2,6 +2,7 @@ package engine;
 
 import game.Scene;
 import object.Billboard;
+import object.Camera;
 import object.Entity;
 import object.Model;
 import org.lwjgl.Sys;
@@ -15,14 +16,28 @@ public class AABBShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        for (Entity entity : scene.entities) {
-            uniform("model",        entity.transformation.model());
-            uniform("projection",   Renderer.projection());
-            uniform("view",         Renderer.camera.transformation.view());
-            uniform("selected",     entity.obb.selected);
-            float t = (Sys.getTime() * 1000.0f) / Sys.getTimerResolution();
-            uniform("time",         t / 1000.0f);
-            render(entity.obb);
+        Entity entity = Entity.collides(30f, scene.entities);
+        if (entity == null) {
+            return;
         }
+        System.out.println(entity.distance());
+        uniform("model",        entity.transformation.model());
+        uniform("projection",   Renderer.projection());
+        uniform("view",         Camera.view);
+        float t = (Sys.getTime() * 1000.0f) / Sys.getTimerResolution();
+        uniform("time",         t / 1000.0f);
+        render(entity.collider);
+        /*
+        for (Entity entity : scene.entities) {
+            if (entity.collides(30f)) {
+                System.out.println(entity.distance());
+                uniform("model",        entity.transformation.model());
+                uniform("projection",   Renderer.projection());
+                uniform("view",         Camera.view);
+                float t = (Sys.getTime() * 1000.0f) / Sys.getTimerResolution();
+                uniform("time",         t / 1000.0f);
+                render(entity.collider);
+            }
+        }*/
     }
 }

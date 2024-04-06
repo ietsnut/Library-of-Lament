@@ -36,7 +36,7 @@ public class TerrainShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        uniform("view",         Renderer.camera.transformation.view());
+        uniform("view",         Camera.view);
         uniform("model",        scene.terrain.transformation.model());
         for (int i = 0; i < Light.ALL.size(); i++) {
             uniform("lightPosition[" + i + "]",     scene.lights.get(i).position);

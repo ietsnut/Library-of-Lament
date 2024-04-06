@@ -4,12 +4,16 @@ import org.lwjgl.util.vector.*;
 
 public class Transformation {
 
+    public static final Vector3f AXIS_X = new Vector3f(1, 0, 0);
+    public static final Vector3f AXIS_Y = new Vector3f(0, 1, 0);
+    public static final Vector3f AXIS_Z = new Vector3f(0, 0, 1);
+
     public final Vector4f orientation   = new Vector4f(0, 0, 0, 1);
     public final Vector3f rotation      = new Vector3f(0, 0, 0);
     public final Vector3f position      = new Vector3f(0, 0, 0);
     public final Vector3f scale         = new Vector3f(1, 1, 1);
 
-    private final Matrix4f view         = new Matrix4f();
+    //private final Matrix4f view         = new Matrix4f();
     private final Matrix4f model        = new Matrix4f();
 
     public Transformation position(Vector3f position) {
@@ -158,6 +162,7 @@ public class Transformation {
         return this;
     }
 
+    /*
     public Matrix4f view() {
         norm();
         view.setIdentity();
@@ -180,6 +185,7 @@ public class Transformation {
         view.translate(new Vector3f(-position.x, -position.y, -position.z));
         return view;
     }
+    */
 
 
     public Matrix4f rotation() {

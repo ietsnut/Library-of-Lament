@@ -6,17 +6,12 @@ layout(location = 1) out vec4 normal;
 in vec3 pos;
 in float scale;
 
-uniform bool    selected;
 uniform float   time;
 
 void main(void) {
-    if (selected) {
-        float pattern = mod((pos.x + pos.y + pos.z) * 10.0 * scale + time * 5.0, 20.0) / 20.0;
-        if (pattern < 0.5) {
-            color = 1.0;
-        } else {
-            discard;
-        }
+    float pattern = mod((pos.x + pos.y + pos.z) * 10.0 * scale + time * 5.0, 20.0) / 20.0;
+    if (pattern < 0.5) {
+        color = 1.0;
     } else {
         discard;
     }

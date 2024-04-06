@@ -18,29 +18,23 @@ public class Renderer {
     public static final float NEAR_PLANE = 0.1f;
     public static final float FAR_PLANE = Terrain.SIZE * 4;
 
-    private final ModelShader modelShader;
+    private final ModelShader   modelShader;
     private final TerrainShader terrainShader;
-    private final SkyShader skyShader;
-    private final FBOShader fboShader;
-    private final AABBShader aabbShader;
+    private final SkyShader     skyShader;
+    private final FBOShader     fboShader;
+    private final AABBShader    aabbShader;
 
     public static final Camera camera = new Camera();
 
     public Renderer() {
-        modelShader = new ModelShader();
-        terrainShader = new TerrainShader();
-        skyShader = new SkyShader();
-        fboShader = new FBOShader();
-        aabbShader = new AABBShader();
+        modelShader     = new ModelShader();
+        terrainShader   = new TerrainShader();
+        skyShader       = new SkyShader();
+        fboShader       = new FBOShader();
+        aabbShader      = new AABBShader();
     }
 
     public void render(Scene scene) {
-        if (Mouse.isButtonDown(1)) {
-            Mouse.setGrabbed(false);
-        }
-        if (Mouse.isButtonDown(0)) {
-            Mouse.setGrabbed(true);
-        }
         camera.update(scene);
         fboShader.bind();
         GL11.glEnable(GL11.GL_DEPTH_TEST);
