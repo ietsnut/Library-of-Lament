@@ -6,11 +6,8 @@ out vec3 color;
 uniform sampler2D colorTexture;
 uniform sampler2D normalTexture;
 
-uniform int width;
-uniform int height;
-
-const float dx = 1.0 / width;
-const float dy = 1.0 / height;
+const float dx = 1.0 / WIDTH;
+const float dy = 1.0 / HEIGHT;
 
 float sobel(sampler2D sampler, int channel) {
     float mCenter   = texture(sampler, fragUV)[channel] * 2.0 - 1.0;
@@ -26,11 +23,11 @@ void main(void) {
     float normalDelta   = max(sobel(normalTexture, 0), max(sobel(normalTexture, 1), sobel(normalTexture, 2)));
     float albedo        = texture(colorTexture, fragUV).r > 0.5 ? 1.0 : 0.0;
     color               = vec3(albedo);
-    if ((albedo < 0.5) && ((normalDelta > 0.01 && albedoDelta > 0.2) || (depthDelta > 0.2))) {
+    if ((normalDelta > 0.01 && albedoDelta > 0.2) || (depthDelta > 0.1)) {
         color = vec3(1.0);
     }
-    vec2 center = vec2(0.5, 0.5);
-    float distance = length(fragUV - center);
+    vec2 center         = vec2(0.5, 0.5);
+    float distance      = length(fragUV - center);
     if(distance < 0.01 + 0.001 && distance > 0.01 - 0.001 || distance < 0.002) {
         color = color.r > 0.5 ? vec3(0.0) : vec3(1.0);
     }

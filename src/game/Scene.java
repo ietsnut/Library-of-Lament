@@ -21,16 +21,27 @@ public class Scene {
         entities    = new ArrayList<>();
         lights      = new ArrayList<>();
 
-        terrain     = new Terrain("1");
+        terrain     = new Terrain("test");
         sky         = new Sky("1", 3);
 
         Model model1 = new Model("cottage");
+        model1.transformation.scale(0.5f);
         model1.transformation.position(0, terrain.getHeightOfTerrain(0, 0), 0);
         entities.add(model1);
 
         Model model2 = new Model("tree1", "tree1");
         model2.transformation.position(30, terrain.getHeightOfTerrain(30, 30), 30);
         entities.add(model2);
+
+        Model model3 = new Model("slotmachine", 2);
+        model3.transformation.scale(0.25f);
+        model3.transformation.position(10, terrain.getHeightOfTerrain(10, 10), 10);
+        entities.add(model3);
+
+        Model model4 = new Model("vendingmachine");
+        model4.transformation.scale(0.5f);
+        model4.transformation.position(15, terrain.getHeightOfTerrain(15, 15), 15);
+        entities.add(model4);
 
         Billboard billboard = new Billboard("1");
         billboard.transformation.scale(3);
@@ -48,11 +59,15 @@ public class Scene {
 
     public void update() {
         lights.getFirst().position = new Vector3f(Camera.transformation.position);
+        /*
         for (Entity entity : entities) {
             if (entity instanceof Model model) {
                 model.transformation.rotation(Axis.Y, Sys.getTime() / 1000f);
+                if (model.textures.getFirst().frames > 1) {
+                    model.frame = (int) (Sys.getTime() / 1000f) % entity.textures.getFirst().frames;
+                }
             }
-        }
+        }*/
     }
 
 }

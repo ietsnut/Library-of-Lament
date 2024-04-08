@@ -3,6 +3,7 @@ package engine;
 import game.Game;
 import game.Scene;
 import object.*;
+import org.lwjgl.util.vector.Matrix4f;
 
 
 import java.util.List;
@@ -11,13 +12,10 @@ public class ModelShader extends Shader {
 
     public ModelShader() {
         super("model", "position", "uv", "normal");
-        start();
-        uniform("projection",       Renderer.projection());
-        uniform("modelTexture",     0);
-        stop();
     }
 
     public void shader(Scene scene) {
+        uniform("projection",       Renderer.projection());
         uniform("view",             Camera.view);
         for (int i = 0; i < Light.ALL.size(); i++) {
             uniform("lightPosition[" + i + "]",     scene.lights.get(i).position);
@@ -26,6 +24,8 @@ public class ModelShader extends Shader {
         }
         for (Entity model : scene.entities) {
             uniform("model",        model.transformation.model());
+            uniform("frame",        model.frame);
+            uniform("frames",       model.textures.getFirst().frames);
             render(model);
         }
     }

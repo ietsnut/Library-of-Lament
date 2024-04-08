@@ -37,21 +37,32 @@ public class Camera {
         if (Mouse.isGrabbed()) {
             transformation.rotate(Axis.Y, dx).rotate(Axis.X, dy).rotation(Axis.X, Math.min(Math.max(transformation.rotation.x, -80), 80));
             Vector3f forward = new Vector3f(transformation.forward().x, 0, transformation.forward().z).normalise(null);
+            //Vector3f position = new Vector3f(transformation.position);
             if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP))
-                transformation.translate(forward.x * -SPEED, 0, forward.z * -SPEED);
+                transformation.position.translate(forward.x * -SPEED, 0, forward.z * -SPEED);
             if (Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN))
-                transformation.translate(forward.x * SPEED, 0, forward.z * SPEED);
+                transformation.position.translate(forward.x * SPEED, 0, forward.z * SPEED);
             if (Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT))
-                transformation.translate(forward.z * SPEED, 0, forward.x * -SPEED);
+                transformation.position.translate(forward.z * SPEED, 0, forward.x * -SPEED);
             if (Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT))
-                transformation.translate(forward.z * -SPEED, 0, forward.x * SPEED);
+                transformation.position.translate(forward.z * -SPEED, 0, forward.x * SPEED);
             transformation.position.y = scene.terrain.getHeightOfTerrain(transformation.position.x, transformation.position.z) + 2f;
+            for (Entity entity : scene.entities) {
+                int direction = 1;
+                while (entity.inside()) {
+                    if (direction % 2 == 0) {
+                        transformation.position.translate(forward.x * SPEED, 0, 0);
+                    } else {
+                        transformation.position.translate(0, 0, forward.z * SPEED);
+                    }
+                    direction++;
+                }
+            }
         }
 
         view();
 
     }
-
     public Matrix4f view() {
         transformation.norm();
         view.setIdentity();

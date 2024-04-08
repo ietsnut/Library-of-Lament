@@ -16,7 +16,7 @@ public class Billboard extends Entity {
                 Matrix4f matrix = super.model();
                 matrix.setIdentity();
                 matrix.translate(position);
-                Vector3f directionToCamera = Vector3f.sub(Renderer.camera.transformation.position, position, null);
+                Vector3f directionToCamera = Vector3f.sub(Camera.transformation.position, position, null);
                 if (directionToCamera.lengthSquared() > 0) {
                     directionToCamera.normalise();
                     matrix.rotate((float) Math.atan2(directionToCamera.x, directionToCamera.z), AXIS_Y);
@@ -25,7 +25,7 @@ public class Billboard extends Entity {
                 return matrix;
             }
         };
-        texture("resource/texture/" + name + ".png");
+        texture("texture", name);
     }
 
     @Override

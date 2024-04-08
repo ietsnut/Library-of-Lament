@@ -1,10 +1,10 @@
 package engine;
 
 import java.io.*;
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.*;
 
+import game.Game;
 import game.Scene;
 import object.Entity;
 import object.Light;
@@ -43,6 +43,8 @@ public abstract class Shader {
         ALL.add(this);
     }
 
+    final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+
     protected void uniform(String location, Serializable data) {
         int uniform = uniforms.computeIfAbsent(location, loc -> GL20.glGetUniformLocation(program, loc));
         switch (data) {
@@ -52,17 +54,13 @@ public abstract class Shader {
             case Vector2f   v -> GL20.glUniform2f(uniform, v.x, v.y);
             case Vector3f   v -> GL20.glUniform3f(uniform, v.x, v.y, v.z);
             case Vector4f   v -> GL20.glUniform4f(uniform, v.x, v.y, v.z, v.w);
-            case Matrix4f   m -> GL20.glUniformMatrix4(uniform, false, matrix(m));
+            case Matrix4f   m -> {
+                m.store(buffer);
+                buffer.flip();
+                GL20.glUniformMatrix4(uniform, false, buffer);
+            }
             default -> throw new IllegalArgumentException("Unsupported uniform type: " + data.getClass());
         }
-    }
-
-    final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
-
-    private FloatBuffer matrix(Matrix4f matrix) {
-        matrix.store(buffer);
-        buffer.flip();
-        return buffer;
     }
 
     protected abstract void shader(Scene scene);
@@ -136,6 +134,8 @@ public abstract class Shader {
                 shaderSource.append(line).append("//\n");
                 if (line.startsWith("#version")) {
                     shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
+                    shaderSource.append("#define WIDTH " + Game.WIDTH).append("//\n");
+                    shaderSource.append("#define HEIGHT " + Game.HEIGHT).append("//\n");
                 }
             }
             reader.close();

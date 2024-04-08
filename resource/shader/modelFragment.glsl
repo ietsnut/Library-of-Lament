@@ -15,27 +15,32 @@ uniform vec3    lightPosition[LIGHTS];
 uniform vec3    lightAttenuation[LIGHTS];
 uniform float   lightIntensity[LIGHTS];
 
+uniform int     frame;
+uniform int     frames;
+
 void main(void) {
 
-    vec4 albedo = texture(modelTexture, fragUV);
-
-    normal = vec4(fragNormal.xyz, fragDepth);
+    float frameW    = 1.0 / float(frames);
+    float offset    = frameW * float(frame);
+    vec2 atlasUV    = vec2(fragUV.x * frameW + offset, fragUV.y);
+    vec4 albedo     = texture(modelTexture, atlasUV);
+    normal          = vec4(fragNormal.xyz, fragDepth);
 
     if (albedo.a < 0.5) {
         discard;
     }
 
     vec3 lightEffect = vec3(0);
+
     for(int i = 0; i < LIGHTS; i++) {
-        float distance = length(fragPosition - lightPosition[i]);
-        float attenuation = 1.0 / (lightAttenuation[i].x + lightAttenuation[i].y * distance + lightAttenuation[i].z * distance * distance);
-        lightEffect += vec3(attenuation * lightIntensity[i]);
+        float distance      = length(fragPosition - lightPosition[i]);
+        float attenuation   = 1.0 / (lightAttenuation[i].x + lightAttenuation[i].y * distance + lightAttenuation[i].z * distance * distance);
+        lightEffect         += vec3(attenuation * lightIntensity[i]);
     }
-    lightEffect = clamp(lightEffect, 0.2, 0.8);
 
-    vec3 diffuse = albedo.rgb * lightEffect * fragDepth;
-
-    color = dot(diffuse, GRAYSCALE);
+    lightEffect     = clamp(lightEffect, 0.0, 0.8);
+    vec3 diffuse    = albedo.rgb * lightEffect;
+    color           = dot(diffuse, GRAYSCALE);
 
 }
 

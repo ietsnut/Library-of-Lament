@@ -43,16 +43,12 @@ public class Terrain extends Entity {
         };
         this.transformation.position.x = (SIZE / -2);
         this.transformation.position.z = (SIZE / -2);
-        texture("resource/terrain/" + name + ".png").repeat();
-        texture("resource/terrain/" + name + "_R.png").repeat();
-        texture("resource/terrain/" + name + "_G.png").repeat();
-        texture("resource/terrain/" + name + "_B.png").repeat();
-        texture("resource/terrain/" + name + "_blendMap.png");
+        texture("terrain", name, 5);
     }
 
     @Override
     protected void load(Object... args) {
-        BufferedImage hMap = new Texture("resource/terrain/" + args[0] + "_heightMap.png").image;
+        BufferedImage hMap = new Texture("terrain", args[0] + "5").image;
         int VERTEXS = hMap.getHeight();
         heights     = new float[VERTEXS][VERTEXS];
         int count   = VERTEXS * VERTEXS;

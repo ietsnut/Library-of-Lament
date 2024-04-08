@@ -33,6 +33,7 @@ public abstract class Entity {
     public List<Texture> textures = new ArrayList<>();
     public Transformation transformation = new Transformation();
     public String name;
+    public int frame = 0;
 
     public Collider collider;
 
@@ -71,8 +72,14 @@ public abstract class Entity {
         return name;
     }
 
-    public Texture texture(String name) {
-        Texture texture = new Texture(name);
+    public Texture texture(String namespace, String name, int frames) {
+        Texture texture = new Texture(namespace, name, frames);
+        textures.add(texture);
+        return texture;
+    }
+
+    public Texture texture(String namespace, String name) {
+        Texture texture = new Texture(namespace, name);
         textures.add(texture);
         return texture;
     }

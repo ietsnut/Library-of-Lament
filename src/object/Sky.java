@@ -71,7 +71,7 @@ public class Sky {
                     return matrix;
                 }
             };
-            texture("resource/sky/" + name + ".png");
+            texture("sky", name);
         }
 
         @Override

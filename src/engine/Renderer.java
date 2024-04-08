@@ -15,7 +15,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Renderer {
 
-    public static final float NEAR_PLANE = 0.1f;
+    public static final float NEAR_PLANE = 0.001f;
     public static final float FAR_PLANE = Terrain.SIZE * 4;
 
     private final ModelShader   modelShader;

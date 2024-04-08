@@ -25,19 +25,15 @@ public class TerrainShader extends Shader {
 
     public TerrainShader() {
         super("terrain", "position", "uv", "normal");
-        start();
-        uniform("backgroundTexture", 0);
-        uniform("rTexture", 1);
-        uniform("gTexture", 2);
-        uniform("bTexture", 3);
-        uniform("blendMap", 4);
-        uniform("projection",   Renderer.projection());
-        stop();
     }
 
     public void shader(Scene scene) {
+        uniform("tiling",       40f);
+        uniform("projection",   Renderer.projection());
         uniform("view",         Camera.view);
         uniform("model",        scene.terrain.transformation.model());
+        uniform("terrainTexture",       0);
+        uniform("blendTexture",         1);
         for (int i = 0; i < Light.ALL.size(); i++) {
             uniform("lightPosition[" + i + "]",     scene.lights.get(i).position);
             uniform("lightAttenuation[" + i + "]",  scene.lights.get(i).attenuation);

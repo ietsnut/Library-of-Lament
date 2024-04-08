@@ -3,6 +3,8 @@ package object;
 import de.javagl.obj.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.Sys;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -22,9 +24,21 @@ public class Model extends Entity {
         this(name, name);
     }
 
+    public Model(String name, int frames) {
+        this(name, name, frames);
+    }
+
     public Model(String name, String texture) {
+        this(name, texture, 1);
+    }
+
+    public Model(String name, String texture, int frames) {
         super(name);
-        texture("resource/texture/" + texture + ".png");
+        if (frames == 1) {
+            texture("texture", texture);
+        } else {
+            texture("texture", texture, frames);
+        }
     }
 
     @Override
