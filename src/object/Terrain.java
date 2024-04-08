@@ -27,6 +27,7 @@ public class Terrain extends Entity {
     public static final float SIZE = 128;
     public static final float MAX_HEIGHT = 8;
     public static final float MAX_PIXEL_COLOUR = 256 * 256 * 256;
+    int VERTEXS;
 
     public float[][] heights;
 
@@ -49,7 +50,7 @@ public class Terrain extends Entity {
     @Override
     protected void load(Object... args) {
         BufferedImage hMap = new Texture("terrain", args[0] + "5").image;
-        int VERTEXS = hMap.getHeight();
+        VERTEXS = hMap.getHeight();
         heights     = new float[VERTEXS][VERTEXS];
         int count   = VERTEXS * VERTEXS;
         vertices    = new float[count * 3];
@@ -100,6 +101,13 @@ public class Terrain extends Entity {
         return height;
     }
 
+    public float getHeightOfTerrain(float playerX, float playerZ) {
+        int gridX = (int) ((playerX - this.transformation.position.x) / (SIZE / (VERTEXS - 1)));
+        int gridZ = (int) ((playerZ - this.transformation.position.z) / (SIZE / (VERTEXS - 1)));
+        return (gridX < 0 || gridZ < 0 || gridX >= VERTEXS - 1 || gridZ >= VERTEXS - 1) ? 0 : heights[gridX][gridZ];
+    }
+    /*
+
     public float getHeightOfTerrain(float worldX, float worldZ) {
         float terrainX = worldX - this.transformation.position.x;
         float terrainZ = worldZ - this.transformation.position.z;
@@ -124,14 +132,6 @@ public class Terrain extends Entity {
         float l2    = ((p3.z - p1.z) * (pos.x - p3.x) + (p1.x - p3.x) * (pos.y - p3.z)) / det;
         float l3    = 1.0f - l1 - l2;
         return l1 * p1.y + l2 * p2.y + l3 * p3.y;
-    }
-/*
-    @Override
-    public Matrix4f getModel() {
-        Matrix4f matrix = new Matrix4f();
-        matrix.setIdentity();
-        matrix.translate(new Vector3f(transformation.position.x, 0, transformation.position.z));
-        return matrix;
     }*/
 
 }
