@@ -29,7 +29,7 @@ public class FBO extends Entity {
         this.height = height;
         frameBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        drawBuffers = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();
+        drawBuffers = BufferUtils.createIntBuffer(3).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();
         glDrawBuffers(drawBuffers);
         Texture colorTexture = texture();
         glBindTexture(GL11.GL_TEXTURE_2D, colorTexture.ID);

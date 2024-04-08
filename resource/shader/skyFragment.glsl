@@ -8,12 +8,10 @@ layout(location = 1) out vec4   normal;
 uniform sampler2D modelTexture;
 
 void main(void) {
-
     vec4 albedo = texture(modelTexture, textureCoord);
-    normal = vec4(1.0);
     if (albedo.a < 0.5) {
         discard;
     }
+    normal = vec4(1.0);
     color = dot(albedo.rgb, GRAYSCALE);
-
 }

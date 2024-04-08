@@ -47,17 +47,6 @@ public class Camera {
             if (Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT))
                 transformation.position.translate(forward.z * -SPEED, 0, forward.x * SPEED);
             transformation.position.y = scene.terrain.getHeightOfTerrain(transformation.position.x, transformation.position.z) + 2f;
-            for (Entity entity : scene.entities) {
-                int direction = 1;
-                while (entity.inside()) {
-                    if (direction % 2 == 0) {
-                        transformation.position.translate(forward.x * SPEED, 0, 0);
-                    } else {
-                        transformation.position.translate(0, 0, forward.z * SPEED);
-                    }
-                    direction++;
-                }
-            }
         }
 
         view();

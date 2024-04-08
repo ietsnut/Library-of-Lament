@@ -11,6 +11,7 @@ import static org.lwjgl.opengl.GL32.GL_DEPTH_CLAMP;
 
 public class SkyShader extends Shader {
 
+
     public SkyShader() {
         super("sky", "position", "uv");
     }
@@ -19,11 +20,15 @@ public class SkyShader extends Shader {
         glDepthMask(false);
         uniform("projection",   Renderer.projection());
         uniform("view",         view());
+
         for (int i = scene.sky.layers.size() - 1; i >= 0; i--) {
             Sky.Layer layer = scene.sky.layers.get(i);
+            uniform("cube",    false);
             uniform("model",    layer.transformation.model());
+            uniform("tile",     i);
             render(layer);
         }
+
         glDepthMask(true);
     }
 

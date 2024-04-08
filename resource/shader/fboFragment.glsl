@@ -3,8 +3,8 @@
 in vec2 fragUV;
 out vec3 color;
 
-uniform sampler2D colorTexture;
-uniform sampler2D normalTexture;
+layout(location = 0) uniform sampler2D colorTexture;
+layout(location = 1) uniform sampler2D normalTexture;
 
 const float dx = 1.0 / WIDTH;
 const float dy = 1.0 / HEIGHT;
@@ -21,9 +21,9 @@ void main(void) {
     float albedoDelta   = sobel(colorTexture, 0);
     float depthDelta    = sobel(normalTexture, 3);
     float normalDelta   = max(sobel(normalTexture, 0), max(sobel(normalTexture, 1), sobel(normalTexture, 2)));
-    float albedo        = texture(colorTexture, fragUV).r > 0.5 ? 1.0 : 0.0;
+    float albedo        = texture(colorTexture, fragUV).r;
     color               = vec3(albedo);
-    if ((normalDelta > 0.01 && albedoDelta > 0.2) || (depthDelta > 0.1)) {
+    if ((normalDelta > 0.01 && albedoDelta > 0.4) || (depthDelta > 0.1)) {
         color = vec3(1.0);
     }
     vec2 center         = vec2(0.5, 0.5);

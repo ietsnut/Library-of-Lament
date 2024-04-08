@@ -48,10 +48,10 @@ public class Scene {
         billboard.transformation.position(20, terrain.getHeightOfTerrain(20, 20) + 1, 20);
         entities.add(billboard);
 
-        Light light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 10);
+        Light light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 10f);
         lights.add(light1);
 
-        Light light2 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 10);
+        Light light2 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 10f);
         light2.position = new Vector3f(model2.transformation.position).translate(0, 3, 0);
         lights.add(light2);
 
@@ -59,7 +59,6 @@ public class Scene {
 
     public void update() {
         lights.getFirst().position = new Vector3f(Camera.transformation.position);
-        /*
         for (Entity entity : entities) {
             if (entity instanceof Model model) {
                 model.transformation.rotation(Axis.Y, Sys.getTime() / 1000f);
@@ -67,7 +66,7 @@ public class Scene {
                     model.frame = (int) (Sys.getTime() / 1000f) % entity.textures.getFirst().frames;
                 }
             }
-        }*/
+        }
     }
 
 }

@@ -43,7 +43,7 @@ public class Sky {
 
     public Sky(String name, int rings) {
         for (int i = 0; i < rings; i++) {
-            layers.add(new Layer(name + "_" + i));
+            layers.add(new Layer(name + i));
         }
     }
 

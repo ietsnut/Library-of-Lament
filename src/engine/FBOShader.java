@@ -13,7 +13,7 @@ public class FBOShader extends Shader {
 
     public FBOShader() {
         super("fbo", "position");
-        this.fbo = new FBO(Display.getWidth(), Display.getHeight());;
+        this.fbo = new FBO(Display.getWidth(), Display.getHeight());
     }
 
     public void shader(Scene scene) {
@@ -22,6 +22,7 @@ public class FBOShader extends Shader {
         uniform("height",           fbo.height);
         uniform("colorTexture",     0);
         uniform("normalTexture",    1);
+        uniform("noiseTexture",     2);
         render(fbo);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }

@@ -118,6 +118,7 @@ public abstract class Entity {
 
         public Vector3f min;
         public Vector3f max;
+        public float size;
 
         public Collider() {
             super("");
@@ -132,6 +133,7 @@ public abstract class Entity {
                 min.set(Math.min(min.x, vertices[i]), Math.min(min.y, vertices[i + 1]), Math.min(min.z, vertices[i + 2]));
                 max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));
             }
+            size = Vector3f.sub(max, min, null).length();
             this.vertices = new float[] {
                     min.x, min.y, min.z, max.x, min.y, min.z, max.x, max.y, min.z, min.x, max.y, min.z, min.x, min.y, max.z, max.x, min.y, max.z, max.x, max.y, max.z, min.x, max.y, max.z,
             };
@@ -191,8 +193,9 @@ public abstract class Entity {
     }
 
     public static Entity collides(float distance, List<Entity> entities) {
-        //return first entity within distance, otherwise null
-        return entities.stream().filter(entity -> entity.collide(distance)).findFirst().orElse(null);
+        //return the enemy with the least distance
+        return entities.stream().filter(entity -> entity.collide(distance)).min(Comparator.comparing(Entity::distance)).orElse(null);
+
     }
 
 }

@@ -25,22 +25,21 @@ void main(void) {
     vec2 atlasUV    = vec2(fragUV.x * frameW + offset, fragUV.y);
     vec4 albedo     = texture(modelTexture, atlasUV);
     normal          = vec4(fragNormal.xyz, fragDepth);
-
     if (albedo.a < 0.5) {
         discard;
     }
+    color = dot(albedo.rgb, GRAYSCALE);
 
-    vec3 lightEffect = vec3(0);
+    float lightEffect = 0.0;
 
     for(int i = 0; i < LIGHTS; i++) {
         float distance      = length(fragPosition - lightPosition[i]);
         float attenuation   = 1.0 / (lightAttenuation[i].x + lightAttenuation[i].y * distance + lightAttenuation[i].z * distance * distance);
-        lightEffect         += vec3(attenuation * lightIntensity[i]);
+        lightEffect         += attenuation * lightIntensity[i];
     }
 
-    lightEffect     = clamp(lightEffect, 0.0, 0.8);
-    vec3 diffuse    = albedo.rgb * lightEffect;
-    color           = dot(diffuse, GRAYSCALE);
+    lightEffect     = clamp(lightEffect, 0.0, 0.75);
+    color           *= lightEffect;
 
 }
 

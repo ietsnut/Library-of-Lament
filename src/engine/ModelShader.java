@@ -23,6 +23,8 @@ public class ModelShader extends Shader {
             uniform("lightIntensity[" + i + "]",    scene.lights.get(i).intensity);
         }
         for (Entity model : scene.entities) {
+            uniform("modelTexture", 0);
+            uniform("noiseTexture", 1);
             uniform("model",        model.transformation.model());
             uniform("frame",        model.frame);
             uniform("frames",       model.textures.getFirst().frames);

@@ -39,6 +39,7 @@ public class Model extends Entity {
         } else {
             texture("texture", texture, frames);
         }
+        texture("texture", "noise");
     }
 
     @Override
