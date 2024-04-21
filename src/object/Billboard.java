@@ -8,33 +8,17 @@ import property.Transformation;
 public class Billboard extends Entity {
 
     public Billboard(String name) {
-        super(name);
-
-        this.transformation = new Transformation() {
-            @Override
-            public Matrix4f model() {
-                Matrix4f matrix = super.model();
-                matrix.setIdentity();
-                matrix.translate(position);
-                Vector3f directionToCamera = Vector3f.sub(Camera.transformation.position, position, null);
-                if (directionToCamera.lengthSquared() > 0) {
-                    directionToCamera.normalise();
-                    matrix.rotate((float) Math.atan2(directionToCamera.x, directionToCamera.z), AXIS_Y);
-                }
-                matrix.scale(new Vector3f(scale.x, scale.y, scale.z));
-                return matrix;
-            }
-        };
-        texture("texture", name);
+        super(name, true);
+        enqueue();
     }
 
     @Override
-    protected void load(Object... args) {
+    public void load() {
         vertices = new float[] {
-                -0.5f, 0.5f, 0,
-                -0.5f, -0.5f, 0,
-                0.5f, -0.5f, 0,
-                0.5f, 0.5f, 0
+                -1.0f, 2.0f, 0,
+                -1.0f, 0.0f, 0,
+                1.0f, 0.0f, 0,
+                1.0f, 2.0f, 0
         };
         indices = new int[] {
                 0,1,3,
@@ -52,6 +36,12 @@ public class Billboard extends Entity {
                 0.0f, 0.0f, 1.0f,
                 0.0f, 0.0f, 1.0f
         };
+    }
+
+    @Override
+    public Matrix4f model() {
+        rotation(Axis.Y, 360 - Camera.transformation.rotation.y);
+        return super.model();
     }
 
 }

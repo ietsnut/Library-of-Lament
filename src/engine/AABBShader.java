@@ -20,8 +20,8 @@ public class AABBShader extends Shader {
         if (entity == null) {
             return;
         }
-        uniform("model",        entity.transformation.model());
-        uniform("projection",   Renderer.projection());
+        uniform("model",        entity.model);
+        uniform("projection",   Renderer.projection);
         uniform("view",         Camera.view);
         float t = (Sys.getTime() * 1000.0f) / Sys.getTimerResolution();
         uniform("time",         t / 1000.0f);

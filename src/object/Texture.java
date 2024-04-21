@@ -1,143 +1,294 @@
 package object;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.BufferUtils;
+import property.Load;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.image.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
+import java.nio.*;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
-import static org.lwjgl.opengl.GL14.GL_GENERATE_MIPMAP;
+import static org.lwjgl.opengl.GL12.*;
+import static org.lwjgl.opengl.GL30.*;
 
-public class Texture extends Number {
+public class Texture implements Load {
 
-    public static final ArrayList<Texture> ALL = new ArrayList<>();
-    public final int ID;
-    public int frames = 1;
-    public BufferedImage image;
+    private static final IndexColorModel ICM = new IndexColorModel(2, 4,
+            new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
+            new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
+            new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
+            new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
-    public Texture(String namespace, String name, int frames) {
-        this.frames = frames;
-        BufferedImage example = load("resource/" + namespace + "/" + name + "0.png");
-        this.image = new BufferedImage(example.getWidth() * frames, example.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = this.image.createGraphics();
-        for (int i = 0; i < frames; i++) {
-            BufferedImage frame = load("resource/" + namespace + "/" + name + i + ".png");
-            g.drawImage(frame, example.getWidth() * i, 0, null);
-        }
-        g.dispose();
-        this.ID = glGenTextures();
-        load(this.image);
-        ALL.add(this);
+    public int id;
+
+    public String           file;
+    public ByteBuffer       bytes;
+
+    public int width;
+    public int height;
+
+    public int tiles;
+    public int tile;
+
+    public boolean repeat = false;
+
+    public Texture() {
+        this.id = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, this.id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        BOUND.add(this);
     }
 
     public Texture(String namespace, String name) {
-        this(load("resource/" + namespace + "/" + name + ".png"));
+        this(namespace, name, 1);
     }
 
-    public Texture(BufferedImage image) {
-        this.ID = glGenTextures();
-        load(image);
-        ALL.add(this);
+    public Texture(String namespace, String name, int tiles) {
+        this.tiles  = tiles;
+        this.file   = namespace + "/" + name;
+        enqueue();
     }
 
-    public Texture() {
-        this.ID = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, this.ID);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL11.GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL11.GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        ALL.add(this);
-    }
-
-    public Texture repeat() {
-        glBindTexture(GL_TEXTURE_2D, this.ID);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        return this;
-    }
-
-    public Texture bind() {
-        glBindTexture(GL_TEXTURE_2D, this.ID);
-        return this;
-    }
-
-    public Texture unbind() {
-        glBindTexture(GL_TEXTURE_2D, 0);
-        return this;
-    }
-
-    private void load(BufferedImage image) {
-        int[] pixels = null;
-        this.image  = image;
-        int width   = image.getWidth();
-        int height  = image.getHeight();
-        pixels = new int[width * height];
-        image.getRGB(0, 0, width, height, pixels, 0, width);
-        int[] data = new int[width * height];
-        for (int i = 0; i < width * height; i++) {
-            int a = (pixels[i] & 0xff000000)    >> 24;
-            int r = (pixels[i] & 0xff0000)      >> 16;
-            int g = (pixels[i] & 0xff00)        >> 8;
-            int b = (pixels[i] & 0xff);
-            data[i] = a << 24 | b << 16 | g << 8 | r;
-        }
-        glBindTexture(GL_TEXTURE_2D, this.ID);
-        GL30.glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_NEAREST_MIPMAP_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,   GL_NEAREST_MIPMAP_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,   GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,       GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,       GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP,      GL_FALSE);
-        IntBuffer buffer = ByteBuffer.allocateDirect(data.length << 2).order(ByteOrder.nativeOrder()).asIntBuffer();
-        buffer.put(data).flip();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    private static BufferedImage load(String file) {
+    public static BufferedImage load(String file) {
         BufferedImage image;
         try {
-            image = ImageIO.read(new FileInputStream(file));
+            image = ImageIO.read(new FileInputStream("resource/" + file + ".png"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return image;
     }
 
-    @Override
-    public int intValue() {
-        return ID;
+    public BufferedImage dither(BufferedImage original) {
+        BufferedImage image = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
+        for (int y = 0; y < original.getHeight(); y++) {
+            for (int x = 0; x < original.getWidth(); x++) {
+                int argb = original.getRGB(x, y);
+                int a = (argb >> 24) & 0xff;
+                int r = (argb >> 16) & 0xff;
+                int g = (argb >> 8) & 0xff;
+                int b = argb & 0xff;
+                int index;
+                int gray = (int) (0.299 * r + 0.587 * g + 0.114 * b);
+                if (a < 128) {
+                    index = 0;
+                } else if (gray < 64.75) {
+                    index = 1; // black
+                } else if (gray < 191.25) {
+                    index = 2; // gray
+                } else {
+                    index = 3; // white
+                }
+                image.getRaster().setSample(x, y, 0, index);
+            }
+        }
+        return image;
+    }
+
+    public ByteBuffer load(BufferedImage image) {
+        byte[] imgData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        ByteBuffer buffer = BufferUtils.createByteBuffer(imgData.length / 4).order(ByteOrder.nativeOrder());
+        byte packedData;
+        for (int i = 0; i < imgData.length; i += 4) {
+            packedData = 0;
+            for (int j = 0; j < 4; j++) {
+                if (i + j < imgData.length) {
+                    int pixelValue = (imgData[i + j] & 0xFF) & 0x03;
+                    packedData |= (byte) (pixelValue << (6 - 2 * j));
+                }
+            }
+            buffer.put(packedData);
+        }
+        buffer.flip();
+        return buffer;
     }
 
     @Override
-    public long longValue() {
-        return ID;
+    public void load() {
+        BufferedImage image;
+        if (tiles == 1) {
+            image = load(this.file);
+        } else {
+            BufferedImage sample = load(this.file + "0");
+            image = new BufferedImage(sample.getWidth() * tiles, sample.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
+            Graphics2D g = image.createGraphics();
+            for (int i = 0; i < tiles; i++) {
+                BufferedImage frame = load(file + i);
+                g.drawImage(frame, sample.getWidth() * i, 0, null);
+            }
+            g.dispose();
+        }
+        image = dither(image);
+        this.width = image.getWidth();
+        this.height = image.getHeight();
+        this.bytes = load(image);
     }
 
     @Override
-    public float floatValue() {
-        return ID;
+    public void bind() {
+        this.id = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, this.id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        if (repeat) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        }
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4) * tiles, height, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     @Override
-    public double doubleValue() {
-        return ID;
+    public String toString() {
+        return "<" + this.getClass().getSimpleName() + "> [" + file + "] : " + width + ", " + height;
     }
 
+    public Texture repeat() {
+        repeat = true;
+        return this;
+    }
+
+    class Dither {
+
+        static class C3 {
+
+            int r, g, b;
+
+            public C3(int c) {
+                Color color = new Color(c);
+                r = color.getRed();
+                g = color.getGreen();
+                b = color.getBlue();
+            }
+
+            public C3(int r, int g, int b) {
+                this.r = r;
+                this.g = g;
+                this.b = b;
+            }
+
+            public C3 add(C3 o) {
+                return new C3(r + o.r, g + o.g, b + o.b);
+            }
+
+            public int clamp(int c) {
+                return Math.max(0, Math.min(255, c));
+            }
+
+            public int diff(C3 o) {
+                int Rdiff = o.r - r;
+                int Gdiff = o.g - g;
+                int Bdiff = o.b - b;
+                int distanceSquared = Rdiff * Rdiff + Gdiff * Gdiff + Bdiff * Bdiff;
+                return distanceSquared;
+            }
+
+            public C3 mul(double d) {
+                return new C3((int) (d * r), (int) (d * g), (int) (d * b));
+            }
+
+            public C3 sub(C3 o) {
+                return new C3(r - o.r, g - o.g, b - o.b);
+            }
+
+            public Color toColor() {
+                return new Color(clamp(r), clamp(g), clamp(b));
+            }
+
+            public int toRGB() {
+                return toColor().getRGB();
+            }
+        }
+
+        private static C3 findClosestPaletteColor(C3 c, C3[] palette) {
+            C3 closest = palette[0];
+
+            for (C3 n : palette) {
+                if (n.diff(c) < closest.diff(c)) {
+                    closest = n;
+                }
+            }
+
+            return closest;
+        }
+
+        public static BufferedImage floydSteinbergDithering(BufferedImage img) {
+
+            C3[] palette = new C3[]{
+
+                    new C3(0, 0, 0), // black
+                    new C3(0, 0, 255), // green
+                    new C3(0, 255, 0), // blue
+                    new C3(0, 255, 255), // cyan
+                    new C3(255, 0, 0), // red
+                    new C3(255, 0, 255), // purple
+                    new C3(255, 255, 0), // yellow
+                    new C3(255, 255, 255)  // white
+
+            };
+
+            int w = img.getWidth();
+            int h = img.getHeight();
+
+            C3[][] d = new C3[h][w];
+
+            for (int y = 0; y < h; y++) {
+
+                for (int x = 0; x < w; x++) {
+
+                    d[y][x] = new C3(img.getRGB(x, y));
+
+                }
+
+            }
+
+            for (int y = 0; y < img.getHeight(); y++) {
+
+                for (int x = 0; x < img.getWidth(); x++) {
+
+                    C3 oldColor = d[y][x];
+                    C3 newColor = findClosestPaletteColor(oldColor, palette);
+                    img.setRGB(x, y, newColor.toColor().getRGB());
+
+                    C3 err = oldColor.sub(newColor);
+
+                    if (x + 1 < w) {
+                        d[y][x + 1] = d[y][x + 1].add(err.mul(7. / 16));
+                    }
+
+                    if (x - 1 >= 0 && y + 1 < h) {
+                        d[y + 1][x - 1] = d[y + 1][x - 1].add(err.mul(3. / 16));
+                    }
+
+                    if (y + 1 < h) {
+                        d[y + 1][x] = d[y + 1][x].add(err.mul(5. / 16));
+                    }
+
+                    if (x + 1 < w && y + 1 < h) {
+                        d[y + 1][x + 1] = d[y + 1][x + 1].add(err.mul(1. / 16));
+                    }
+
+                }
+
+            }
+
+            return img;
+        }
+
+    }
 }

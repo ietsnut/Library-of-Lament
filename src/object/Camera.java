@@ -1,17 +1,20 @@
 package object;
 
 import game.Scene;
-import org.lwjgl.BufferUtils;
-import property.Axis;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import property.Transformation;
 
-import java.nio.FloatBuffer;
-
 public class Camera {
+
+    /* TODO:
+        - add head bobbing when walking (optional: maybe bob the tool)
+        - add dynamic walking speed based on terrain
+        - add jumping and gravity
+        - add dynamic FOV
+    */
 
     public static Transformation    transformation  = new Transformation();
     public static Matrix4f          view            = new Matrix4f();
@@ -35,7 +38,7 @@ public class Camera {
         float dy = Mouse.getDY() * SENS;
 
         if (Mouse.isGrabbed()) {
-            transformation.rotate(Axis.Y, dx).rotate(Axis.X, dy).rotation(Axis.X, Math.min(Math.max(transformation.rotation.x, -80), 80));
+            transformation.rotate(Transformation.Axis.Y, dx).rotate(Transformation.Axis.X, dy).rotation(Transformation.Axis.X, Math.min(Math.max(transformation.rotation.x, -80), 80));
             Vector3f forward = new Vector3f(transformation.forward().x, 0, transformation.forward().z).normalise(null);
             //Vector3f position = new Vector3f(transformation.position);
             if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP))
@@ -46,11 +49,9 @@ public class Camera {
                 transformation.position.translate(forward.z * SPEED, 0, forward.x * -SPEED);
             if (Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT))
                 transformation.position.translate(forward.z * -SPEED, 0, forward.x * SPEED);
-            transformation.position.y = scene.terrain.getHeightOfTerrain(transformation.position.x, transformation.position.z) + 2f;
+            transformation.position.y = scene.terrain != null ? scene.terrain.height(transformation.position.x, transformation.position.z) + 2f : 0;
         }
-
         view();
-
     }
     public Matrix4f view() {
         transformation.norm();

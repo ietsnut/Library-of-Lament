@@ -1,12 +1,7 @@
 package engine;
 
-import game.Game;
 import game.Scene;
 import object.*;
-import org.lwjgl.util.vector.Matrix4f;
-
-
-import java.util.List;
 
 public class ModelShader extends Shader {
 
@@ -15,21 +10,27 @@ public class ModelShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        uniform("projection",       Renderer.projection());
+        uniform("projection",       Renderer.projection);
         uniform("view",             Camera.view);
-        for (int i = 0; i < Light.ALL.size(); i++) {
+        uniform("lights",           Math.min(scene.lights.size(), LIGHTS));
+        for (int i = 0; i < Math.min(scene.lights.size(), LIGHTS); i++) {
             uniform("lightPosition[" + i + "]",     scene.lights.get(i).position);
             uniform("lightAttenuation[" + i + "]",  scene.lights.get(i).attenuation);
             uniform("lightIntensity[" + i + "]",    scene.lights.get(i).intensity);
         }
+        uniform("modelTexture", 0);
         for (Entity model : scene.entities) {
-            uniform("modelTexture", 0);
-            uniform("noiseTexture", 1);
-            uniform("model",        model.transformation.model());
-            uniform("frame",        model.frame);
-            uniform("frames",       model.textures.getFirst().frames);
             render(model);
         }
+        render(scene.terrain);
     }
 
+    @Override
+    protected void render(Entity entity) {
+        if (entity != null) {
+            uniform("model",        entity.model);
+            uniform("tiles",        entity.textures.getFirst().tiles);
+            super.render(entity);
+        }
+    }
 }

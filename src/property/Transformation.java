@@ -13,8 +13,7 @@ public class Transformation {
     public final Vector3f position      = new Vector3f(0, 0, 0);
     public final Vector3f scale         = new Vector3f(1, 1, 1);
 
-    //private final Matrix4f view         = new Matrix4f();
-    private final Matrix4f model        = new Matrix4f();
+    public final Matrix4f model         = new Matrix4f();
 
     public Transformation position(Vector3f position) {
         this.position.set(position);
@@ -161,8 +160,7 @@ public class Transformation {
         orientation.w /= norm;
         return this;
     }
-
-    /*
+/*
     public Matrix4f view() {
         norm();
         view.setIdentity();
@@ -184,9 +182,7 @@ public class Transformation {
         view.m33 = 1.0f;
         view.translate(new Vector3f(-position.x, -position.y, -position.z));
         return view;
-    }
-    */
-
+    }*/
 
     public Matrix4f rotation() {
         norm();
@@ -235,6 +231,47 @@ public class Transformation {
     public Vector3f forward() {
         norm();
         return new Vector3f(2.0f * (orientation.x * orientation.z + orientation.w * orientation.y), 2.0f * (orientation.y * orientation.z - orientation.w * orientation.x), 1.0f - 2.0f * (orientation.x * orientation.x + orientation.y * orientation.y));
+    }
+
+    public enum Axis {
+        X(1, 0, 0),
+        Y(0, 1, 0),
+        Z(0, 0, 1);
+        public final Vector3f vector;
+        Axis(int x, int y, int z) {
+            this.vector = new Vector3f(x, y, z);
+        }
+    }
+
+    public Transformation lerp(Transformation target, float t) {
+        Vector3f lerpPosition = new Vector3f(
+                position.x + (target.position.x - position.x) * t,
+                position.y + (target.position.y - position.y) * t,
+                position.z + (target.position.z - position.z) * t
+        );
+        float dot = orientation.x * target.orientation.x + orientation.y * target.orientation.y
+                + orientation.z * target.orientation.z + orientation.w * target.orientation.w;
+        float blendI = 1f - t;
+        if (dot < 0) {
+            orientation.x = blendI * orientation.x - t * target.orientation.x;
+            orientation.y = blendI * orientation.y - t * target.orientation.y;
+            orientation.z = blendI * orientation.z - t * target.orientation.z;
+            orientation.w = blendI * orientation.w - t * target.orientation.w;
+        } else {
+            orientation.x = blendI * orientation.x + t * target.orientation.x;
+            orientation.y = blendI * orientation.y + t * target.orientation.y;
+            orientation.z = blendI * orientation.z + t * target.orientation.z;
+            orientation.w = blendI * orientation.w + t * target.orientation.w;
+        }
+        norm();
+        Vector3f lerpScale = new Vector3f(
+                scale.x + (target.scale.x - scale.x) * t,
+                scale.y + (target.scale.y - scale.y) * t,
+                scale.z + (target.scale.z - scale.z) * t
+        );
+        position.set(lerpPosition);
+        scale.set(lerpScale);
+        return this;
     }
 
 }

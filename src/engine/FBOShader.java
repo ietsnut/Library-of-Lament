@@ -22,7 +22,6 @@ public class FBOShader extends Shader {
         uniform("height",           fbo.height);
         uniform("colorTexture",     0);
         uniform("normalTexture",    1);
-        uniform("noiseTexture",     2);
         render(fbo);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }

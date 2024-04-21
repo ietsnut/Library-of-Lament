@@ -2,6 +2,7 @@ package object;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
@@ -18,27 +19,30 @@ public class FBO extends Entity {
     public final int width;
     public final int height;
 
-    public final int frameBuffer;
-    public final int depthBuffer;
+    public int frameBuffer;
+    public int depthBuffer;
 
-    public final IntBuffer drawBuffers;
+    public IntBuffer drawBuffers;
 
     public FBO(int width, int height) {
-        super();
+        super("fbo", false);
         this.width = width;
         this.height = height;
         frameBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        drawBuffers = BufferUtils.createIntBuffer(3).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();
+        drawBuffers = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();
         glDrawBuffers(drawBuffers);
-        Texture colorTexture = texture();
-        glBindTexture(GL11.GL_TEXTURE_2D, colorTexture.ID);
+
+        Texture color = texture(new Texture()).textures.getLast();
+        glBindTexture(GL11.GL_TEXTURE_2D, color.id);
         glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture.ID, 0);
-        Texture normalTexture = texture();
-        glBindTexture(GL_TEXTURE_2D, normalTexture.ID);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,color.id, 0);
+
+        Texture normals = texture(new Texture()).textures.getLast();
+        glBindTexture(GL_TEXTURE_2D, normals.id);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture.ID, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normals.id, 0);
+
         depthBuffer = glGenRenderbuffers();
         glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
@@ -50,10 +54,14 @@ public class FBO extends Entity {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             throw new RuntimeException("Framebuffer not complete");
         }
+        load();
+        post();
+        bind();
+        BOUND.add(this);
     }
 
     @Override
-    protected void load(Object... args) {
+    public void load() {
         indices     = new int[] { 0, 1, 2, 2, 1, 3 };
         vertices    = new float[] { -1, 1, -1, -1, 1, 1, 1, -1 };
     }

@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+import property.Load;
 import property.Transformation;
 
 import java.nio.FloatBuffer;
@@ -18,9 +19,7 @@ import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 
-public abstract class Entity {
-
-    public static final List<Entity> ALL = new ArrayList<>();
+public abstract class Entity extends Transformation implements Load {
 
     public int vaoID;
     public List<Integer> vboIDs = new ArrayList<>();
@@ -30,88 +29,93 @@ public abstract class Entity {
     public float[]  normals;
     public float[]  texCoords;
 
-    public List<Texture> textures = new ArrayList<>();
-    public Transformation transformation = new Transformation();
-    public String name;
-    public int frame = 0;
+    public IntBuffer    indicesBuffer;
+    public FloatBuffer  verticesBuffer;
+    public FloatBuffer  normalsBuffer;
+    public FloatBuffer  texCoordsBuffer;
 
+    public final List<Texture> textures = new ArrayList<>();
+
+    public final int dimensions;
+    public final String name;
     public Collider collider;
+    public final boolean collidable;
 
-    public Entity(Object... args) {
-        this.vaoID = glGenVertexArrays();
-        glBindVertexArray(this.vaoID);
-        load(args);
-        if (this.indices != null) {
-            bindIndicesBuffer(this.indices);
-        }
-        if (this.vertices != null) {
-            if (args.length > 0) {
-                bindFloatBuffer(0, 3, this.vertices);
-            } else {
-                bindFloatBuffer(0, 2, this.vertices);
-            }
-        }
-        if (this.texCoords != null) {
-            bindFloatBuffer(1, 2, this.texCoords);
-        }
-        if (this.normals != null) {
-            bindFloatBuffer(2, 3, this.normals);
-        }
-        glBindVertexArray(0);
-        if (args.length > 0 && args[0] instanceof String s) {
-            this.name = s;
-        }
-        if (args.length > 0 && !(this instanceof Collider)) {
-            this.collider = new Collider();
-        }
-        ALL.add(this);
+    public Entity(String name, boolean collidable) {
+        this.name = name;
+        this.dimensions = this instanceof FBO ? 2 : 3;
+        this.collidable = collidable;
+    }
+
+    public Entity texture(Texture texture) {
+        textures.add(texture);
+        return this;
     }
 
     @Override
     public String toString() {
-        return name;
+        return "<" + this.getClass().getSimpleName() + "> [" + name + "] : " + position.x + ", " + position.y + ", " + position.z;
     }
 
-    public Texture texture(String namespace, String name, int frames) {
-        Texture texture = new Texture(namespace, name, frames);
-        textures.add(texture);
-        return texture;
-    }
-
-    public Texture texture(String namespace, String name) {
-        Texture texture = new Texture(namespace, name);
-        textures.add(texture);
-        return texture;
-    }
-
-    public Texture texture() {
-        Texture texture = new Texture();
-        textures.add(texture);
-        return texture;
-    }
-
-    protected abstract void load(Object... args);
-
-    protected void bindIndicesBuffer(int[] indices) {
-        IntBuffer buffer = BufferUtils.createIntBuffer(indices.length);
-        buffer.put(indices);
-        buffer.flip();
-        int vboId = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
-        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-        vboIDs.add(vboId);
-    }
-
-    protected void bindFloatBuffer(int attributeNumber, int coordinateSize, float[] data) {
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
-        buffer.put(data);
-        buffer.flip();
+    protected void bindBuffer(int attributeNumber, int coordinateSize, FloatBuffer buffer) {
         int vboID = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
         glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
         glVertexAttribPointer(attributeNumber, coordinateSize, GL_FLOAT, false, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         vboIDs.add(vboID);
+    }
+
+    @Override
+    public void bind() {
+        this.vaoID = glGenVertexArrays();
+        glBindVertexArray(this.vaoID);
+        if (this.indices != null) {
+            int vboId = GL15.glGenBuffers();
+            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
+            GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
+            vboIDs.add(vboId);
+        }
+        if (this.vertices != null) {
+            bindBuffer(0, this.dimensions, this.verticesBuffer);
+        }
+        if (this.texCoords != null) {
+            bindBuffer(1, 2, this.texCoordsBuffer);
+        }
+        if (this.normals != null) {
+            bindBuffer(2, 3, this.normalsBuffer);
+        }
+        glBindVertexArray(0);
+        this.collider = collidable ? new Collider() : null;
+    }
+
+    @Override
+    public void run() {
+        Load.super.run();
+        post();
+    }
+
+    public void post() {
+        if (this.indices != null) {
+            indicesBuffer = BufferUtils.createIntBuffer(indices.length);
+            indicesBuffer.put(indices);
+            indicesBuffer.flip();
+        }
+        if (this.vertices != null) {
+            verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
+            verticesBuffer.put(vertices);
+            verticesBuffer.flip();
+        }
+        if (this.texCoords != null) {
+            texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
+            texCoordsBuffer.put(texCoords);
+            texCoordsBuffer.flip();
+        }
+        if (this.normals != null) {
+            normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
+            normalsBuffer.put(normals);
+            normalsBuffer.flip();
+        }
     }
 
     public class Collider extends Entity {
@@ -121,11 +125,15 @@ public abstract class Entity {
         public float size;
 
         public Collider() {
-            super("");
+            super("collider", false);
+            load();
+            post();
+            bind();
+            BOUND.add(this);
         }
 
         @Override
-        protected void load(Object... args) {
+        public void load() {
             float[] vertices = Entity.this.vertices;
             min = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
             max = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
@@ -145,8 +153,11 @@ public abstract class Entity {
     }
 
     private Float collision() {
+        if (collider == null) {
+            return -1f;
+        }
         Matrix4f inverseModelMatrix = new Matrix4f();
-        Matrix4f.invert(Entity.this.transformation.model(), inverseModelMatrix);
+        Matrix4f.invert(Entity.this.model(), inverseModelMatrix);
         Vector4f rayOriginModelSpace = new Vector4f(Camera.transformation.position.x, Camera.transformation.position.y, Camera.transformation.position.z, 1.0f);
         Matrix4f.transform(inverseModelMatrix, rayOriginModelSpace, rayOriginModelSpace);
         Vector3f ray = Camera.transformation.forward().negate(null).normalise(null);
@@ -185,7 +196,7 @@ public abstract class Entity {
     }
 
     public float distance() {
-        return Vector3f.sub(Camera.transformation.position, this.transformation.position, null).length();
+        return Vector3f.sub(Camera.transformation.position, this.position, null).length();
     }
 
     public boolean distance(Float distance) {
@@ -194,8 +205,16 @@ public abstract class Entity {
 
     public static Entity collides(float distance, List<Entity> entities) {
         //return the enemy with the least distance
-        return entities.stream().filter(entity -> entity.collide(distance)).min(Comparator.comparing(Entity::distance)).orElse(null);
-
+        float min = Float.MAX_VALUE;
+        Entity closest = null;
+        for (Entity entity : entities) {
+            if (entity.collide(distance) && entity.distance() < min) {
+                min = entity.distance();
+                closest = entity;
+            }
+        }
+        return closest;
+        //return entities.stream().filter(entity -> entity.collide(distance)).min(Comparator.comparing(Entity::distance)).orElse(null);
     }
 
 }

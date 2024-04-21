@@ -7,7 +7,6 @@ import java.util.*;
 import game.Game;
 import game.Scene;
 import object.Entity;
-import object.Light;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -22,6 +21,7 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 public abstract class Shader {
 
     public static final List<Shader> ALL = new ArrayList<>();
+    public static final int LIGHTS = 64;
 
     private final HashMap<String, Integer> uniforms = new HashMap<>();
     private final String[] attributes;
@@ -41,6 +41,7 @@ public abstract class Shader {
         GL20.glLinkProgram(program);
         GL20.glValidateProgram(program);
         ALL.add(this);
+
     }
 
     final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
@@ -71,14 +72,14 @@ public abstract class Shader {
         stop();
     }
 
-    protected final void render(Entity entity) {
+    protected void render(Entity entity) {
         GL30.glBindVertexArray(entity.vaoID);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glEnableVertexAttribArray(i);
         }
         for (int i = 0; i < entity.textures.size(); i++) {
             glActiveTexture(GL13.GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).ID);
+            glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).id);
         }
         GL11.glDrawElements(GL11.GL_TRIANGLES, entity.indices.length, GL11.GL_UNSIGNED_INT, 0);
         for (int i = 0; i < entity.textures.size(); i++) {
@@ -91,7 +92,7 @@ public abstract class Shader {
         GL30.glBindVertexArray(0);
     }
 
-    protected final void render(Entity.Collider collider) {
+    protected void render(Entity.Collider collider) {
         GL30.glBindVertexArray(collider.vaoID);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glEnableVertexAttribArray(i);
@@ -128,11 +129,9 @@ public abstract class Shader {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
             while((line = reader.readLine())!=null){
-                if (line.startsWith("#define LIGHTS 2")) {
-                    line = "#define LIGHTS " + Light.ALL.size();
-                }
                 shaderSource.append(line).append("//\n");
                 if (line.startsWith("#version")) {
+                    shaderSource.append("#define LIGHTS " + LIGHTS).append("//\n");
                     shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
                     shaderSource.append("#define WIDTH " + Game.WIDTH).append("//\n");
                     shaderSource.append("#define HEIGHT " + Game.HEIGHT).append("//\n");

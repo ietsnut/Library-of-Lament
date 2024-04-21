@@ -1,30 +1,29 @@
 package game;
 
-import engine.Renderer;
+import engine.*;
 import object.*;
-import object.Window;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
 import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.util.vector.Vector3f;
+import property.Load;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Game {
 
-    public static final int WIDTH = 1280;
-    public static final int HEIGHT = 1280;
+    public static final int WIDTH = 1200;
+    public static final int HEIGHT = 1200;
 
     private final List<Scene> scenes = new ArrayList<>();
-    //public static Window stone;
+    public static Scene scene;
 
     public Game() {
 
-        ContextAttribs attribs = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
+        ContextAttribs attribs = new ContextAttribs(4, 3).withForwardCompatible(true).withProfileCore(true);
         try {
             Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
             Display.create(new PixelFormat(), attribs);
@@ -32,31 +31,43 @@ public class Game {
         } catch (LWJGLException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("OpenGL version: " + GL11.glGetString(GL11.GL_VERSION));
         GL11.glViewport(0, 0, WIDTH, HEIGHT);
 
-        scenes.add(new Scene());
-
-        //Texture windowTexture = new Texture("resource/texture/stone.png");
-        //stone = new Window(windowTexture.image, WIDTH/3, HEIGHT/3);
-
         Renderer renderer = new Renderer();
-        Mouse.setGrabbed(true);
 
+        scenes.add(new Scene());
+        scene = scenes.getFirst();
+
+       // Window window1 = new Window(Texture.load("texture/1"), 1000, 1000);
+
+        try {
+            Display.makeCurrent();
+        } catch (LWJGLException e) {
+            throw new RuntimeException(e);
+        }
+        Mouse.setGrabbed(true);
         int fps = 0;
         long lastFrameTime = (Sys.getTime() * 1000) / Sys.getTimerResolution();;
         while (!Display.isCloseRequested()) {
-            //sky1.rotation.y += 0.01f;
+            Load load = Load.process();
+            if (load != null) {
+                System.out.println(load);
+            }
+            if (load instanceof Terrain terrain) {
+                scene.terrain = terrain;
+            } else if (load instanceof Entity entity) {
+                scene.entities.add(entity);
+            }
             if ((Sys.getTime() * 1000) / Sys.getTimerResolution() - lastFrameTime > 1000) {
                 Display.setTitle("FPS: " + fps);
-                fps = 0; // Reset the FPS counter
-                lastFrameTime += 1000; // Move to the next second
+                fps = 0;
+                lastFrameTime += 1000;
             }
             fps++;
-            scenes.getFirst().update();
-            renderer.render(scenes.getFirst());
+            renderer.render(scene);
             Display.update();
         }
-
         renderer.clean();
         Display.destroy();
 

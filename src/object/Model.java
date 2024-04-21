@@ -20,38 +20,30 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Model extends Entity {
 
-    public Model(String name) {
-        this(name, name);
+    Obj obj;
+
+    public Model(String model) {
+        super(model, true);
+        enqueue();
     }
 
-    public Model(String name, int frames) {
-        this(name, name, frames);
-    }
-
-    public Model(String name, String texture) {
-        this(name, texture, 1);
-    }
-
-    public Model(String name, String texture, int frames) {
-        super(name);
-        if (frames == 1) {
-            texture("texture", texture);
-        } else {
-            texture("texture", texture, frames);
-        }
-        texture("texture", "noise");
+    public Model(String model, Obj obj) {
+        super(model, true);
+        this.obj = obj;
+        enqueue();
     }
 
     @Override
-    protected void load(Object... args) {
-        Obj obj;
-        try {
-            obj = ObjReader.read(new FileInputStream("resource/model/" + args[0] + ".obj"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public void load() {
+        if (obj == null) {
+            try {
+                obj = ObjReader.read(new FileInputStream("resource/model/" + name + ".obj"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        obj = ObjUtils.convertToRenderable(obj);
-        System.out.println(ObjUtils.createInfoString(obj));
+        obj         = ObjUtils.convertToRenderable(obj);
+        //System.out.println(ObjUtils.createInfoString(obj));
         indices     = ObjData.getFaceVertexIndicesArray(obj);
         vertices    = ObjData.getVerticesArray(obj);
         texCoords   = ObjData.getTexCoordsArray(obj, 2, true);

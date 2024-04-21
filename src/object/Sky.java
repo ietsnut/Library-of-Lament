@@ -36,8 +36,6 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class Sky {
 
-    //"right", "left", "top", "bottom", "back", "front"
-
     public List<Layer> layers = new ArrayList<>();
     private static final int sides = 12;
 
@@ -50,36 +48,30 @@ public class Sky {
     public class Layer extends Entity {
 
         float height;
+        float radius;
 
         public Layer(String name) {
-            super(name);
-            this.transformation = new Transformation() {
-                @Override
-                public Matrix4f model() {
-                    if (layers.indexOf(Layer.this) % 2 == 0) {
-                        transformation.rotation.y += (float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(Layer.this) + 1);
-                    } else {
-                        transformation.rotation.y -= (float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(Layer.this) + 1);
-                    }
-                    Matrix4f matrix = new Matrix4f();
-                    matrix.setIdentity();
-                    matrix.translate(transformation.position);
-                    matrix.rotate((float) Math.toRadians(transformation.rotation.x), AXIS_X);
-                    matrix.rotate((float) Math.toRadians(transformation.rotation.y), AXIS_Y);
-                    matrix.rotate((float) Math.toRadians(transformation.rotation.z), AXIS_Z);
-                    matrix.scale(new Vector3f(transformation.scale.x, -transformation.scale.y, transformation.scale.z));
-                    return matrix;
-                }
-            };
-            texture("sky", name);
+            super(name, false);
+            radius = Terrain.SIZE + (layers.size() * (Terrain.SIZE/12));
+            height = (float) (2 * radius * Math.sin(Math.PI / sides));
+            position.y = height / 4;
+            texture(new Texture("sky", name));
+            flip(Axis.Y);
+            enqueue();
         }
 
         @Override
-        protected void load(Object... args) {
+        public Matrix4f model() {
+            if (layers.indexOf(Layer.this) % 2 == 0) {
+                rotate(Axis.Y, (float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(Layer.this) + 1));
+            } else {
+                rotate(Axis.Y, -(float) (System.currentTimeMillis() / 1e14) / (layers.indexOf(Layer.this) + 1));
+            }
+            return super.model();
+        }
 
-            float radius = Terrain.SIZE + (layers.size() * (Terrain.SIZE/12));
-            height = (float) (2 * radius * Math.sin(Math.PI / sides));
-            transformation.position.y = height / 4;
+        @Override
+        public void load() {
 
             double angleStep = 2.0 * Math.PI / sides;
 

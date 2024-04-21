@@ -23,7 +23,7 @@ void main(void) {
     float normalDelta   = max(sobel(normalTexture, 0), max(sobel(normalTexture, 1), sobel(normalTexture, 2)));
     float albedo        = texture(colorTexture, fragUV).r;
     color               = vec3(albedo);
-    if ((normalDelta > 0.01 && albedoDelta > 0.4) || (depthDelta > 0.1)) {
+    if ((normalDelta > 0.01 && albedoDelta > 0.2) || (depthDelta > 0.1)) {
         color = vec3(1.0);
     }
     vec2 center         = vec2(0.5, 0.5);
