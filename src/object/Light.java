@@ -1,8 +1,6 @@
 package object;
 
-import org.lwjgl.util.vector.Vector3f;
-
-import java.util.ArrayList;
+import org.joml.Vector3f;
 
 public class Light {
 

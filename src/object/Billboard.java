@@ -1,9 +1,6 @@
 package object;
 
-import engine.Renderer;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector3f;
-import property.Transformation;
+import org.joml.Matrix4f;
 
 public class Billboard extends Entity {
 

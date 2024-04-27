@@ -1,7 +1,5 @@
 package object;
 
-import org.lwjgl.input.Mouse;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;

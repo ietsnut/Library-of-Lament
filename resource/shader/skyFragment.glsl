@@ -1,11 +1,11 @@
-#version 430 core
+#version 410 core
 
 in vec2 fragUV;
 
 layout(location = 0) out float color;
 layout(location = 1) out vec4  normal;
 
-layout(location = 0) uniform sampler2D modelTexture;
+uniform sampler2D modelTexture;
 
 void main(void) {
     float texelSize = 1.0 / textureSize(modelTexture, 0).x;

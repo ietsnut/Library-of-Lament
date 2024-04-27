@@ -1,10 +1,10 @@
-#version 430 core
+#version 410 core
 
 in vec2 fragUV;
 out vec3 color;
 
-layout(location = 0) uniform sampler2D colorTexture;
-layout(location = 1) uniform sampler2D normalTexture;
+uniform sampler2D colorTexture;
+uniform sampler2D normalTexture;
 
 const float dx = 1.0 / WIDTH;
 const float dy = 1.0 / HEIGHT;

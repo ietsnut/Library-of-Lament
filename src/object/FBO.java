@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
+import game.Game;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
@@ -50,7 +51,7 @@ public class FBO extends Entity {
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        glViewport(0, 0, Display.getWidth(), Display.getHeight());
+        glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             throw new RuntimeException("Framebuffer not complete");
         }
@@ -58,6 +59,14 @@ public class FBO extends Entity {
         post();
         bind();
         BOUND.add(this);
+    }
+
+    @Override
+    public void unload() {
+        super.unload();
+        glDeleteFramebuffers(frameBuffer);
+        glDeleteFramebuffers(drawBuffers);
+        glDeleteRenderbuffers(depthBuffer);
     }
 
     @Override

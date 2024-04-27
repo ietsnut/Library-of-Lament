@@ -16,6 +16,8 @@ public interface Load extends Runnable {
 
     void bind();
 
+    void unload();
+
     static Load process() {
         Load load = QUEUE.poll();
         if (load != null) {
@@ -29,6 +31,12 @@ public interface Load extends Runnable {
     default void run() {
         this.load();
         QUEUE.add(this);
+    }
+
+    default void direct() {
+        this.load();
+        this.bind();
+        BOUND.add(this);
     }
 
 }

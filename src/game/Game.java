@@ -2,75 +2,124 @@ package game;
 
 import engine.*;
 import object.*;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.Sys;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.*;
-import org.lwjgl.opengl.DisplayMode;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.Version;
+import org.lwjgl.system.MemoryStack;
 import property.Load;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.lwjgl.*;
+import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.*;
+import org.lwjgl.system.*;
+
+import java.nio.*;
+
+import static org.lwjgl.glfw.Callbacks.*;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.system.MemoryStack.*;
+import static org.lwjgl.system.MemoryUtil.*;
+
 public class Game {
 
-    public static final int WIDTH = 1200;
-    public static final int HEIGHT = 1200;
+    public static final int WIDTH = 800;
+    public static final int HEIGHT = 800;
+    public static final String TITLE = "";
 
-    private final List<Scene> scenes = new ArrayList<>();
-    public static Scene scene;
+    public static List<Scene>   scenes = new ArrayList<>();
+    public static Renderer      renderer;
+    public static Scene         scene;
+    public static long          window;
 
-    public Game() {
+    public static void run() {
+        open();
+        loop();
+        close();
+    }
 
-        ContextAttribs attribs = new ContextAttribs(4, 3).withForwardCompatible(true).withProfileCore(true);
-        try {
-            Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
-            Display.create(new PixelFormat(), attribs);
-            Display.setVSyncEnabled(true);
-        } catch (LWJGLException e) {
-            throw new RuntimeException(e);
+    public static void open() {
+        System.out.println("LWJGL " + Version.getVersion());
+        GLFWErrorCallback.createPrint(System.err).set();
+        if (!glfwInit()) {
+            throw new IllegalStateException("Unable to initialize GLFW");
         }
-        System.out.println("OpenGL version: " + GL11.glGetString(GL11.GL_VERSION));
-        GL11.glViewport(0, 0, WIDTH, HEIGHT);
-
-        Renderer renderer = new Renderer();
-
-        scenes.add(new Scene());
-        scene = scenes.getFirst();
-
-       // Window window1 = new Window(Texture.load("texture/1"), 1000, 1000);
-
-        try {
-            Display.makeCurrent();
-        } catch (LWJGLException e) {
-            throw new RuntimeException(e);
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+        window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, NULL, NULL);
+        if (window == NULL) {
+            throw new RuntimeException("Failed to create the GLFW window");
         }
-        Mouse.setGrabbed(true);
-        int fps = 0;
-        long lastFrameTime = (Sys.getTime() * 1000) / Sys.getTimerResolution();;
-        while (!Display.isCloseRequested()) {
-            Load load = Load.process();
-            if (load != null) {
-                System.out.println(load);
+        glfwSetKeyCallback(window, new Control.Keyboard());
+        Control.listen();
+        glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                glfwSetWindowShouldClose(window, true);
             }
+        });
+        try (MemoryStack stack = stackPush()) {
+            IntBuffer pWidth = stack.mallocInt(1); // int*
+            IntBuffer pHeight = stack.mallocInt(1); // int*
+            glfwGetWindowSize(window, pWidth, pHeight);
+            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
+            glfwMakeContextCurrent(window);
+            glfwSwapInterval(1);
+            glfwShowWindow(window);
+            GL.createCapabilities();
+        }
+        scene = new Scene();
+        scenes.add(scene);
+        renderer = new Renderer();
+    }
+
+    private static void loop() {
+        int fps = 0;
+        long lastFrameTime = time();
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        while ( !glfwWindowShouldClose(window) ) {
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            Load load = Load.process();
             if (load instanceof Terrain terrain) {
                 scene.terrain = terrain;
             } else if (load instanceof Entity entity) {
                 scene.entities.add(entity);
             }
-            if ((Sys.getTime() * 1000) / Sys.getTimerResolution() - lastFrameTime > 1000) {
-                Display.setTitle("FPS: " + fps);
+            if (time() - lastFrameTime > 1000) {
+                glfwSetWindowTitle(window, "FPS: " + fps);
                 fps = 0;
                 lastFrameTime += 1000;
             }
             fps++;
+            glfwPollEvents();
             renderer.render(scene);
-            Display.update();
+            glfwSwapBuffers(window);
         }
-        renderer.clean();
-        Display.destroy();
+    }
 
+    public static void close() {
+        for (Load load : Load.BOUND) {
+            load.unload();
+        }
+        Shader.unload();
+        glfwFreeCallbacks(window);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        glfwSetErrorCallback(null).free();
+    }
+
+    public static long time() {
+        return (long) (GLFW.glfwGetTime() * 1000);
     }
 
 }

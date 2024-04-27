@@ -7,13 +7,14 @@ import java.util.*;
 import game.Game;
 import game.Scene;
 import object.Entity;
+import org.joml.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.util.vector.*;
 
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -46,7 +47,7 @@ public abstract class Shader {
 
     final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
-    protected void uniform(String location, Serializable data) {
+    protected void uniform(String location, Object data) {
         int uniform = uniforms.computeIfAbsent(location, loc -> GL20.glGetUniformLocation(program, loc));
         switch (data) {
             case Float      f -> GL20.glUniform1f(uniform, f);
@@ -56,9 +57,8 @@ public abstract class Shader {
             case Vector3f   v -> GL20.glUniform3f(uniform, v.x, v.y, v.z);
             case Vector4f   v -> GL20.glUniform4f(uniform, v.x, v.y, v.z, v.w);
             case Matrix4f   m -> {
-                m.store(buffer);
-                buffer.flip();
-                GL20.glUniformMatrix4(uniform, false, buffer);
+                m.get(buffer);
+                GL20.glUniformMatrix4fv(uniform, false, buffer);
             }
             default -> throw new IllegalArgumentException("Unsupported uniform type: " + data.getClass());
         }
@@ -73,13 +73,15 @@ public abstract class Shader {
     }
 
     protected void render(Entity entity) {
-        GL30.glBindVertexArray(entity.vaoID);
+        System.out.println(entity);
+        GL30.glBindVertexArray(entity.vao);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glEnableVertexAttribArray(i);
         }
         for (int i = 0; i < entity.textures.size(); i++) {
+            int id = entity.textures.get(i).id;
             glActiveTexture(GL13.GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).id);
+            glBindTexture(GL_TEXTURE_2D, id);
         }
         GL11.glDrawElements(GL11.GL_TRIANGLES, entity.indices.length, GL11.GL_UNSIGNED_INT, 0);
         for (int i = 0; i < entity.textures.size(); i++) {
@@ -93,7 +95,7 @@ public abstract class Shader {
     }
 
     protected void render(Entity.Collider collider) {
-        GL30.glBindVertexArray(collider.vaoID);
+        GL30.glBindVertexArray(collider.vao);
         for (int i = 0; i < attributes.length; i++) {
             GL20.glEnableVertexAttribArray(i);
         }
@@ -112,7 +114,7 @@ public abstract class Shader {
         GL20.glUseProgram(0);
     }
 
-    public static void clean() {
+    public static void unload() {
         for (Shader shader : Shader.ALL) {
             shader.stop();
             GL20.glDetachShader(shader.program, shader.vertex);
@@ -129,13 +131,16 @@ public abstract class Shader {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
             while((line = reader.readLine())!=null){
-                shaderSource.append(line).append("//\n");
                 if (line.startsWith("#version")) {
+                    shaderSource.append("#version ").append(glfwGetWindowAttrib(Game.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Game.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
                     shaderSource.append("#define LIGHTS " + LIGHTS).append("//\n");
                     shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
                     shaderSource.append("#define WIDTH " + Game.WIDTH).append("//\n");
                     shaderSource.append("#define HEIGHT " + Game.HEIGHT).append("//\n");
+                } else {
+                    shaderSource.append(line).append("//\n");
                 }
+
             }
             reader.close();
         } catch (IOException e){

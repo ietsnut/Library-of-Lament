@@ -1,4 +1,4 @@
-#version 430 core
+#version 410 core
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 uv;
@@ -15,7 +15,7 @@ uniform mat4 view;
 
 const float fogDensity = 0.01;
 
-layout(location = 0) uniform sampler2D modelTexture;
+uniform sampler2D modelTexture;
 
 void main(void) {
     fragUV = uv;

@@ -1,27 +1,9 @@
 package object;
 
-import org.lwjgl.BufferUtils;
-import org.lwjgl.Sys;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-import property.Transformation;
+import org.joml.*;
+import org.joml.Math;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.Buffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class Terrain extends Entity {
 
@@ -44,7 +26,7 @@ public class Terrain extends Entity {
                 heights[j][i] = getHeight(j, i, hMap);
             }
         }
-        texture(new Texture("terrain", name));
+        //texture(new Texture("terrain", name));
         enqueue();
     }
 
@@ -126,8 +108,7 @@ public class Terrain extends Entity {
 
     @Override
     public Matrix4f model() {
-        this.model.setIdentity();
-        return this.model.translate(new Vector3f(position.x, 0, position.z));
+        return this.model.identity().translate(new Vector3f(position.x, 0, position.z));
     }
 
 }

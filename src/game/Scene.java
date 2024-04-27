@@ -1,18 +1,13 @@
 package game;
 
 import content.Tree;
-import engine.Renderer;
 import object.*;
-import org.lwjgl.Sys;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.util.vector.Vector3f;
-import property.Load;
-import property.Transformation;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11.glGetError;
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 public class Scene extends Thread {
 
@@ -28,7 +23,7 @@ public class Scene extends Thread {
 
     public void run() {
 
-        Terrain terrain = new Terrain("test", 1);
+        Terrain terrain = (Terrain) new Terrain("test", 1).texture(new Texture("terrain", "test"));
         //new Sky("1", 3);
 
         Texture tree1 = new Texture("texture", "tree1");
@@ -63,21 +58,21 @@ public class Scene extends Thread {
         Billboard billboard = (Billboard) new Billboard("1").texture(new Texture("texture", "1"));
         billboard.position(20, terrain.height(20, 20), 20);
 
-        Light light1 = new Light(new Vector3f (-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 10f);
+        Light light1 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 10f);
         lights.add(light1);
 
         //Light light2 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 10f);
         //light2.position = new Vector3f(model2.position).translate(0, 3, 0);
         //lights.add(light2);
 
-        while (!Display.isCloseRequested()) {
-            update();
+        while (!glfwWindowShouldClose(Game.window)) {
+            //update();
         }
 
     }
 
     public void update() {
-        lights.getFirst().position = new Vector3f(Camera.transformation.position);
+        //lights.getFirst().position = new Vector3f(Camera.transformation.position);
     }
 
 }

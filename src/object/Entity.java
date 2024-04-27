@@ -1,10 +1,10 @@
 package object;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
-import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
 import property.Load;
 import property.Transformation;
 
@@ -21,8 +21,8 @@ import static org.lwjgl.opengl.GL30.*;
 
 public abstract class Entity extends Transformation implements Load {
 
-    public int vaoID;
-    public List<Integer> vboIDs = new ArrayList<>();
+    public int vao;
+    public List<Integer> vbo = new ArrayList<>();
 
     public int[]    indices;
     public float[]  vertices;
@@ -63,30 +63,38 @@ public abstract class Entity extends Transformation implements Load {
         glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
         glVertexAttribPointer(attributeNumber, coordinateSize, GL_FLOAT, false, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        vboIDs.add(vboID);
+        vbo.add(vboID);
     }
 
     @Override
     public void bind() {
-        this.vaoID = glGenVertexArrays();
-        glBindVertexArray(this.vaoID);
-        if (this.indices != null) {
+        this.vao = glGenVertexArrays();
+        glBindVertexArray(this.vao);
+        if (this.indicesBuffer != null) {
             int vboId = GL15.glGenBuffers();
             GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
             GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
-            vboIDs.add(vboId);
+            vbo.add(vboId);
         }
-        if (this.vertices != null) {
+        if (this.verticesBuffer != null) {
             bindBuffer(0, this.dimensions, this.verticesBuffer);
         }
-        if (this.texCoords != null) {
+        if (this.texCoordsBuffer != null) {
             bindBuffer(1, 2, this.texCoordsBuffer);
         }
-        if (this.normals != null) {
+        if (this.normalsBuffer != null) {
             bindBuffer(2, 3, this.normalsBuffer);
         }
         glBindVertexArray(0);
         this.collider = collidable ? new Collider() : null;
+    }
+
+    @Override
+    public void unload() {
+        glDeleteVertexArrays(vao);
+        for (int vbo : vbo) {
+            glDeleteBuffers(vbo);
+        }
     }
 
     @Override
@@ -141,7 +149,7 @@ public abstract class Entity extends Transformation implements Load {
                 min.set(Math.min(min.x, vertices[i]), Math.min(min.y, vertices[i + 1]), Math.min(min.z, vertices[i + 2]));
                 max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));
             }
-            size = Vector3f.sub(max, min, null).length();
+            size = new Vector3f(max).sub(min).length();
             this.vertices = new float[] {
                     min.x, min.y, min.z, max.x, min.y, min.z, max.x, max.y, min.z, min.x, max.y, min.z, min.x, min.y, max.z, max.x, min.y, max.z, max.x, max.y, max.z, min.x, max.y, max.z,
             };
@@ -157,13 +165,13 @@ public abstract class Entity extends Transformation implements Load {
             return -1f;
         }
         Matrix4f inverseModelMatrix = new Matrix4f();
-        Matrix4f.invert(Entity.this.model(), inverseModelMatrix);
+        Entity.this.model().invert(inverseModelMatrix);
         Vector4f rayOriginModelSpace = new Vector4f(Camera.transformation.position.x, Camera.transformation.position.y, Camera.transformation.position.z, 1.0f);
-        Matrix4f.transform(inverseModelMatrix, rayOriginModelSpace, rayOriginModelSpace);
-        Vector3f ray = Camera.transformation.forward().negate(null).normalise(null);
+        inverseModelMatrix.transform(rayOriginModelSpace);
+        Vector3f ray = new Vector3f(Camera.transformation.forward()).negate().normalize();
         Vector4f rayDirectionModelSpace = new Vector4f(ray.x, ray.y, ray.z, 0.0f);
-        Matrix4f.transform(inverseModelMatrix, rayDirectionModelSpace, rayDirectionModelSpace);
-        Vector3f directionNormalized = new Vector3f(rayDirectionModelSpace.x, rayDirectionModelSpace.y, rayDirectionModelSpace.z).normalise(null);
+        inverseModelMatrix.transform(rayDirectionModelSpace);
+        Vector3f directionNormalized = new Vector3f(rayDirectionModelSpace.x, rayDirectionModelSpace.y, rayDirectionModelSpace.z).normalize();
         Vector3f invDir = new Vector3f(1.0f / directionNormalized.x, 1.0f / directionNormalized.y, 1.0f / directionNormalized.z);
         float t1 = (collider.min.x - rayOriginModelSpace.x) * invDir.x;
         float t2 = (collider.max.x - rayOriginModelSpace.x) * invDir.x;
@@ -196,7 +204,8 @@ public abstract class Entity extends Transformation implements Load {
     }
 
     public float distance() {
-        return Vector3f.sub(Camera.transformation.position, this.position, null).length();
+        return new Vector3f(Camera.transformation.position).sub(this.position).length();
+        //return Vector3f.sub(Camera.transformation.position, this.position, null).length();
     }
 
     public boolean distance(Float distance) {

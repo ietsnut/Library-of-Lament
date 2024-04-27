@@ -1,13 +1,9 @@
 package engine;
 
+import game.Game;
 import game.Scene;
-import object.Billboard;
 import object.Camera;
 import object.Entity;
-import object.Model;
-import org.lwjgl.Sys;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
 
 public class AABBShader extends Shader {
 
@@ -23,7 +19,7 @@ public class AABBShader extends Shader {
         uniform("model",        entity.model);
         uniform("projection",   Renderer.projection);
         uniform("view",         Camera.view);
-        float t = (Sys.getTime() * 1000.0f) / Sys.getTimerResolution();
+        float t = Game.time();
         uniform("time",         t / 1000.0f);
         render(entity.collider);
     }

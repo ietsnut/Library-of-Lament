@@ -2,10 +2,7 @@ package engine;
 
 import game.Scene;
 import object.Camera;
-import object.Sky;
-import org.lwjgl.util.vector.Matrix4f;
-
-import static org.lwjgl.opengl.GL11.*;
+import org.joml.Matrix4f;
 
 public class SkyShader extends Shader {
 
@@ -32,9 +29,9 @@ public class SkyShader extends Shader {
 
     private Matrix4f view() {
         Matrix4f matrix = new Matrix4f(Camera.view);
-        matrix.m30 = 0;
-        matrix.m31 = 0;
-        matrix.m32 = 0;
+        matrix.m30(0);
+        matrix.m31(0);
+        matrix.m32(0);
         return matrix;
     }
 

@@ -3,7 +3,6 @@ package engine;
 import game.Game;
 import game.Scene;
 import object.FBO;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
@@ -13,7 +12,7 @@ public class FBOShader extends Shader {
 
     public FBOShader() {
         super("fbo", "position");
-        this.fbo = new FBO(Display.getWidth(), Display.getHeight());
+        this.fbo = new FBO(Game.WIDTH, Game.HEIGHT);
     }
 
     public void shader(Scene scene) {
@@ -33,7 +32,7 @@ public class FBOShader extends Shader {
 
     public void unbind() {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-        GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+        GL11.glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
     }
 
 }

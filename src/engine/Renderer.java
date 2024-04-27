@@ -1,12 +1,13 @@
 package engine;
 
+import game.Game;
 import game.Scene;
 import object.*;
-import org.lwjgl.Sys;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
-import org.lwjgl.util.vector.Matrix4f;
 import property.Load;
 
+import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL30.*;
@@ -41,7 +42,7 @@ public class Renderer {
         fboShader.bind();
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         aabbShader.render(scene);
         modelShader.render(scene);
         //skyShader.render(scene);
@@ -49,38 +50,8 @@ public class Renderer {
         fboShader.render(scene);
     }
 
-    public void clean() {
-        for (Load load : Load.BOUND) {
-            if (load instanceof Texture texture) {
-                glDeleteTextures(texture.id);
-            }
-            if (load instanceof Entity entity) {
-                glDeleteVertexArrays(entity.vaoID);
-                for (int vbo : entity.vboIDs) {
-                    glDeleteBuffers(vbo);
-                }
-                if (entity instanceof FBO fbo) {
-                    glDeleteFramebuffers(fbo.frameBuffer);
-                    glDeleteFramebuffers(fbo.drawBuffers);
-                    glDeleteRenderbuffers(fbo.depthBuffer);
-                }
-            }
-        }
-        Shader.clean();
-    }
-
     public static void projection() {
-        projection.setIdentity();
-        float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
-        float y_scale = (float) ((1f / Math.tan(Math.toRadians(Camera.FOV / 2f))) * aspectRatio);
-        float x_scale = y_scale / aspectRatio;
-        float frustum_length = FAR - NEAR;
-        projection.m00 = x_scale;
-        projection.m11 = y_scale;
-        projection.m22 = -((FAR + NEAR) / frustum_length);
-        projection.m23 = -1;
-        projection.m32 = -((2 * NEAR * FAR) / frustum_length);
-        projection.m33 = 0;
+        projection.identity().perspective((float) Math.toRadians(Camera.FOV), (float) Game.WIDTH / (float) Game.HEIGHT, NEAR, FAR);
     }
 
 }

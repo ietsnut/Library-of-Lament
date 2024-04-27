@@ -25,7 +25,7 @@ public class Texture implements Load {
     public int id;
 
     public String           file;
-    public ByteBuffer       bytes;
+    public IntBuffer        buffer;
 
     public int width;
     public int height;
@@ -93,6 +93,7 @@ public class Texture implements Load {
         return image;
     }
 
+    /*
     public ByteBuffer load(BufferedImage image) {
         byte[] imgData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         ByteBuffer buffer = BufferUtils.createByteBuffer(imgData.length / 4).order(ByteOrder.nativeOrder());
@@ -108,6 +109,27 @@ public class Texture implements Load {
             buffer.put(packedData);
         }
         buffer.flip();
+        return buffer;
+    }*/
+
+    private IntBuffer load(BufferedImage image) {
+        int[] pixels = null;
+        width = image.getWidth();
+        height = image.getHeight();
+        pixels = new int[width * height];
+        image.getRGB(0, 0, width, height, pixels, 0, width);
+        int[] data = new int[width * height];
+        for (int i = 0; i < width * height; i++) {
+            int a = (pixels[i] & 0xff000000) >> 24;
+            int r = (pixels[i] & 0xff0000) >> 16;
+            int g = (pixels[i] & 0xff00) >> 8;
+            int b = (pixels[i] & 0xff);
+            data[i] = a << 24 | b << 16 | g << 8 | r;
+        }
+        IntBuffer buffer = ByteBuffer.allocateDirect(data.length << 2).order(ByteOrder.nativeOrder()).asIntBuffer();
+        buffer.put(data).flip();
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        //glBindTexture(GL_TEXTURE_2D, 0);
         return buffer;
     }
 
@@ -126,10 +148,10 @@ public class Texture implements Load {
             }
             g.dispose();
         }
-        image = dither(image);
-        this.width = image.getWidth();
+        //image = dither(image);
+        this.width  = image.getWidth();
         this.height = image.getHeight();
-        this.bytes = load(image);
+        this.buffer = load(image);
     }
 
     @Override
@@ -148,9 +170,16 @@ public class Texture implements Load {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         }
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4) * tiles, height, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
+        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4) * tiles, height, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
+        System.out.println("Texture: " + file + " : " + width + ", " + height);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    @Override
+    public void unload() {
+        glDeleteTextures(id);
     }
 
     @Override
@@ -163,132 +192,4 @@ public class Texture implements Load {
         return this;
     }
 
-    class Dither {
-
-        static class C3 {
-
-            int r, g, b;
-
-            public C3(int c) {
-                Color color = new Color(c);
-                r = color.getRed();
-                g = color.getGreen();
-                b = color.getBlue();
-            }
-
-            public C3(int r, int g, int b) {
-                this.r = r;
-                this.g = g;
-                this.b = b;
-            }
-
-            public C3 add(C3 o) {
-                return new C3(r + o.r, g + o.g, b + o.b);
-            }
-
-            public int clamp(int c) {
-                return Math.max(0, Math.min(255, c));
-            }
-
-            public int diff(C3 o) {
-                int Rdiff = o.r - r;
-                int Gdiff = o.g - g;
-                int Bdiff = o.b - b;
-                int distanceSquared = Rdiff * Rdiff + Gdiff * Gdiff + Bdiff * Bdiff;
-                return distanceSquared;
-            }
-
-            public C3 mul(double d) {
-                return new C3((int) (d * r), (int) (d * g), (int) (d * b));
-            }
-
-            public C3 sub(C3 o) {
-                return new C3(r - o.r, g - o.g, b - o.b);
-            }
-
-            public Color toColor() {
-                return new Color(clamp(r), clamp(g), clamp(b));
-            }
-
-            public int toRGB() {
-                return toColor().getRGB();
-            }
-        }
-
-        private static C3 findClosestPaletteColor(C3 c, C3[] palette) {
-            C3 closest = palette[0];
-
-            for (C3 n : palette) {
-                if (n.diff(c) < closest.diff(c)) {
-                    closest = n;
-                }
-            }
-
-            return closest;
-        }
-
-        public static BufferedImage floydSteinbergDithering(BufferedImage img) {
-
-            C3[] palette = new C3[]{
-
-                    new C3(0, 0, 0), // black
-                    new C3(0, 0, 255), // green
-                    new C3(0, 255, 0), // blue
-                    new C3(0, 255, 255), // cyan
-                    new C3(255, 0, 0), // red
-                    new C3(255, 0, 255), // purple
-                    new C3(255, 255, 0), // yellow
-                    new C3(255, 255, 255)  // white
-
-            };
-
-            int w = img.getWidth();
-            int h = img.getHeight();
-
-            C3[][] d = new C3[h][w];
-
-            for (int y = 0; y < h; y++) {
-
-                for (int x = 0; x < w; x++) {
-
-                    d[y][x] = new C3(img.getRGB(x, y));
-
-                }
-
-            }
-
-            for (int y = 0; y < img.getHeight(); y++) {
-
-                for (int x = 0; x < img.getWidth(); x++) {
-
-                    C3 oldColor = d[y][x];
-                    C3 newColor = findClosestPaletteColor(oldColor, palette);
-                    img.setRGB(x, y, newColor.toColor().getRGB());
-
-                    C3 err = oldColor.sub(newColor);
-
-                    if (x + 1 < w) {
-                        d[y][x + 1] = d[y][x + 1].add(err.mul(7. / 16));
-                    }
-
-                    if (x - 1 >= 0 && y + 1 < h) {
-                        d[y + 1][x - 1] = d[y + 1][x - 1].add(err.mul(3. / 16));
-                    }
-
-                    if (y + 1 < h) {
-                        d[y + 1][x] = d[y + 1][x].add(err.mul(5. / 16));
-                    }
-
-                    if (x + 1 < w && y + 1 < h) {
-                        d[y + 1][x + 1] = d[y + 1][x + 1].add(err.mul(1. / 16));
-                    }
-
-                }
-
-            }
-
-            return img;
-        }
-
-    }
 }

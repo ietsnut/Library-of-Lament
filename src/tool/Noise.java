@@ -1,6 +1,7 @@
 package tool;
 
-import org.lwjgl.util.vector.*;
+import org.joml.*;
+import org.joml.Math;
 
 public class Noise
 {
@@ -531,7 +532,7 @@ public class Noise
 
     private static float FastAbs(float f) { return f < 0 ? -f : f; }
 
-    private static float FastSqrt(float f) { return (float)Math.sqrt(f); }
+    private static float FastSqrt(float f) { return (float) Math.sqrt(f); }
 
     private static int FastFloor(/*FNLfloat*/ float f) { return f >= 0 ? (int)f : (int)f - 1; }
 
