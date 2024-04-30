@@ -46,7 +46,7 @@ public class Sky {
 
             double angleStep = 2.0 * Math.PI / sides;
 
-            vertices = new float[sides * 4 * 3];
+            vertices = new byte[sides * 4 * 3];
             indices = new int[sides * 6];
             texCoords = new float[sides * 4 * 2];
 
@@ -60,18 +60,18 @@ public class Sky {
                 float z1 = (float)(radius * Math.sin(nextAngle));
 
                 int baseVertexIndex = i * 4 * 3;
-                vertices[baseVertexIndex] = x0;
-                vertices[baseVertexIndex + 1] = -height / 2;
-                vertices[baseVertexIndex + 2] = z0;
-                vertices[baseVertexIndex + 3] = x1;
-                vertices[baseVertexIndex + 4] = -height / 2;
-                vertices[baseVertexIndex + 5] = z1;
-                vertices[baseVertexIndex + 6] = x1;
-                vertices[baseVertexIndex + 7] = height / 2;
-                vertices[baseVertexIndex + 8] = z1;
-                vertices[baseVertexIndex + 9] = x0;
-                vertices[baseVertexIndex + 10] = height / 2;
-                vertices[baseVertexIndex + 11] = z0;
+                vertices[baseVertexIndex] = (byte) x0;
+                vertices[baseVertexIndex + 1] = (byte) (-height / 2);
+                vertices[baseVertexIndex + 2] = (byte) z0;
+                vertices[baseVertexIndex + 3] = (byte) x1;
+                vertices[baseVertexIndex + 4] = (byte) (-height / 2);
+                vertices[baseVertexIndex + 5] = (byte) z1;
+                vertices[baseVertexIndex + 6] = (byte) x1;
+                vertices[baseVertexIndex + 7] = (byte) (height / 2);
+                vertices[baseVertexIndex + 8] = (byte) z1;
+                vertices[baseVertexIndex + 9] = (byte) x0;
+                vertices[baseVertexIndex + 10] = (byte) (height / 2);
+                vertices[baseVertexIndex + 11] = (byte) z0;
 
                 int baseIndexIndex = i * 6;
                 int vertexOffset = i * 4;

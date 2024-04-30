@@ -21,6 +21,7 @@ public class AABBShader extends Shader {
         uniform("view",         Camera.view);
         float t = Game.time();
         uniform("time",         t / 1000.0f);
-        render(entity.collider);
+        uniform("scale",        entity.collider.size);
+        //render(entity.collider);
     }
 }

@@ -11,18 +11,16 @@ public class Tree extends Entity {
 
     @Override
     public void load() {
-        vertices = new float[] {
+        vertices = new byte[] {
                 // First Quad (One diagonal of the X)
-                -1.0f, 0.0f, 0.0f, // Lower left
-                1.0f, 0.0f, 0.0f,  // Lower right
-                -1.0f, 2.0f, 0.0f, // Upper left
-                1.0f, 2.0f, 0.0f,  // Upper right
-
-                // Second Quad (The other diagonal of the X)
-                0.0f, 0.0f, -1.0f, // Lower left
-                0.0f, 0.0f, 1.0f,  // Lower right
-                0.0f, 2.0f, -1.0f, // Upper left
-                0.0f, 2.0f, 1.0f   // Upper right
+                (byte) -1, 0, 0, // Lower left
+                (byte) 1, 0, 0,  // Lower right
+                (byte) -1, (byte) 2, 0, // Upper left
+                (byte) 1, (byte) 2, 0,  // Upper right
+                0, 0, (byte) -1, // Lower left
+                0, 0, (byte) 1,  // Lower right
+                0, (byte) 2, (byte) -1, // Upper left
+                0, (byte) 2, (byte) 1   // Upper right
         };
         texCoords = new float[] {
                 0, 1,
@@ -35,13 +33,10 @@ public class Tree extends Entity {
                 1, 0
         };
         normals = new float[] {
-                // Normals for the first quad
                 0f, 0f, 1f,  // Points out of the screen
                 0f, 0f, 1f,
                 0f, 0f, 1f,
                 0f, 0f, 1f,
-
-                // Normals for the second quad
                 1f, 0f, 0f,  // Points right
                 1f, 0f, 0f,
                 1f, 0f, 0f,

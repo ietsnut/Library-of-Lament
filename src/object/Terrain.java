@@ -1,5 +1,6 @@
 package object;
 
+import game.Scene;
 import org.joml.*;
 import org.joml.Math;
 
@@ -7,23 +8,42 @@ import java.awt.image.BufferedImage;
 
 public class Terrain extends Entity {
 
-    public static final float SIZE = 128;
-    public static final float MAX_HEIGHT = 8;
+    public static final byte SIZE = 126;
+    public static final byte MAX_HEIGHT = 32;
     public static final float MAX_PIXEL_COLOUR = 256 * 256 * 256;
     final int VERTEXS;
 
     public float[][] heights;
 
-    public Terrain(String name, int tiles) {
+    public Terrain(String name) {
         super(name, false);
-        this.position.x -= (SIZE / 2);
-        this.position.z -= (SIZE / 2);
+        //this.position.x -= (SIZE / 2);
+        //this.position.z -= (SIZE / 2);
+        //this.position.x = 0;
         BufferedImage hMap = Texture.load("terrain/" + name + "_h");
         VERTEXS = hMap.getHeight();
         heights = new float[VERTEXS][VERTEXS];
         for (int i = 0; i < VERTEXS; i++) {
             for (int j = 0; j < VERTEXS; j++) {
                 heights[j][i] = getHeight(j, i, hMap);
+            }
+        }
+        //smooth terrain
+        for (int i = 0; i < VERTEXS; i++) {
+            for (int j = 0; j < VERTEXS; j++) {
+                float total = 0;
+                int count = 0;
+                for (int k = -1; k <= 1; k++) {
+                    for (int l = -1; l <= 1; l++) {
+                        int x = j + k;
+                        int z = i + l;
+                        if (x >= 0 && x < VERTEXS && z >= 0 && z < VERTEXS) {
+                            total += heights[x][z];
+                            count++;
+                        }
+                    }
+                }
+                heights[j][i] = total / count;
             }
         }
         //texture(new Texture("terrain", name));
@@ -33,19 +53,19 @@ public class Terrain extends Entity {
     @Override
     public void load() {
         int count = VERTEXS * VERTEXS;
-        vertices = new float[count * 3];
+        vertices = new byte[count * 3];
         normals = new float[count * 3];
         texCoords = new float[count * 2];
         indices = new int[6 * (VERTEXS - 1) * (VERTEXS - 1)];
         int vertexPointer = 0;
         for (int i = 0; i < VERTEXS; i++) {
             for (int j = 0; j < VERTEXS; j++) {
-                vertices[vertexPointer * 3] = (float) j / ((float) VERTEXS - 1) * SIZE;
-                vertices[vertexPointer * 3 + 1] = heights[j][i];
-                vertices[vertexPointer * 3 + 2] = (float) i / ((float) VERTEXS - 1) * SIZE;
-                normals[vertexPointer * 3] = 0;
-                normals[vertexPointer * 3 + 1] = 1;
-                normals[vertexPointer * 3 + 2] = 0;
+                vertices[vertexPointer * 3] = (byte) ((float) j / ((float) VERTEXS - 1) * (SIZE * 2) - SIZE);
+                vertices[vertexPointer * 3 + 1] = (byte) heights[j][i];
+                vertices[vertexPointer * 3 + 2] = (byte) ((float) i / ((float) VERTEXS - 1) * (SIZE * 2) - SIZE);
+
+                //System.out.println(vertices[vertexPointer * 3] + " " + vertices[vertexPointer * 3 + 1] + " " + vertices[vertexPointer * 3 + 2]);
+
                 texCoords[vertexPointer * 2] = (float) j / ((float) VERTEXS - 1);
                 texCoords[vertexPointer * 2 + 1] = (float) i / ((float) VERTEXS - 1);
                 vertexPointer++;
@@ -81,9 +101,9 @@ public class Terrain extends Entity {
     }
 
     public float height(float worldX, float worldZ) {
-        float terrainX = worldX - this.position.x;
-        float terrainZ = worldZ - this.position.z;
-        float gridSquareSize = SIZE / ((float) heights.length - 1);
+        float terrainX = worldX + (SIZE);
+        float terrainZ = worldZ + (SIZE);
+        float gridSquareSize = (SIZE * 2) / ((float) heights.length - 1);
         int gridX = (int) Math.floor(terrainX / gridSquareSize);
         int gridZ = (int) Math.floor(terrainZ / gridSquareSize);
         if (gridX + 1 >= heights.length || gridZ + 1 >= heights.length || gridX < 0 || gridZ < 0) {

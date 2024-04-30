@@ -5,12 +5,7 @@ import game.Scene;
 import object.*;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
-import property.Load;
-
-import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL40.*;
 
 public class Renderer {
 
@@ -24,8 +19,6 @@ public class Renderer {
     private final FBOShader     fboShader;
     private final AABBShader    aabbShader;
 
-    public static final Camera camera = new Camera();
-
     public Renderer() {
         fboShader       = new FBOShader();
         modelShader     = new ModelShader();
@@ -34,20 +27,22 @@ public class Renderer {
     }
 
     public void render(Scene scene) {
+        Camera.move();
+        Camera.view();
         projection();
-        camera.update(scene);
         for (Entity entity : scene.entities) {
             entity.model();
         }
         fboShader.bind();
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         aabbShader.render(scene);
         modelShader.render(scene);
         //skyShader.render(scene);
         fboShader.unbind();
         fboShader.render(scene);
+
     }
 
     public static void projection() {

@@ -10,9 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.*;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL40.*;
 
 public class Texture implements Load {
 
@@ -24,8 +22,9 @@ public class Texture implements Load {
 
     public int id;
 
+    public BufferedImage    image;
     public String           file;
-    public IntBuffer        buffer;
+    public ByteBuffer       buffer;
 
     public int width;
     public int height;
@@ -93,7 +92,6 @@ public class Texture implements Load {
         return image;
     }
 
-    /*
     public ByteBuffer load(BufferedImage image) {
         byte[] imgData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         ByteBuffer buffer = BufferUtils.createByteBuffer(imgData.length / 4).order(ByteOrder.nativeOrder());
@@ -110,37 +108,15 @@ public class Texture implements Load {
         }
         buffer.flip();
         return buffer;
-    }*/
-
-    private IntBuffer load(BufferedImage image) {
-        int[] pixels = null;
-        width = image.getWidth();
-        height = image.getHeight();
-        pixels = new int[width * height];
-        image.getRGB(0, 0, width, height, pixels, 0, width);
-        int[] data = new int[width * height];
-        for (int i = 0; i < width * height; i++) {
-            int a = (pixels[i] & 0xff000000) >> 24;
-            int r = (pixels[i] & 0xff0000) >> 16;
-            int g = (pixels[i] & 0xff00) >> 8;
-            int b = (pixels[i] & 0xff);
-            data[i] = a << 24 | b << 16 | g << 8 | r;
-        }
-        IntBuffer buffer = ByteBuffer.allocateDirect(data.length << 2).order(ByteOrder.nativeOrder()).asIntBuffer();
-        buffer.put(data).flip();
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-        //glBindTexture(GL_TEXTURE_2D, 0);
-        return buffer;
     }
 
     @Override
     public void load() {
-        BufferedImage image;
         if (tiles == 1) {
-            image = load(this.file);
+            this.image = load(this.file);
         } else {
             BufferedImage sample = load(this.file + "0");
-            image = new BufferedImage(sample.getWidth() * tiles, sample.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
+            this.image = new BufferedImage(sample.getWidth() * tiles, sample.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
             Graphics2D g = image.createGraphics();
             for (int i = 0; i < tiles; i++) {
                 BufferedImage frame = load(file + i);
@@ -148,7 +124,7 @@ public class Texture implements Load {
             }
             g.dispose();
         }
-        //image = dither(image);
+        this.image = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();
         this.buffer = load(image);
@@ -160,20 +136,17 @@ public class Texture implements Load {
         glBindTexture(GL_TEXTURE_2D, this.id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        if (repeat) {
+        if (!repeat) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-            glBindTexture(GL_TEXTURE_2D, 0);
         } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         }
-        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4) * tiles, height, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
-        System.out.println("Texture: " + file + " : " + width + ", " + height);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4) * tiles, height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 

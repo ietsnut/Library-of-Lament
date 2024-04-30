@@ -1,7 +1,9 @@
 package game;
 
+import object.Camera;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
+import property.Transformation;
 
 import java.nio.DoubleBuffer;
 
@@ -9,28 +11,39 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Control {
 
-    private static float mouseX, mouseY, prevMouseX, prevMouseY;
-    private static boolean leftButtonPressed, rightButtonPressed;
+    private static final boolean[] keys = new boolean[65536];
+    private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY;
     private static float dWheel;
+    private static boolean mouseLocked, firstMouse;
 
-    public static class Keyboard extends GLFWKeyCallback {
-        @Override
-        public void invoke(long window, int key, int scancode, int action, int mods) {
-            if (key < 0) {
-                return;
+    public static void listen(long window) {
+        GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
+            @Override
+            public void invoke(long window, int key, int scancode, int action, int mods) {
+                if (key < 0) {
+                    return;
+                }
+                keys[key] = action != GLFW_RELEASE;
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                    glfwSetWindowShouldClose(window, true);
+                }
             }
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                glfwSetWindowShouldClose(window, true);
-            }
-        }
-    }
-
-    public static void listen() {
+        };
         GLFWMouseButtonCallback mouseButtonCallback = new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window, int button, int action, int mods) {
-                leftButtonPressed = button == 0 && action == 1;
-                rightButtonPressed = button == 1 && action == 1;
+                if (button == 0 && action == 1 && !mouseLocked) {
+                    glfwSetCursorPos(Game.window, Game.WIDTH/2f, Game.HEIGHT/2f);
+                    glfwSetInputMode(Game.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    mouseLocked = true;
+                    firstMouse = true;
+                }
+                if (button == 1 && action == 1 && mouseLocked) {
+                    glfwSetInputMode(Game.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    glfwSetCursorPos(Game.window, Game.WIDTH/2f, Game.HEIGHT/2f);
+                    mouseLocked = false;
+                    firstMouse = true;
+                }
             }
         };
         GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
@@ -42,52 +55,42 @@ public class Control {
         GLFWCursorPosCallback cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
-                prevMouseX = mouseX;
-                prevMouseY = mouseY;
-                mouseX = (float) xpos;
-                mouseY = (float) (Game.HEIGHT - ypos);
+                if (!mouseLocked) return;
+                if (firstMouse) {
+                    prevMouseX = mouseX = (float) xpos;
+                    prevMouseY = mouseY = (float) ypos;
+                    firstMouse = false;
+                } else {
+                    prevMouseX = mouseX;
+                    prevMouseY = mouseY;
+                    mouseX = (float) xpos;
+                    mouseY = (float) ypos;
+                    deltaMouseX = mouseX - prevMouseX;
+                    deltaMouseY = mouseY - prevMouseY;
+                    Camera.rotate();
+                }
             }
         };
-        mouseButtonCallback.set(Game.window);
-        scrollCallback.set(Game.window);
-        cursorPosCallback.set(Game.window);
+        mouseButtonCallback.set(window);
+        scrollCallback.set(window);
+        cursorPosCallback.set(window);
+        keyCallback.set(window);
     }
 
     public static boolean isKeyDown(int keycode) {
-        int state = glfwGetKey(Game.window, keycode);
-        return state == GLFW_PRESS;
+        return keys[keycode];
     }
 
     public static void update() {
         dWheel = 0;
     }
 
-    public static float getX() {
-        return mouseX;
-    }
-
-    public static float getY() {
-        return mouseY;
-    }
-
     public static float getDX() {
-        float dx = mouseX - prevMouseX;
-        prevMouseX = mouseX;
-        return dx;
+        return deltaMouseX;
     }
 
     public static float getDY() {
-        float dy = mouseY - prevMouseY;
-        prevMouseY = mouseY;
-        return dy;
-    }
-
-    public static boolean isLeftButtonPressed() {
-        return leftButtonPressed;
-    }
-
-    public static boolean isRightButtonPressed() {
-        return rightButtonPressed;
+        return deltaMouseY;
     }
 
     public static float getDWheel() {

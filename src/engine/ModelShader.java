@@ -23,14 +23,13 @@ public class ModelShader extends Shader {
         for (Entity model : scene.entities) {
             render(model);
         }
-        render(scene.terrain);
+        //render(scene.terrain);
     }
 
     @Override
     protected void render(Entity entity) {
         if (entity != null) {
             uniform("model",        entity.model);
-            uniform("tiles",        entity.textures.getFirst().tiles);
             super.render(entity);
         }
     }

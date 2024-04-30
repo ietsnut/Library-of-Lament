@@ -11,11 +11,11 @@ public class Billboard extends Entity {
 
     @Override
     public void load() {
-        vertices = new float[] {
-                -1.0f, 2.0f, 0,
-                -1.0f, 0.0f, 0,
-                1.0f, 0.0f, 0,
-                1.0f, 2.0f, 0
+        vertices = new byte[] {
+                (byte) -1, (byte) 2, 0,
+                (byte) -1, 0, 0,
+                (byte) 1, 0, 0,
+                (byte) 1, (byte) 2, 0
         };
         indices = new int[] {
                 0,1,3,

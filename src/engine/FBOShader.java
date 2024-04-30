@@ -3,8 +3,8 @@ package engine;
 import game.Game;
 import game.Scene;
 import object.FBO;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
+
+import static org.lwjgl.opengl.GL40.*;
 
 public class FBOShader extends Shader {
 
@@ -16,23 +16,23 @@ public class FBOShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         uniform("width",            fbo.width);
         uniform("height",           fbo.height);
         uniform("colorTexture",     0);
         uniform("normalTexture",    1);
         render(fbo);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
     }
 
     public void bind() {
-        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbo.frameBuffer);
-        GL11.glViewport(0, 0, fbo.width, fbo.height);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo.frameBuffer);
+        glViewport(0, 0, fbo.width, fbo.height);
     }
 
     public void unbind() {
-        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-        GL11.glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
     }
 
 }

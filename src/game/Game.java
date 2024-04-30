@@ -21,14 +21,14 @@ import java.nio.*;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class Game {
 
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 800;
+    public static final int WIDTH = 1200;
+    public static final int HEIGHT = 1200;
     public static final String TITLE = "";
 
     public static List<Scene>   scenes = new ArrayList<>();
@@ -60,13 +60,7 @@ public class Game {
         if (window == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
-        glfwSetKeyCallback(window, new Control.Keyboard());
-        Control.listen();
-        glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                glfwSetWindowShouldClose(window, true);
-            }
-        });
+        Control.listen(window);
         try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
@@ -88,21 +82,19 @@ public class Game {
         long lastFrameTime = time();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         while ( !glfwWindowShouldClose(window) ) {
-            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             Load load = Load.process();
-            if (load instanceof Terrain terrain) {
-                scene.terrain = terrain;
-            } else if (load instanceof Entity entity) {
+            if (load instanceof Entity entity) {
                 scene.entities.add(entity);
             }
+            //entity.reload();
             if (time() - lastFrameTime > 1000) {
                 glfwSetWindowTitle(window, "FPS: " + fps);
                 fps = 0;
                 lastFrameTime += 1000;
             }
             fps++;
-            glfwPollEvents();
             renderer.render(scene);
+            glfwPollEvents();
             glfwSwapBuffers(window);
         }
     }

@@ -5,32 +5,26 @@ import java.io.*;
 
 public class Model extends Entity {
 
-    Obj obj;
-
     public Model(String model) {
         super(model, true);
         enqueue();
     }
 
-    public Model(String model, Obj obj) {
-        super(model, true);
-        this.obj = obj;
-        enqueue();
-    }
-
     @Override
     public void load() {
-        if (obj == null) {
-            try {
-                obj = ObjReader.read(new FileInputStream("resource/model/" + name + ".obj"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        Obj obj;
+        try {
+            obj = ObjReader.read(new FileInputStream("resource/model/" + name + ".obj"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         obj         = ObjUtils.convertToRenderable(obj);
-        //System.out.println(ObjUtils.createInfoString(obj));
         indices     = ObjData.getFaceVertexIndicesArray(obj);
-        vertices    = ObjData.getVerticesArray(obj);
+        float[] vertices    = ObjData.getVerticesArray(obj);
+        this.vertices = new byte[vertices.length];
+        for (int i = 0; i < vertices.length; i++) {
+            this.vertices[i] = (byte) vertices[i];
+        }
         texCoords   = ObjData.getTexCoordsArray(obj, 2, true);
         normals     = ObjData.getNormalsArray(obj);
     }

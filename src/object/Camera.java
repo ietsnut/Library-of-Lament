@@ -10,7 +10,7 @@ import property.Transformation;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Camera {
+public class Camera extends Thread {
 
     /* TODO:
         - add head bobbing when walking (optional: maybe bob the tool)
@@ -19,28 +19,17 @@ public class Camera {
         - add dynamic FOV
     */
 
-    public static Transformation    transformation  = new Transformation();
+    public static Transformation transformation     = new Transformation();
     public static Matrix4f view                     = new Matrix4f();
 
-    private static final float SPEED    = 0.05f;
-    private static final float SENS     = 0.1f;
+    public static final float SPEED    = 0.05f;
+    public static final float SENS     = 0.2f;
 
     public static float FOV = 75;
 
-    public void update(Scene scene) {
-        if (Control.isLeftButtonPressed()) {
-            glfwSetCursorPos(Game.window, Game.WIDTH/2f, Game.HEIGHT/2f);
-            glfwSetInputMode(Game.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        }
-        if (Control.isRightButtonPressed()) {
-            glfwSetInputMode(Game.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        }
+    public static void move() {
         if (glfwGetInputMode(Game.window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
-            float dx = Control.getDX() * -SENS;
-            float dy = Control.getDY() * SENS;
-            transformation.rotate(Transformation.Axis.Y, dx).rotate(Transformation.Axis.X, dy).rotation(Transformation.Axis.X, Math.min(Math.max(transformation.rotation.x, -80), 80));
             Vector3f forward = new Vector3f(transformation.forward().x, 0, transformation.forward().z).normalize();
-            //Vector3f position = new Vector3f(transformation.position);
             if (Control.isKeyDown(GLFW_KEY_W) || Control.isKeyDown(GLFW_KEY_UP)) {
                 transformation.position.add(forward.x * -SPEED, 0, forward.z * -SPEED);
             }
@@ -54,12 +43,17 @@ public class Camera {
             if (Control.isKeyDown(GLFW_KEY_A) || Control.isKeyDown(GLFW_KEY_LEFT)) {
                 transformation.position.add(forward.z * -SPEED, 0, forward.x * SPEED);
             }
-            transformation.position.y = scene.terrain != null ? scene.terrain.height(transformation.position.x, transformation.position.z) + 2f : 0;
+            transformation.position.y = 1f;
         }
-        view();
     }
 
-    public Matrix4f view() {
+    public static void rotate() {
+        float dx        = Control.getDX() * -SENS;
+        float dy        = Control.getDY() * -SENS;
+        transformation.rotate(Transformation.Axis.Y, dx).rotate(Transformation.Axis.X, dy).rotation(Transformation.Axis.X, Math.min(Math.max(Camera.transformation.rotation.x, -80), 80));
+    }
+
+    public static void view() {
         transformation.norm();
         view.identity();
         view.m00(1.0f - 2.0f * (transformation.orientation.y * transformation.orientation.y + transformation.orientation.z * transformation.orientation.z));
@@ -78,8 +72,7 @@ public class Camera {
         view.m31(0);
         view.m32(0);
         view.m33(1.0f);
-        view.translate(new Vector3f(transformation.position).negate());
-        return view;
+        view.translate(-transformation.position.x, -transformation.position.y, -transformation.position.z);
     }
 
 

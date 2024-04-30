@@ -15,9 +15,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL40.*;
 
 public abstract class Shader {
 
@@ -30,17 +28,17 @@ public abstract class Shader {
     private final int program, vertex, fragment;
 
     public Shader(String type, String... attributes) {
-        vertex      = loadShader("resource/shader/" + type + "Vertex.glsl",     GL20.GL_VERTEX_SHADER);
-        fragment    = loadShader("resource/shader/" + type + "Fragment.glsl",   GL20.GL_FRAGMENT_SHADER);
-        program     = GL20.glCreateProgram();
-        GL20.glAttachShader(program, vertex);
-        GL20.glAttachShader(program, fragment);
+        vertex      = loadShader("resource/shader/" + type + "Vertex.glsl",     GL_VERTEX_SHADER);
+        fragment    = loadShader("resource/shader/" + type + "Fragment.glsl",   GL_FRAGMENT_SHADER);
+        program     = glCreateProgram();
+        glAttachShader(program, vertex);
+        glAttachShader(program, fragment);
         this.attributes = attributes;
         for (int i = 0; i < attributes.length; i++) {
-            GL20.glBindAttribLocation(program, i, attributes[i]);
+            glBindAttribLocation(program, i, attributes[i]);
         }
-        GL20.glLinkProgram(program);
-        GL20.glValidateProgram(program);
+        glLinkProgram(program);
+        glValidateProgram(program);
         ALL.add(this);
 
     }
@@ -48,17 +46,17 @@ public abstract class Shader {
     final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
     protected void uniform(String location, Object data) {
-        int uniform = uniforms.computeIfAbsent(location, loc -> GL20.glGetUniformLocation(program, loc));
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
         switch (data) {
-            case Float      f -> GL20.glUniform1f(uniform, f);
-            case Integer    i -> GL20.glUniform1i(uniform, i);
-            case Boolean    b -> GL20.glUniform1f(uniform, b ? 1.0f : 0.0f);
-            case Vector2f   v -> GL20.glUniform2f(uniform, v.x, v.y);
-            case Vector3f   v -> GL20.glUniform3f(uniform, v.x, v.y, v.z);
-            case Vector4f   v -> GL20.glUniform4f(uniform, v.x, v.y, v.z, v.w);
+            case Float      f -> glUniform1f(uniform, f);
+            case Integer    i -> glUniform1i(uniform, i);
+            case Boolean    b -> glUniform1f(uniform, b ? 1.0f : 0.0f);
+            case Vector2f   v -> glUniform2f(uniform, v.x, v.y);
+            case Vector3f   v -> glUniform3f(uniform, v.x, v.y, v.z);
+            case Vector4f   v -> glUniform4f(uniform, v.x, v.y, v.z, v.w);
             case Matrix4f   m -> {
                 m.get(buffer);
-                GL20.glUniformMatrix4fv(uniform, false, buffer);
+                glUniformMatrix4fv(uniform, false, buffer);
             }
             default -> throw new IllegalArgumentException("Unsupported uniform type: " + data.getClass());
         }
@@ -73,55 +71,53 @@ public abstract class Shader {
     }
 
     protected void render(Entity entity) {
-        System.out.println(entity);
-        GL30.glBindVertexArray(entity.vao);
+        glBindVertexArray(entity.vao);
         for (int i = 0; i < attributes.length; i++) {
-            GL20.glEnableVertexAttribArray(i);
+            glEnableVertexAttribArray(i);
         }
         for (int i = 0; i < entity.textures.size(); i++) {
-            int id = entity.textures.get(i).id;
-            glActiveTexture(GL13.GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, id);
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).id);
         }
-        GL11.glDrawElements(GL11.GL_TRIANGLES, entity.indices.length, GL11.GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, entity.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < entity.textures.size(); i++) {
-            glActiveTexture(GL13.GL_TEXTURE0 + i);
+            glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         for (int i = 0; i < attributes.length; i++) {
-            GL20.glDisableVertexAttribArray(i);
+            glDisableVertexAttribArray(i);
         }
-        GL30.glBindVertexArray(0);
+        glBindVertexArray(0);
     }
 
     protected void render(Entity.Collider collider) {
-        GL30.glBindVertexArray(collider.vao);
+        glBindVertexArray(collider.vao);
         for (int i = 0; i < attributes.length; i++) {
-            GL20.glEnableVertexAttribArray(i);
+            glEnableVertexAttribArray(i);
         }
-        GL11.glDrawElements(GL11.GL_LINES, collider.indices.length, GL11.GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, collider.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
-            GL20.glDisableVertexAttribArray(i);
+            glDisableVertexAttribArray(i);
         }
-        GL30.glBindVertexArray(0);
+        glBindVertexArray(0);
     }
 
     public void start() {
-        GL20.glUseProgram(program);
+        glUseProgram(program);
     }
 
     public void stop(){
-        GL20.glUseProgram(0);
+        glUseProgram(0);
     }
 
     public static void unload() {
         for (Shader shader : Shader.ALL) {
             shader.stop();
-            GL20.glDetachShader(shader.program, shader.vertex);
-            GL20.glDetachShader(shader.program, shader.fragment);
-            GL20.glDeleteShader(shader.vertex);
-            GL20.glDeleteShader(shader.fragment);
-            GL20.glDeleteProgram(shader.program);
+            glDetachShader(shader.program, shader.vertex);
+            glDetachShader(shader.program, shader.fragment);
+            glDeleteShader(shader.vertex);
+            glDeleteShader(shader.fragment);
+            glDeleteProgram(shader.program);
         }
     }
 
@@ -147,11 +143,11 @@ public abstract class Shader {
             System.exit(-1);
             throw new RuntimeException(e);
         }
-        int shaderID = GL20.glCreateShader(type);
-        GL20.glShaderSource(shaderID, shaderSource);
-        GL20.glCompileShader(shaderID);
-        if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE){
-            System.out.println(GL20.glGetShaderInfoLog(shaderID, 500));
+        int shaderID = glCreateShader(type);
+        glShaderSource(shaderID, shaderSource);
+        glCompileShader(shaderID);
+        if(glGetShaderi(shaderID, GL_COMPILE_STATUS) == GL_FALSE){
+            System.out.println(glGetShaderInfoLog(shaderID, 500));
             System.err.println("Could not compile shader!");
             System.exit(-1);
         }

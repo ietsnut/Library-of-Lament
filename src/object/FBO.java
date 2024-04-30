@@ -8,12 +8,7 @@ import game.Game;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.*;
-import static org.lwjgl.opengl.GL14.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL32.*;
+import static org.lwjgl.opengl.GL40.*;
 
 public class FBO extends Entity {
 
@@ -35,8 +30,8 @@ public class FBO extends Entity {
         glDrawBuffers(drawBuffers);
 
         Texture color = texture(new Texture()).textures.getLast();
-        glBindTexture(GL11.GL_TEXTURE_2D, color.id);
-        glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, (ByteBuffer) null);
+        glBindTexture(GL_TEXTURE_2D, color.id);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, width, height, 0, GL_RG, GL_FLOAT, (ByteBuffer) null);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,color.id, 0);
 
         Texture normals = texture(new Texture()).textures.getLast();
@@ -72,7 +67,7 @@ public class FBO extends Entity {
     @Override
     public void load() {
         indices     = new int[] { 0, 1, 2, 2, 1, 3 };
-        vertices    = new float[] { -1, 1, -1, -1, 1, 1, 1, -1 };
+        vertices    = new byte[] { -1, 1, -1, -1, 1, 1, 1, -1 };
     }
 
 }

@@ -8,16 +8,13 @@ import org.lwjgl.opengl.GL15;
 import property.Load;
 import property.Transformation;
 
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.glDeleteTextures;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL40.*;
 
 public abstract class Entity extends Transformation implements Load {
 
@@ -25,12 +22,13 @@ public abstract class Entity extends Transformation implements Load {
     public List<Integer> vbo = new ArrayList<>();
 
     public int[]    indices;
-    public float[]  vertices;
+    //public float[]  vertices;
+    public byte[]   vertices;
     public float[]  normals;
     public float[]  texCoords;
 
     public IntBuffer    indicesBuffer;
-    public FloatBuffer  verticesBuffer;
+    public ByteBuffer   verticesBuffer;
     public FloatBuffer  normalsBuffer;
     public FloatBuffer  texCoordsBuffer;
 
@@ -57,11 +55,43 @@ public abstract class Entity extends Transformation implements Load {
         return "<" + this.getClass().getSimpleName() + "> [" + name + "] : " + position.x + ", " + position.y + ", " + position.z;
     }
 
-    protected void bindBuffer(int attributeNumber, int coordinateSize, FloatBuffer buffer) {
+    public void post() {
+        if (this.indices != null) {
+            indicesBuffer = BufferUtils.createIntBuffer(indices.length);
+            indicesBuffer.put(indices);
+            indicesBuffer.flip();
+        }
+        if (this.vertices != null) {
+            verticesBuffer = BufferUtils.createByteBuffer(vertices.length);
+            verticesBuffer.put(vertices);
+            verticesBuffer.flip();
+        }
+        if (this.texCoords != null) {
+            texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
+            texCoordsBuffer.put(texCoords);
+            texCoordsBuffer.flip();
+        }
+        if (this.normals != null) {
+            normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
+            normalsBuffer.put(normals);
+            normalsBuffer.flip();
+        }
+    }
+
+    private void bindBuffer(int attributeNumber, int coordinateSize, Buffer buffer) {
         int vboID = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
-        glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
-        glVertexAttribPointer(attributeNumber, coordinateSize, GL_FLOAT, false, 0, 0);
+        switch (buffer) {
+            case FloatBuffer fb -> {
+                glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+                glVertexAttribPointer(attributeNumber, coordinateSize, GL_FLOAT, false, 0, 0);
+            }
+            case ByteBuffer bb -> {
+                glBufferData(GL_ARRAY_BUFFER, bb, GL_STATIC_DRAW);
+                glVertexAttribPointer(attributeNumber, coordinateSize, GL_BYTE, false, 0, 0);
+            }
+            default -> throw new IllegalArgumentException("Unsupported buffer type: " + buffer.getClass());
+        }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         vbo.add(vboID);
     }
@@ -71,13 +101,13 @@ public abstract class Entity extends Transformation implements Load {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
         if (this.indicesBuffer != null) {
-            int vboId = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
-            GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
+            int vboId = glGenBuffers();
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboId);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
             vbo.add(vboId);
         }
         if (this.verticesBuffer != null) {
-            bindBuffer(0, this.dimensions, this.verticesBuffer);
+            bindBuffer(0, dimensions, this.verticesBuffer);
         }
         if (this.texCoordsBuffer != null) {
             bindBuffer(1, 2, this.texCoordsBuffer);
@@ -103,29 +133,6 @@ public abstract class Entity extends Transformation implements Load {
         post();
     }
 
-    public void post() {
-        if (this.indices != null) {
-            indicesBuffer = BufferUtils.createIntBuffer(indices.length);
-            indicesBuffer.put(indices);
-            indicesBuffer.flip();
-        }
-        if (this.vertices != null) {
-            verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
-            verticesBuffer.put(vertices);
-            verticesBuffer.flip();
-        }
-        if (this.texCoords != null) {
-            texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
-            texCoordsBuffer.put(texCoords);
-            texCoordsBuffer.flip();
-        }
-        if (this.normals != null) {
-            normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
-            normalsBuffer.put(normals);
-            normalsBuffer.flip();
-        }
-    }
-
     public class Collider extends Entity {
 
         public Vector3f min;
@@ -142,16 +149,16 @@ public abstract class Entity extends Transformation implements Load {
 
         @Override
         public void load() {
-            float[] vertices = Entity.this.vertices;
-            min = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-            max = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
+            byte[] vertices = Entity.this.vertices;
+            min = new Vector3f(Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE);
+            max = new Vector3f(Byte.MIN_VALUE, Byte.MIN_VALUE, Byte.MIN_VALUE);
             for (int i = 0; i < vertices.length; i += 3) {
                 min.set(Math.min(min.x, vertices[i]), Math.min(min.y, vertices[i + 1]), Math.min(min.z, vertices[i + 2]));
                 max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));
             }
             size = new Vector3f(max).sub(min).length();
-            this.vertices = new float[] {
-                    min.x, min.y, min.z, max.x, min.y, min.z, max.x, max.y, min.z, min.x, max.y, min.z, min.x, min.y, max.z, max.x, min.y, max.z, max.x, max.y, max.z, min.x, max.y, max.z,
+            this.vertices = new byte[] {
+                    (byte) min.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) max.y, (byte) max.z, (byte) min.x, (byte) max.y, (byte) max.z,
             };
             this.indices = new int[] {
                     0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
