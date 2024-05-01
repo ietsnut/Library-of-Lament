@@ -3,6 +3,7 @@ package object;
 import java.util.ArrayList;
 import java.util.List;
 
+import content.Terrain;
 import org.joml.Matrix4f;
 
 public class Sky {
@@ -23,7 +24,7 @@ public class Sky {
 
         public Layer(String name) {
             super(name, false);
-            radius = Terrain.SIZE + (layers.size() * (Terrain.SIZE/12));
+            radius = Byte.MAX_VALUE + (layers.size() * (Byte.MAX_VALUE/12f));
             height = (float) (2 * radius * Math.sin(Math.PI / sides));
             position.y = height / 4;
             texture(new Texture("sky", name));

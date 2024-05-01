@@ -2,9 +2,9 @@ package content;
 
 import object.Model;
 
-public class Sewer extends Model {
+public class Vase extends Model {
 
-    public Sewer(String model) {
+    public Vase(String model) {
         super(model);
     }
 

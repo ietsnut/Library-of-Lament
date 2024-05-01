@@ -19,7 +19,7 @@ public class Camera extends Thread {
         - add dynamic FOV
     */
 
-    public static Transformation transformation     = new Transformation();
+    public static Transformation transformation     = new Transformation().translate(1, 1, -1.5f);
     public static Matrix4f view                     = new Matrix4f();
 
     public static final float SPEED    = 0.05f;
@@ -30,20 +30,36 @@ public class Camera extends Thread {
     public static void move() {
         if (glfwGetInputMode(Game.window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
             Vector3f forward = new Vector3f(transformation.forward().x, 0, transformation.forward().z).normalize();
+
+            Vector3f origin = new Vector3f(transformation.position);
+            Vector3f direction = new Vector3f();
+
             if (Control.isKeyDown(GLFW_KEY_W) || Control.isKeyDown(GLFW_KEY_UP)) {
-                transformation.position.add(forward.x * -SPEED, 0, forward.z * -SPEED);
+                direction.add(forward.x * -SPEED, 0, forward.z * -SPEED);
             }
             if (Control.isKeyDown(GLFW_KEY_S) || Control.isKeyDown(GLFW_KEY_DOWN)) {
-                transformation.position.add(forward.x * SPEED, 0, forward.z * SPEED);
+                direction.add(forward.x * SPEED, 0, forward.z * SPEED);
             }
             if (Control.isKeyDown(GLFW_KEY_D) || Control.isKeyDown(GLFW_KEY_RIGHT)) {
-                transformation.position.add(forward.z * SPEED, 0, forward.x * -SPEED);
-
+                direction.add(forward.z * SPEED, 0, forward.x * -SPEED);
             }
             if (Control.isKeyDown(GLFW_KEY_A) || Control.isKeyDown(GLFW_KEY_LEFT)) {
-                transformation.position.add(forward.z * -SPEED, 0, forward.x * SPEED);
+                direction.add(forward.z * -SPEED, 0, forward.x * SPEED);
             }
-            transformation.position.y = 1f;
+
+            Vector3f position = new Vector3f(origin).add(direction);
+
+            if (Game.scene.terrain() != null) {
+                float height = Game.scene.terrain().move(new Vector3f(position));
+                System.out.println(height);
+                if (height >= 0) {
+                    transformation.position(position);
+                    transformation.position.y = height + 1f;
+                }
+            } else {
+                transformation.position(position);
+                transformation.position.y = 1f;
+            }
         }
     }
 

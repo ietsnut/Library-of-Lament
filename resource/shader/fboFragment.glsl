@@ -18,17 +18,15 @@ float sobel(sampler2D sampler, int channel) {
 }
 
 void main(void) {
-    color = vec3(texture(colorTexture, fragUV).r);
     float depthDelta    = sobel(normalTexture, 3);
     float normalDelta   = max(sobel(normalTexture, 0), max(sobel(normalTexture, 1), sobel(normalTexture, 2)));
-    float albedo        = texture(colorTexture, fragUV).r;
-    color               = vec3(albedo);
     float light         = texture(colorTexture, fragUV).g;
-    if (depthDelta > 0.1) {
+    if (depthDelta > 0.1 && light < 1.0) {
         color = vec3(0.5);
-    }
-    if ((normalDelta > 0.01 || depthDelta > 0.1) && light > 1) {
+    } else if (normalDelta > 0.1 && light > 1.0) {
         color = vec3(1.0);
+    } else {
+        color = vec3(texture(colorTexture, fragUV).r);
     }
     vec2 center         = vec2(0.5, 0.5);
     float distance      = length(fragUV - center);

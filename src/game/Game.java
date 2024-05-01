@@ -1,5 +1,6 @@
 package game;
 
+import content.Terrain;
 import engine.*;
 import object.*;
 
@@ -93,6 +94,7 @@ public class Game {
                 lastFrameTime += 1000;
             }
             fps++;
+            scene.render();
             renderer.render(scene);
             glfwPollEvents();
             glfwSwapBuffers(window);

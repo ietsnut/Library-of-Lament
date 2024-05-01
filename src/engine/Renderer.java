@@ -1,16 +1,17 @@
 package engine;
 
+import content.Terrain;
 import game.Game;
 import game.Scene;
 import object.*;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.*;
+
 import static org.lwjgl.opengl.GL40.*;
 
 public class Renderer {
 
     public static final float NEAR      = 0.001f;
-    public static final float FAR       = Terrain.SIZE * 4;
+    public static final float FAR       = Byte.MAX_VALUE * 4;
 
     public static final Matrix4f projection   = new Matrix4f();
 
@@ -39,6 +40,7 @@ public class Renderer {
         //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         aabbShader.render(scene);
         modelShader.render(scene);
+
         //skyShader.render(scene);
         fboShader.unbind();
         fboShader.render(scene);
