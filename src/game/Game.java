@@ -10,6 +10,7 @@ import org.lwjgl.system.MemoryStack;
 import property.Load;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -31,6 +32,8 @@ public class Game {
     public static final int WIDTH = 1200;
     public static final int HEIGHT = 1200;
     public static final String TITLE = "";
+    public static float TIME = time();
+    public static float PLAYTIME = 0;
 
     public static List<Scene>   scenes = new ArrayList<>();
     public static Renderer      renderer;
@@ -56,6 +59,8 @@ public class Game {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
         window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, NULL, NULL);
         if (window == NULL) {
@@ -76,20 +81,19 @@ public class Game {
         scene = new Scene();
         scenes.add(scene);
         renderer = new Renderer();
+        new Camera().start();
     }
 
     private static void loop() {
         int fps = 0;
         long lastFrameTime = time();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        while ( !glfwWindowShouldClose(window) ) {
-            Load load = Load.process();
-            if (load instanceof Entity entity) {
-                scene.entities.add(entity);
-            }
-            //entity.reload();
-            if (time() - lastFrameTime > 1000) {
-                glfwSetWindowTitle(window, "FPS: " + fps);
+        while (!glfwWindowShouldClose(window)) {
+            Load.process();
+            TIME = time();
+            PLAYTIME = (TIME - lastFrameTime) / 1000;
+            if (TIME - lastFrameTime > 1000) {
+                glfwSetWindowTitle(window, Integer.toString(fps));
                 fps = 0;
                 lastFrameTime += 1000;
             }
@@ -102,9 +106,7 @@ public class Game {
     }
 
     public static void close() {
-        for (Load load : Load.BOUND) {
-            load.unload();
-        }
+        Load.clear();
         Shader.unload();
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);

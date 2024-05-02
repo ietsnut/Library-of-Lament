@@ -4,6 +4,8 @@ import game.Scene;
 import org.joml.Math;
 import object.*;
 
+import static org.lwjgl.opengl.GL40.*;
+
 public class ModelShader extends Shader {
 
     public ModelShader() {
@@ -19,18 +21,20 @@ public class ModelShader extends Shader {
             uniform("lightAttenuation[" + i + "]",  scene.lights.get(i).attenuation);
             uniform("lightIntensity[" + i + "]",    scene.lights.get(i).intensity);
         }
-        uniform("modelTexture", 0);
         for (Entity model : scene.entities) {
-            render(model);
+            if (model.bound()) {
+                render(model);
+            }
         }
-        //render(scene.terrain);
+        if (scene.terrain.bound()) {
+            render(scene.terrain);
+        }
     }
 
     @Override
     protected void render(Entity entity) {
-        if (entity != null) {
-            uniform("model",        entity.model);
-            super.render(entity);
-        }
+        uniform("model",        entity.model);
+        super.render(entity);
     }
+
 }

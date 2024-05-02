@@ -9,10 +9,6 @@ import game.Scene;
 import object.Entity;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
@@ -25,7 +21,7 @@ public abstract class Shader {
     private final HashMap<String, Integer> uniforms = new HashMap<>();
     private final String[] attributes;
 
-    private final int program, vertex, fragment;
+    protected final int program, vertex, fragment;
 
     public Shader(String type, String... attributes) {
         vertex      = loadShader("resource/shader/" + type + "Vertex.glsl",     GL_VERTEX_SHADER);
@@ -78,24 +74,13 @@ public abstract class Shader {
         for (int i = 0; i < entity.textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).id);
+            glUniform1i(uniforms.computeIfAbsent("texture" + i, loc -> glGetUniformLocation(program, loc)), i);
         }
-        glDrawElements(GL_TRIANGLES, entity.indices.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(entity instanceof Entity.Collider ? GL_LINES : GL_TRIANGLES, entity.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < entity.textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        for (int i = 0; i < attributes.length; i++) {
-            glDisableVertexAttribArray(i);
-        }
-        glBindVertexArray(0);
-    }
-
-    protected void render(Entity.Collider collider) {
-        glBindVertexArray(collider.vao);
-        for (int i = 0; i < attributes.length; i++) {
-            glEnableVertexAttribArray(i);
-        }
-        glDrawElements(GL_LINES, collider.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
             glDisableVertexAttribArray(i);
         }

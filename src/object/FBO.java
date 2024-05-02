@@ -12,8 +12,8 @@ import static org.lwjgl.opengl.GL40.*;
 
 public class FBO extends Entity {
 
-    public final int width;
-    public final int height;
+    public int width;
+    public int height;
 
     public int frameBuffer;
     public int depthBuffer;
@@ -21,23 +21,38 @@ public class FBO extends Entity {
     public IntBuffer drawBuffers;
 
     public FBO(int width, int height) {
-        super("fbo", false);
+        super();
         this.width = width;
         this.height = height;
+        direct();
+    }
+
+    @Override
+    public void unbind() {
+        super.unbind();
+        glDeleteFramebuffers(frameBuffer);
+        glDeleteFramebuffers(drawBuffers);
+        glDeleteRenderbuffers(depthBuffer);
+    }
+
+    @Override
+    public void preload() {
         frameBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        drawBuffers = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();
+        drawBuffers = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT1).put(GL_COLOR_ATTACHMENT0).flip();
         glDrawBuffers(drawBuffers);
 
-        Texture color = texture(new Texture()).textures.getLast();
+        Texture color = new Texture();
         glBindTexture(GL_TEXTURE_2D, color.id);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, width, height, 0, GL_RG, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,color.id, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.id, 0);
+        textures.add(color);
 
-        Texture normals = texture(new Texture()).textures.getLast();
+        Texture normals = new Texture();
         glBindTexture(GL_TEXTURE_2D, normals.id);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, (ByteBuffer) null);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normals.id, 0);
+        textures.add(normals);
 
         depthBuffer = glGenRenderbuffers();
         glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
@@ -50,18 +65,6 @@ public class FBO extends Entity {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             throw new RuntimeException("Framebuffer not complete");
         }
-        load();
-        post();
-        bind();
-        BOUND.add(this);
-    }
-
-    @Override
-    public void unload() {
-        super.unload();
-        glDeleteFramebuffers(frameBuffer);
-        glDeleteFramebuffers(drawBuffers);
-        glDeleteRenderbuffers(depthBuffer);
     }
 
     @Override

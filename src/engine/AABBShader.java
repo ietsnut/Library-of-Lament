@@ -1,5 +1,7 @@
 package engine;
 
+import content.Vase;
+import game.Control;
 import game.Game;
 import game.Scene;
 import object.Camera;
@@ -14,7 +16,7 @@ public class AABBShader extends Shader {
 
     public void shader(Scene scene) {
         Entity entity = Entity.collides(30f, scene.entities);
-        if (entity == null) {
+        if (entity == null || !entity.bound() || !entity.collider.bound()) {
             return;
         }
         uniform("model",        entity.model);

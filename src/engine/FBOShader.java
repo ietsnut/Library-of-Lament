@@ -2,6 +2,7 @@ package engine;
 
 import game.Game;
 import game.Scene;
+import object.Entity;
 import object.FBO;
 
 import static org.lwjgl.opengl.GL40.*;
@@ -19,8 +20,6 @@ public class FBOShader extends Shader {
         glDisable(GL_DEPTH_TEST);
         uniform("width",            fbo.width);
         uniform("height",           fbo.height);
-        uniform("colorTexture",     0);
-        uniform("normalTexture",    1);
         render(fbo);
         glEnable(GL_DEPTH_TEST);
     }

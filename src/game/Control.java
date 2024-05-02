@@ -67,7 +67,8 @@ public class Control {
                     mouseY = (float) ypos;
                     deltaMouseX = mouseX - prevMouseX;
                     deltaMouseY = mouseY - prevMouseY;
-                    Camera.rotate();
+                    Camera.DX += deltaMouseX;
+                    Camera.DY += deltaMouseY;
                 }
             }
         };

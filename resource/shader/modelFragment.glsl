@@ -8,7 +8,7 @@ in float    fragDepth;
 layout(location = 0) out vec2   color;
 layout(location = 1) out vec4   normal;
 
-uniform sampler2D modelTexture;
+uniform sampler2D texture1;
 
 uniform int     tile;
 uniform int     tiles;
@@ -35,7 +35,7 @@ int t(sampler2D s, vec2 v) {
 
 void main(void) {
 
-    int albedo = t(modelTexture, fragUV);
+    int albedo = t(texture1, fragUV);
     if (albedo == 0) {
         discard;
     }

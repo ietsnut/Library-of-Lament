@@ -6,6 +6,7 @@ import property.Load;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.*;
@@ -21,18 +22,14 @@ public class Texture implements Load {
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
     public int id;
+    long last_modified;
 
     public BufferedImage    image;
-    public String           file;
+    public File             file;
     public ByteBuffer       buffer;
 
     public int width;
     public int height;
-
-    public int tiles;
-    public int tile;
-
-    public boolean repeat = false;
 
     public Texture() {
         this.id = glGenTextures();
@@ -47,19 +44,14 @@ public class Texture implements Load {
     }
 
     public Texture(String namespace, String name) {
-        this(namespace, name, 1);
+        this.file   = new File("resource/" + namespace + "/" + name + ".png");
+        queue();
     }
 
-    public Texture(String namespace, String name, int tiles) {
-        this.tiles  = tiles;
-        this.file   = namespace + "/" + name;
-        enqueue();
-    }
-
-    public static BufferedImage load(String file) {
+    public static BufferedImage load(File file) {
         BufferedImage image;
         try {
-            image = ImageIO.read(new FileInputStream("resource/" + file + ".png"));
+            image = ImageIO.read(new FileInputStream(file));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -111,23 +103,23 @@ public class Texture implements Load {
     }
 
     @Override
+    public void preload() {
+
+    }
+
+    @Override
     public void load() {
-        if (tiles == 1) {
-            this.image = load(this.file);
-        } else {
-            BufferedImage sample = load(this.file + "0");
-            this.image = new BufferedImage(sample.getWidth() * tiles, sample.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
-            Graphics2D g = image.createGraphics();
-            for (int i = 0; i < tiles; i++) {
-                BufferedImage frame = load(file + i);
-                g.drawImage(frame, sample.getWidth() * i, 0, null);
-            }
-            g.dispose();
-        }
-        this.image = dither(image);
+        this.image  = load(this.file);
+        this.image  = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();
+        last_modified = file.lastModified();
         this.buffer = load(image);
+    }
+
+    @Override
+    public void postload() {
+
     }
 
     @Override
@@ -136,33 +128,31 @@ public class Texture implements Load {
         glBindTexture(GL_TEXTURE_2D, this.id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        if (!repeat) {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-        } else {
-            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        }
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4) * tiles, height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     @Override
-    public void unload() {
+    public void unbind() {
         glDeleteTextures(id);
+    }
+
+    @Override
+    public boolean reload() {
+        if (file != null && file.exists() && file.lastModified() != last_modified) {
+            last_modified = file.lastModified();
+            return true;
+        }
+        return false;
     }
 
     @Override
     public String toString() {
         return "<" + this.getClass().getSimpleName() + "> [" + file + "] : " + width + ", " + height;
-    }
-
-    public Texture repeat() {
-        repeat = true;
-        return this;
     }
 
 }

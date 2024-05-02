@@ -13,23 +13,13 @@ public class Renderer {
     public static final float NEAR      = 0.001f;
     public static final float FAR       = Byte.MAX_VALUE * 4;
 
-    public static final Matrix4f projection   = new Matrix4f();
+    public static final Matrix4f projection = new Matrix4f();
 
-    private final ModelShader   modelShader;
-    private final SkyShader     skyShader;
-    private final FBOShader     fboShader;
-    private final AABBShader    aabbShader;
-
-    public Renderer() {
-        fboShader       = new FBOShader();
-        modelShader     = new ModelShader();
-        skyShader       = new SkyShader();
-        aabbShader      = new AABBShader();
-    }
+    private final ModelShader   modelShader = new ModelShader();
+    private final FBOShader     fboShader   = new FBOShader();
+    private final AABBShader    aabbShader  = new AABBShader();
 
     public void render(Scene scene) {
-        Camera.move();
-        Camera.view();
         projection();
         for (Entity entity : scene.entities) {
             entity.model();
@@ -37,14 +27,14 @@ public class Renderer {
         fboShader.bind();
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         aabbShader.render(scene);
         modelShader.render(scene);
-
-        //skyShader.render(scene);
         fboShader.unbind();
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         fboShader.render(scene);
-
+        glDisable(GL_BLEND);
     }
 
     public static void projection() {

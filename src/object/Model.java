@@ -5,22 +5,22 @@ import org.joml.Vector3f;
 
 import java.io.*;
 
-public class Model extends Entity {
+public abstract class Model extends Entity {
 
-    public Model(String model) {
-        super(model, true);
-        enqueue();
+    private File file;
+    long last_modified;
+
+    public Model(String namespace, String model, boolean collidable) {
+        super(namespace, model, collidable);
+        file = new File("resource/" + namespace + "/" + name + ".obj");
+        last_modified = file.lastModified();
     }
 
     @Override
     public void load() {
-       obj("model");
-    }
-
-    protected void obj(String model) {
         Obj obj;
         try {
-            obj = ObjReader.read(new FileInputStream("resource/" + model + "/" + name + ".obj"));
+            obj = ObjReader.read(new FileInputStream(file));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -33,7 +33,15 @@ public class Model extends Entity {
         }
         texCoords   = ObjData.getTexCoordsArray(obj, 2, true);
         normals     = ObjData.getNormalsArray(obj);
-        System.out.println(ObjUtils.createInfoString(obj));
+    }
+
+    @Override
+    public boolean reload() {
+        if (file != null && file.exists() && file.lastModified() != last_modified) {
+            last_modified = file.lastModified();
+            return true;
+        }
+        return false;
     }
 
 }

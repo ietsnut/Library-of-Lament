@@ -18,82 +18,117 @@ import static org.lwjgl.opengl.GL40.*;
 
 public abstract class Entity extends Transformation implements Load {
 
-    public int vao;
-    public List<Integer> vbo = new ArrayList<>();
+    public int      vao = 0;
+    public int[]    vbo = new int[4];
 
-    public int[]    indices;
-    //public float[]  vertices;
-    public byte[]   vertices;
-    public float[]  normals;
-    public float[]  texCoords;
+    public int[]    indices     = new int[0];
+    public byte[]   vertices    = new byte[0];
+    public float[]  normals     = new float[0];
+    public float[]  texCoords   = new float[0];
 
-    public IntBuffer    indicesBuffer;
-    public ByteBuffer   verticesBuffer;
-    public FloatBuffer  normalsBuffer;
-    public FloatBuffer  texCoordsBuffer;
+    public IntBuffer    indicesBuffer   = null;
+    public ByteBuffer   verticesBuffer  = null;
+    public FloatBuffer  normalsBuffer   = null;
+    public FloatBuffer  texCoordsBuffer = null;
 
     public final List<Texture> textures = new ArrayList<>();
 
-    public final int dimensions;
+    public final String namespace;
     public final String name;
+
     public Collider collider;
     public final boolean collidable;
 
-    public Entity(String name, boolean collidable) {
-        this.name = name;
-        this.dimensions = this instanceof FBO ? 2 : 3;
-        this.collidable = collidable;
+    public boolean reload = false;
+
+    public Entity() {
+        this.namespace  = null;
+        this.name       = null;
+        this.collidable = false;
     }
 
-    public Entity texture(Texture texture) {
-        textures.add(texture);
-        return this;
+    public Entity(String namespace, String name, boolean collidable) {
+        this.namespace  = namespace;
+        this.name       = name;
+        this.collidable = collidable;
+        // TODO: check if texCoords are beyond 0-1 and make texture repeat
+        textures.add(new Texture(namespace, name));
     }
 
     @Override
     public String toString() {
-        return "<" + this.getClass().getSimpleName() + "> [" + name + "] : " + position.x + ", " + position.y + ", " + position.z;
+        return "<" + this.getClass().getSimpleName() + "> [" + namespace + " : " + name + "] : " + bound();
     }
 
-    public void post() {
-        if (this.indices != null) {
+    @Override
+    public void preload() {
+        this.vao = 0;
+        this.vbo = new int[4];
+
+        this.indices    = new int[0];
+        this.vertices   = new byte[0];
+        this.normals    = new float[0];
+        this.texCoords  = new float[0];
+
+        this.indicesBuffer      = null;
+        this.verticesBuffer     = null;
+        this.normalsBuffer      = null;
+        this.texCoordsBuffer    = null;
+    }
+
+    @Override
+    public boolean reload() {
+        return reload;
+    }
+
+    @Override
+    public void postload() {
+        if (this.indices.length > 0) {
             indicesBuffer = BufferUtils.createIntBuffer(indices.length);
             indicesBuffer.put(indices);
             indicesBuffer.flip();
         }
-        if (this.vertices != null) {
+        if (this.vertices.length > 0) {
             verticesBuffer = BufferUtils.createByteBuffer(vertices.length);
             verticesBuffer.put(vertices);
             verticesBuffer.flip();
         }
-        if (this.texCoords != null) {
+        if (this.texCoords.length > 0) {
             texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
+            texCoordsBuffer.position(0);
             texCoordsBuffer.put(texCoords);
             texCoordsBuffer.flip();
         }
-        if (this.normals != null) {
+        if (this.normals.length > 0) {
             normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
+            normalsBuffer.position(0);
             normalsBuffer.put(normals);
             normalsBuffer.flip();
         }
+        this.collider = collidable ? new Collider() : null;
     }
 
-    private void bindBuffer(int attributeNumber, int coordinateSize, Buffer buffer) {
-        int vboID = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vboID);
+    private void buffer(int i, int l, Buffer buffer) {
+        int vbo = glGenBuffers();
         switch (buffer) {
+            case IntBuffer ib -> {
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, ib, GL_STATIC_DRAW);
+            }
             case FloatBuffer fb -> {
+                glBindBuffer(GL_ARRAY_BUFFER, vbo);
                 glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-                glVertexAttribPointer(attributeNumber, coordinateSize, GL_FLOAT, false, 0, 0);
+                glVertexAttribPointer(i, l, GL_FLOAT, false, 0, 0);
             }
             case ByteBuffer bb -> {
+                glBindBuffer(GL_ARRAY_BUFFER, vbo);
                 glBufferData(GL_ARRAY_BUFFER, bb, GL_STATIC_DRAW);
-                glVertexAttribPointer(attributeNumber, coordinateSize, GL_BYTE, false, 0, 0);
+                glVertexAttribPointer(i, l, GL_BYTE, false, 0, 0);
             }
-            default -> throw new IllegalArgumentException("Unsupported buffer type: " + buffer.getClass());
+            default -> throw new IllegalArgumentException("Unsupported buffer : " + buffer.getClass());
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        vbo.add(vboID);
+        this.vbo[i] = vbo;
     }
 
     @Override
@@ -101,36 +136,26 @@ public abstract class Entity extends Transformation implements Load {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
         if (this.indicesBuffer != null) {
-            int vboId = glGenBuffers();
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboId);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
-            vbo.add(vboId);
+            buffer(0, 0, this.indicesBuffer);
         }
         if (this.verticesBuffer != null) {
-            bindBuffer(0, dimensions, this.verticesBuffer);
+            buffer(0, this instanceof FBO ? 2 : 3, this.verticesBuffer);
         }
         if (this.texCoordsBuffer != null) {
-            bindBuffer(1, 2, this.texCoordsBuffer);
+            buffer(1, 2, this.texCoordsBuffer);
         }
         if (this.normalsBuffer != null) {
-            bindBuffer(2, 3, this.normalsBuffer);
+            buffer(2, 3, this.normalsBuffer);
         }
         glBindVertexArray(0);
-        this.collider = collidable ? new Collider() : null;
     }
 
     @Override
-    public void unload() {
+    public void unbind() {
         glDeleteVertexArrays(vao);
         for (int vbo : vbo) {
             glDeleteBuffers(vbo);
         }
-    }
-
-    @Override
-    public void run() {
-        Load.super.run();
-        post();
     }
 
     public class Collider extends Entity {
@@ -140,11 +165,15 @@ public abstract class Entity extends Transformation implements Load {
         public float size;
 
         public Collider() {
-            super("collider", false);
-            load();
-            post();
-            bind();
-            BOUND.add(this);
+            super();
+            queue();
+        }
+
+        @Override
+        public void preload() {
+            super.preload();
+            this.vertices   = new byte[24];
+            this.indices    = new int[24];
         }
 
         @Override
@@ -158,7 +187,7 @@ public abstract class Entity extends Transformation implements Load {
             }
             size = new Vector3f(max).sub(min).length();
             this.vertices = new byte[] {
-                    (byte) min.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) max.y, (byte) max.z, (byte) min.x, (byte) max.y, (byte) max.z,
+                    (byte) min.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) max.y, (byte) max.z, (byte) min.x, (byte) max.y, (byte) max.z
             };
             this.indices = new int[] {
                     0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
@@ -224,7 +253,7 @@ public abstract class Entity extends Transformation implements Load {
         float min = Float.MAX_VALUE;
         Entity closest = null;
         for (Entity entity : entities) {
-            if (entity.collide(distance) && entity.distance() < min) {
+            if (entity.bound() && entity.collider.bound() && entity.collide(distance) && entity.distance() < min) {
                 min = entity.distance();
                 closest = entity;
             }

@@ -1,12 +1,14 @@
-package object;
+package content;
 
+import object.Camera;
+import object.Entity;
 import org.joml.Matrix4f;
 
-public class Billboard extends Entity {
+public class Character extends Entity {
 
-    public Billboard(String name) {
-        super(name, true);
-        enqueue();
+    public Character(String name) {
+        super("character", name, true);
+        queue();
     }
 
     @Override
@@ -37,7 +39,7 @@ public class Billboard extends Entity {
 
     @Override
     public Matrix4f model() {
-        rotation(Axis.Y, 360 - Camera.transformation.rotation.y);
+        rotation.y = Camera.transformation.rotation.y;
         return super.model();
     }
 

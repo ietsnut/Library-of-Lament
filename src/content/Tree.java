@@ -5,8 +5,8 @@ import object.Entity;
 public class Tree extends Entity {
 
     public Tree(String model) {
-        super(model, true);
-        enqueue();
+        super("tree", model, true);
+        queue();
     }
 
     @Override
@@ -33,11 +33,11 @@ public class Tree extends Entity {
                 1, 0
         };
         normals = new float[] {
-                0f, 0f, 1f,  // Points out of the screen
                 0f, 0f, 1f,
                 0f, 0f, 1f,
                 0f, 0f, 1f,
-                1f, 0f, 0f,  // Points right
+                0f, 0f, 1f,
+                1f, 0f, 0f,
                 1f, 0f, 0f,
                 1f, 0f, 0f,
                 1f, 0f, 0f

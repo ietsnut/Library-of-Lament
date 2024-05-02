@@ -5,7 +5,8 @@ import object.Model;
 public class Vase extends Model {
 
     public Vase(String model) {
-        super(model);
+        super("vase", model, true);
+        queue();
     }
 
 }

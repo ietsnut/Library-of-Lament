@@ -1,32 +1,30 @@
 package game;
 
+import content.Character;
 import content.Terrain;
 import content.Vase;
 import object.*;
 import org.joml.Vector3f;
-import property.Transformation;
+import property.Load;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
+import static property.Transformation.*;
+
 public class Scene extends Thread {
 
-    public Sky          sky;
-
-    public final List<Entity> entities    = new ArrayList<>();
-
     public List<Light>  lights      = new ArrayList<>();
+    public List<Entity> entities    = new ArrayList<>();
+    public Terrain      terrain;
 
     public Scene() {
 
-        Texture vase = new Texture("texture", "vase");
-
         for (int i = 0; i < 30; i+=3) {
-            Vase vasee = (Vase) new Vase("vase").texture(vase);
-            float scale = Math.random() > 0.5 ? 1f/24 : 1f/20;
-            vasee.scale(scale);
+            Vase vase = new Vase("vase");
+            vase.scale = MICRO;
             float x = (float) (Math.random() * i);
             float z = 1.5f;
             if (Math.random() > 0.5) {
@@ -35,18 +33,16 @@ public class Scene extends Thread {
             if (Math.random() > 0.5) {
                 z = -z;
             }
-            vasee.position(x, 0, z);
+            vase.position.set(x, 0, z);
+            entities.add(vase);
         }
 
-        Model model3 = (Model) new Model("slotmachine").texture(new Texture("texture", "slotmachine0"));
-        model3.scale(1f/8);
-        model3.position(-10, 0, -1.5f);
+        terrain = new Terrain("sewer");
 
-        new Terrain("sewer");
-
-        Billboard billboard = (Billboard) new Billboard("1").texture(new Texture("texture", "1"));
-        billboard.scale(1f/2);
-        billboard.position(10, 0, 1.5f);
+        Character character = new Character("1");
+        character.scale = DECI;
+        character.position.set(10, 0, 1.5f);
+        entities.add(character);
 
         Light light1 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
         lights.add(light1);
@@ -57,29 +53,16 @@ public class Scene extends Thread {
     @Override
     public void run() {
         while (!glfwWindowShouldClose(Game.window)) {
-            update();
+            lights.getFirst().position = new Vector3f(Camera.transformation.position);
         }
-    }
-
-    public void update() {
-        lights.getFirst().position = new Vector3f(Camera.transformation.position);
     }
 
     public void render() {
-        for (Entity entity : entities) {
-            if (entity instanceof Vase vase) {
-                vase.rotate(Transformation.Axis.Y, 0.05f);
+        for (Load load : Load.BOUND) {
+            if (load instanceof Vase vase) {
+                vase.rotation.add(0, 0.05f, 0);
             }
         }
-    }
-
-    public Terrain terrain() {
-        for (Entity entity : entities) {
-            if (entity instanceof Terrain terrain) {
-                return terrain;
-            }
-        }
-        return null;
     }
 
 }

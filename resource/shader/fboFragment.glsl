@@ -1,13 +1,22 @@
 #version 410 core
 
 in vec2 fragUV;
-out vec3 color;
+out vec4 color;
 
-uniform sampler2D colorTexture;
-uniform sampler2D normalTexture;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
 
 const float dx = 1.0 / WIDTH;
 const float dy = 1.0 / HEIGHT;
+
+const vec3[] palette = vec3[] (
+    vec3(0.227,0.212,0.208),
+    vec3(0.278,0.278,0.263),
+    vec3(0.341,0.365,0.357),
+    vec3(0.494,0.525,0.525),
+    vec3(0.667,0.675,0.643),
+    vec3(0.902,0.906,0.871)
+);
 
 float sobel(sampler2D sampler, int channel) {
     float mCenter   = texture(sampler, fragUV)[channel] * 2.0 - 1.0;
@@ -18,19 +27,24 @@ float sobel(sampler2D sampler, int channel) {
 }
 
 void main(void) {
-    float depthDelta    = sobel(normalTexture, 3);
-    float normalDelta   = max(sobel(normalTexture, 0), max(sobel(normalTexture, 1), sobel(normalTexture, 2)));
-    float light         = texture(colorTexture, fragUV).g;
-    if (depthDelta > 0.1 && light < 1.0) {
-        color = vec3(0.5);
-    } else if (normalDelta > 0.1 && light > 1.0) {
-        color = vec3(1.0);
-    } else {
-        color = vec3(texture(colorTexture, fragUV).r);
+    //TODO: don't draw outside the circle of window
+    vec2 center = vec2(0.5, 0.5);
+    float distance = length(fragUV - center);
+    if (distance > 0.5) {
+        discard;
     }
-    vec2 center         = vec2(0.5, 0.5);
-    float distance      = length(fragUV - center);
+
+    float depthDelta    = sobel(texture2, 3);
+    float normalDelta   = max(sobel(texture2, 0), max(sobel(texture2, 1), sobel(texture2, 2)));
+    float light         = texture(texture1, fragUV).g;
+    if ((depthDelta > 0.1) && light < 1.0) {
+        color = vec4(0.5, 0.5, 0.5, 1.0);
+    } else if (normalDelta > 0.1 && light > 1.0) {
+        color = vec4(1.0);
+    } else {
+        color = vec4(vec3(texture(texture1, fragUV).r).rgb, 1.0);
+    }
     if(distance < 0.01 + 0.001 && distance > 0.01 - 0.001 || distance < 0.002) {
-        color = color.r > 0.5 ? vec3(0.0) : vec3(1.0);
+        color = color.r > 0.5 ? vec4(0.0) : vec4(1.0);
     }
 }
