@@ -1,10 +1,12 @@
 package object;
 
+import game.Game;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
+import property.Interactive;
 import property.Load;
 import property.Transformation;
 
@@ -14,6 +16,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
 
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 
 public abstract class Entity extends Transformation implements Load {
@@ -33,19 +36,15 @@ public abstract class Entity extends Transformation implements Load {
 
     public final List<Texture> textures = new ArrayList<>();
 
-    public final String namespace;
-    public final String name;
+    public String namespace;
+    public String name;
 
     public Collider collider;
-    public final boolean collidable;
+    public boolean collidable;
 
-    public boolean reload = false;
+    public boolean[] states;
 
-    public Entity() {
-        this.namespace  = null;
-        this.name       = null;
-        this.collidable = false;
-    }
+    public Entity() {}
 
     public Entity(String namespace, String name, boolean collidable) {
         this.namespace  = namespace;
@@ -78,7 +77,7 @@ public abstract class Entity extends Transformation implements Load {
 
     @Override
     public boolean reload() {
-        return reload;
+        return false;
     }
 
     @Override
@@ -201,7 +200,7 @@ public abstract class Entity extends Transformation implements Load {
             return -1f;
         }
         Matrix4f inverseModelMatrix = new Matrix4f();
-        Entity.this.model().invert(inverseModelMatrix);
+        Entity.this.model.invert(inverseModelMatrix);
         Vector4f rayOriginModelSpace = new Vector4f(Camera.transformation.position.x, Camera.transformation.position.y, Camera.transformation.position.z, 1.0f);
         inverseModelMatrix.transform(rayOriginModelSpace);
         Vector3f ray = new Vector3f(Camera.transformation.forward()).negate().normalize();

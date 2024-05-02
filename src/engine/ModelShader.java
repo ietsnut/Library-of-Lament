@@ -13,7 +13,7 @@ public class ModelShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        uniform("projection",       Renderer.projection);
+        uniform("projection",       Camera.projection);
         uniform("view",             Camera.view);
         uniform("lights",           Math.min(scene.lights.size(), LIGHTS));
         for (int i = 0; i < Math.min(scene.lights.size(), LIGHTS); i++) {

@@ -10,20 +10,11 @@ import static org.lwjgl.opengl.GL40.*;
 
 public class Renderer {
 
-    public static final float NEAR      = 0.001f;
-    public static final float FAR       = Byte.MAX_VALUE * 4;
+    private static final ModelShader   modelShader  = new ModelShader();
+    private static final FBOShader     fboShader    = new FBOShader();
+    private static final AABBShader    aabbShader   = new AABBShader();
 
-    public static final Matrix4f projection = new Matrix4f();
-
-    private final ModelShader   modelShader = new ModelShader();
-    private final FBOShader     fboShader   = new FBOShader();
-    private final AABBShader    aabbShader  = new AABBShader();
-
-    public void render(Scene scene) {
-        projection();
-        for (Entity entity : scene.entities) {
-            entity.model();
-        }
+    public static void render(Scene scene) {
         fboShader.bind();
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -35,10 +26,6 @@ public class Renderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         fboShader.render(scene);
         glDisable(GL_BLEND);
-    }
-
-    public static void projection() {
-        projection.identity().perspective((float) Math.toRadians(Camera.FOV), (float) Game.WIDTH / (float) Game.HEIGHT, NEAR, FAR);
     }
 
 }

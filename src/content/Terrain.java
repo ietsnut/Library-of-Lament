@@ -14,6 +14,16 @@ public class Terrain extends Model {
         queue();
     }
 
+    public float height(float x, float z) {
+        for (int i = 0; i < vertices.length; i += 9) {
+            float[] bary = bary(vertices[i], vertices[i + 2], vertices[i + 3], vertices[i + 5], vertices[i + 6], vertices[i + 8], x, z);
+            if (inside(bary)) {
+                return bary[0] * vertices[i + 1] + bary[1] * vertices[i + 4] + bary[2] * vertices[i + 7] + 1f;
+            }
+        }
+        return 0;
+    }
+
     public Vector3f height(Vector3f origin, Vector3f movement) {
         Vector3f pos = new Vector3f(origin).add(movement);
         for (int i = 0; i < vertices.length; i += 9) {
@@ -49,8 +59,7 @@ public class Terrain extends Model {
                     float dotProduct = movementDirection.dot(edgeVector);
                     Vector3f projectedMovement = new Vector3f(edgeVector).mul(dotProduct * movement.length());
                     Vector3f newPosition = new Vector3f(origin).add(projectedMovement);
-                    float newY = bary[0] * vertices[i + 1] + bary[1] * vertices[i + 4] + bary[2] * vertices[i + 7] + 1f;
-                    newPosition.setComponent(1, newY);
+                    newPosition.setComponent(1, y);
                     return newPosition;
                 }
             }
@@ -71,7 +80,7 @@ public class Terrain extends Model {
     }
 
     @Override
-    public Matrix4f model() {
+    protected Matrix4f model() {
         return this.model.identity().translate(position).scale(scale);
     }
 

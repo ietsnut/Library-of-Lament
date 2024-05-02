@@ -12,13 +12,13 @@ public abstract class Model extends Entity {
 
     public Model(String namespace, String model, boolean collidable) {
         super(namespace, model, collidable);
-        file = new File("resource/" + namespace + "/" + name + ".obj");
-        last_modified = file.lastModified();
     }
 
     @Override
     public void load() {
         Obj obj;
+        file = new File("resource/" + namespace + "/" + name + ".obj");
+        last_modified = file.lastModified();
         try {
             obj = ObjReader.read(new FileInputStream(file));
         } catch (IOException e) {

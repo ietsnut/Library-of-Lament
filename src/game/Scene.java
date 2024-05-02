@@ -3,6 +3,7 @@ package game;
 import content.Character;
 import content.Terrain;
 import content.Vase;
+import engine.Renderer;
 import object.*;
 import org.joml.Vector3f;
 import property.Load;
@@ -22,6 +23,8 @@ public class Scene extends Thread {
 
     public Scene() {
 
+        terrain = new Terrain("sewer");
+
         for (int i = 0; i < 30; i+=3) {
             Vase vase = new Vase("vase");
             vase.scale = MICRO;
@@ -37,8 +40,6 @@ public class Scene extends Thread {
             entities.add(vase);
         }
 
-        terrain = new Terrain("sewer");
-
         Character character = new Character("1");
         character.scale = DECI;
         character.position.set(10, 0, 1.5f);
@@ -48,19 +49,15 @@ public class Scene extends Thread {
         lights.add(light1);
 
         start();
+
     }
 
     @Override
     public void run() {
         while (!glfwWindowShouldClose(Game.window)) {
             lights.getFirst().position = new Vector3f(Camera.transformation.position);
-        }
-    }
-
-    public void render() {
-        for (Load load : Load.BOUND) {
-            if (load instanceof Vase vase) {
-                vase.rotation.add(0, 0.05f, 0);
+            for (Entity entity : entities) {
+                entity.remodel();
             }
         }
     }

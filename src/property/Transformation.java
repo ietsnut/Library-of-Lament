@@ -19,7 +19,6 @@ public class Transformation {
     public final Vector3f       rotation    = new Vector3f(0, 0, 0);
     public final Vector3f       position    = new Vector3f(0, 0, 0);
     public float                scale       = UNIT;
-
     public final Matrix4f       model       = new Matrix4f();
 
     public Transformation(float x, float y, float z) {
@@ -46,9 +45,13 @@ public class Transformation {
         return this;
     }
 
-    public Matrix4f model() {
+    protected Matrix4f model() {
         orient();
-        return model.identity().translate(position).rotate(orientation).scale(scale);
+        return new Matrix4f().identity().translate(position).rotate(orientation).scale(scale);
+    }
+
+    public final void remodel() {
+        this.model.set(model());
     }
 
     public Vector3f forward() {

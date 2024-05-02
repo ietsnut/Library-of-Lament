@@ -33,8 +33,7 @@ void main(void) {
     if (distance > 0.5) {
         discard;
     }
-
-    float depthDelta    = sobel(texture2, 3);
+    float depthDelta    = sobel(texture1, 2);
     float normalDelta   = max(sobel(texture2, 0), max(sobel(texture2, 1), sobel(texture2, 2)));
     float light         = texture(texture1, fragUV).g;
     if ((depthDelta > 0.1) && light < 1.0) {
@@ -44,7 +43,10 @@ void main(void) {
     } else {
         color = vec4(vec3(texture(texture1, fragUV).r).rgb, 1.0);
     }
-    if(distance < 0.01 + 0.001 && distance > 0.01 - 0.001 || distance < 0.002) {
+    if(distance < 0.01 && distance > 0.01 - 0.001 || distance < 0.002) {
         color = color.r > 0.5 ? vec4(0.0) : vec4(1.0);
+    }
+    if (distance > 0.499) {
+        color = vec4(1.0);
     }
 }

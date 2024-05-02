@@ -38,9 +38,10 @@ public class Character extends Entity {
     }
 
     @Override
-    public Matrix4f model() {
+    protected Matrix4f model() {
         rotation.y = Camera.transformation.rotation.y;
         return super.model();
     }
+
 
 }

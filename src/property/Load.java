@@ -67,8 +67,8 @@ public interface Load extends Runnable {
     }
 
     static void clear() {
-        QUEUE.clear();
         THREADS.forEach(Thread::interrupt);
+        QUEUE.clear();
         for (Load load : BOUND) {
             load.unbind();
         }

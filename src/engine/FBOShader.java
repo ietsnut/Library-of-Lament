@@ -13,25 +13,21 @@ public class FBOShader extends Shader {
 
     public FBOShader() {
         super("fbo", "position");
-        this.fbo = new FBO(Game.WIDTH, Game.HEIGHT);
+        this.fbo = new FBO();
     }
 
     public void shader(Scene scene) {
         glDisable(GL_DEPTH_TEST);
-        uniform("width",            fbo.width);
-        uniform("height",           fbo.height);
         render(fbo);
         glEnable(GL_DEPTH_TEST);
     }
 
     public void bind() {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo.frameBuffer);
-        glViewport(0, 0, fbo.width, fbo.height);
     }
 
     public void unbind() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
     }
 
 }

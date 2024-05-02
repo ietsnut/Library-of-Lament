@@ -29,11 +29,12 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class Game {
 
-    public static final int WIDTH = 1200;
-    public static final int HEIGHT = 1200;
-    public static final String TITLE = "";
-    public static float TIME = time();
-    public static float PLAYTIME = 0;
+    public static int WIDTH;
+    public static int HEIGHT;
+    public static float TIME            = time();
+    public static float PLAYTIME        = 0;
+
+    public static char  STATE = 1;
 
     public static List<Scene>   scenes = new ArrayList<>();
     public static Renderer      renderer;
@@ -52,6 +53,9 @@ public class Game {
         if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
+        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        WIDTH = vidmode.height() * 4 / 5;
+        HEIGHT = vidmode.height() * 4 / 5;
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -60,9 +64,9 @@ public class Game {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-        GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
-        window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, NULL, NULL);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "", NULL, NULL);
         if (window == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
@@ -71,7 +75,6 @@ public class Game {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
             glfwGetWindowSize(window, pWidth, pHeight);
-            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
             glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1);
@@ -81,13 +84,14 @@ public class Game {
         scene = new Scene();
         scenes.add(scene);
         renderer = new Renderer();
-        new Camera().start();
+        Camera.listen();
     }
 
     private static void loop() {
         int fps = 0;
         long lastFrameTime = time();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
         while (!glfwWindowShouldClose(window)) {
             Load.process();
             TIME = time();
@@ -98,8 +102,7 @@ public class Game {
                 lastFrameTime += 1000;
             }
             fps++;
-            scene.render();
-            renderer.render(scene);
+            Renderer.render(scene);
             glfwPollEvents();
             glfwSwapBuffers(window);
         }
