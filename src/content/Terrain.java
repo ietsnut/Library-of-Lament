@@ -10,7 +10,7 @@ import java.lang.Math;
 public class Terrain extends Model {
 
     public Terrain(String name) {
-        super("terrain", name, true);
+        super(name, false);
         queue();
     }
 

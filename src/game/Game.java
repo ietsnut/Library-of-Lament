@@ -15,6 +15,7 @@ import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
+import property.State;
 
 import java.nio.*;
 
@@ -31,10 +32,9 @@ public class Game {
     public static float TIME;
     public static float PLAYTIME;
 
-    public static BitSet STATE = new BitSet(64);
+    public static State STATE = new State(1);
 
     public static List<Scene>   scenes = new ArrayList<>();
-    public static Renderer      renderer;
     public static Scene         scene;
     public static long          window;
 
@@ -88,6 +88,9 @@ public class Game {
         long lastFrameTime = time();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
+        System.out.println(STATE);
+        State test = State.of(2).set(3);
+        System.out.println(new State(STATE, test, test));
         while (!glfwWindowShouldClose(window)) {
             Load.process();
             TIME = time();
@@ -117,11 +120,5 @@ public class Game {
         return (long) (GLFW.glfwGetTime() * 1000);
     }
 
-    public void encode(boolean... bits) {
-        // encode all the bits into the STATE variable
-        for (int i = 0; i < bits.length; i++) {
-            STATE.set(i, bits[i]);
-        }
-    }
 
 }

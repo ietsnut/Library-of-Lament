@@ -36,7 +36,7 @@ public abstract class Entity extends Transformation implements Load {
 
     public final List<Texture> textures = new ArrayList<>();
 
-    public String namespace;
+    public final String namespace;
     public String name;
 
     public Collider collider;
@@ -45,10 +45,12 @@ public abstract class Entity extends Transformation implements Load {
 
     public boolean[] states;
 
-    public Entity() {}
+    public Entity() {
+        this.namespace  = getClass().getSimpleName().toLowerCase();
+    }
 
-    public Entity(String namespace, String name, boolean collidable) {
-        this.namespace  = namespace;
+    public Entity(String name, boolean collidable) {
+        this();
         this.name       = name;
         this.collidable = collidable;
         // TODO: check if texCoords are beyond 0-1 and make texture repeat

@@ -13,7 +13,7 @@ public class Vase extends Model implements Interactive {
     boolean reload = false;
 
     public Vase(String model) {
-        super("vase", model, true);
+        super(model, true);
         this.states = new boolean[1];
         queue();
     }

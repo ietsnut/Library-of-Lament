@@ -7,7 +7,7 @@ import org.joml.Matrix4f;
 public class Character extends Entity {
 
     public Character(String name) {
-        super("character", name, true);
+        super(name, true);
         queue();
     }
 
