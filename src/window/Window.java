@@ -1,4 +1,4 @@
-package object;
+package window;
 
 import javax.swing.*;
 import java.awt.*;

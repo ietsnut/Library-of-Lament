@@ -8,7 +8,7 @@ import java.io.*;
 public abstract class Model extends Entity {
 
     private File file;
-    long last_modified;
+    long modified;
 
     public Model(String namespace, String model, boolean collidable) {
         super(namespace, model, collidable);
@@ -18,7 +18,7 @@ public abstract class Model extends Entity {
     public void load() {
         Obj obj;
         file = new File("resource/" + namespace + "/" + name + ".obj");
-        last_modified = file.lastModified();
+        modified = file.lastModified();
         try {
             obj = ObjReader.read(new FileInputStream(file));
         } catch (IOException e) {
@@ -37,8 +37,8 @@ public abstract class Model extends Entity {
 
     @Override
     public boolean reload() {
-        if (file != null && file.exists() && file.lastModified() != last_modified) {
-            last_modified = file.lastModified();
+        if (file != null && file.exists() && file.lastModified() != modified) {
+            modified = file.lastModified();
             return true;
         }
         return false;

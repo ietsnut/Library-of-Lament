@@ -83,7 +83,6 @@ public class Game {
         }
         scene = new Scene();
         scenes.add(scene);
-        renderer = new Renderer();
         Camera.listen();
     }
 

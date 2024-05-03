@@ -31,6 +31,8 @@ public class Vase extends Model implements Interactive {
         if (!this.states[0]) {
             this.states[0] = true;
             this.name = "vase_broken";
+            textures.getFirst().name = "vase_broken";
+            textures.getFirst().reload = true;
             reload = true;
         }
     }

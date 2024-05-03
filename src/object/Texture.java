@@ -22,14 +22,19 @@ public class Texture implements Load {
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
     public int id;
-    long last_modified;
+    long modified;
 
     public BufferedImage    image;
     public File             file;
     public ByteBuffer       buffer;
 
+    public String namespace;
+    public String name;
+
     public int width;
     public int height;
+
+    public boolean reload = false;
 
     public Texture() {
         this.id = glGenTextures();
@@ -44,7 +49,8 @@ public class Texture implements Load {
     }
 
     public Texture(String namespace, String name) {
-        this.file   = new File("resource/" + namespace + "/" + name + ".png");
+        this.namespace  = namespace;
+        this.name       = name;
         queue();
     }
 
@@ -104,7 +110,10 @@ public class Texture implements Load {
 
     @Override
     public void preload() {
-
+        this.file   = new File("resource/" + namespace + "/" + name + ".png");
+        modified    = file.lastModified();
+        this.image  = null;
+        this.buffer = null;
     }
 
     @Override
@@ -113,7 +122,6 @@ public class Texture implements Load {
         this.image  = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();
-        last_modified = file.lastModified();
         this.buffer = load(image);
     }
 
@@ -143,8 +151,12 @@ public class Texture implements Load {
 
     @Override
     public boolean reload() {
-        if (file != null && file.exists() && file.lastModified() != last_modified) {
-            last_modified = file.lastModified();
+        if (reload) {
+            reload = false;
+            return true;
+        }
+        if (file != null && file.exists() && file.lastModified() != modified) {
+            modified = file.lastModified();
             return true;
         }
         return false;

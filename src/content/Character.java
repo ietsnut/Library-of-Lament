@@ -43,5 +43,4 @@ public class Character extends Entity {
         return super.model();
     }
 
-
 }
