@@ -74,7 +74,7 @@ public abstract class Shader {
         for (int i = 0; i < entity.textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).id);
-            glUniform1i(uniforms.computeIfAbsent("texture" + i, loc -> glGetUniformLocation(program, loc)), i);
+            uniform("texture" + i, i);
         }
         glDrawElements(entity instanceof Entity.Collider ? GL_LINES : GL_TRIANGLES, entity.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < entity.textures.size(); i++) {

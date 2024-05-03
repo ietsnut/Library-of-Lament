@@ -21,6 +21,8 @@ public class Scene extends Thread {
     public List<Entity> entities    = new ArrayList<>();
     public Terrain      terrain;
 
+    public Entity active;
+
     public Scene() {
 
         terrain = new Terrain("sewer");
@@ -59,6 +61,7 @@ public class Scene extends Thread {
             for (Entity entity : entities) {
                 entity.remodel();
             }
+            this.active = Entity.collides(30f, entities);
         }
     }
 

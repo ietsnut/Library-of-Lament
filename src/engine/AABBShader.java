@@ -18,18 +18,17 @@ public class AABBShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        Entity entity = Entity.collides(30f, scene.entities);
-        if (entity == null || !entity.bound() || !entity.collider.bound()) {
+        if (scene.active == null || !scene.active.bound() || !scene.active.collider.bound()) {
             return;
         }
-        if (entity instanceof Interactive interactive && glfwGetMouseButton(Game.window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        if (scene.active instanceof Interactive interactive && glfwGetMouseButton(Game.window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
             interactive.interact();
         }
-        uniform("model",        entity.model);
+        uniform("model",        scene.active.model);
         uniform("projection",   Camera.projection);
         uniform("view",         Camera.view);
         uniform("time",         Game.time() / 1000.0f);
-        uniform("scale",        entity.collider.size);
-        render(entity.collider);
+        uniform("scale",        scene.active.collider.size);
+        render(scene.active.collider);
     }
 }

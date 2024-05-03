@@ -41,6 +41,7 @@ public abstract class Entity extends Transformation implements Load {
 
     public Collider collider;
     public boolean collidable;
+    public boolean active;
 
     public boolean[] states;
 

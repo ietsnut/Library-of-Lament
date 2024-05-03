@@ -9,10 +9,7 @@ import org.lwjgl.Version;
 import org.lwjgl.system.MemoryStack;
 import property.Load;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
@@ -31,10 +28,10 @@ public class Game {
 
     public static int WIDTH;
     public static int HEIGHT;
-    public static float TIME            = time();
-    public static float PLAYTIME        = 0;
+    public static float TIME;
+    public static float PLAYTIME;
 
-    public static char  STATE = 1;
+    public static BitSet STATE = new BitSet(64);
 
     public static List<Scene>   scenes = new ArrayList<>();
     public static Renderer      renderer;
@@ -118,6 +115,13 @@ public class Game {
 
     public static long time() {
         return (long) (GLFW.glfwGetTime() * 1000);
+    }
+
+    public void encode(boolean... bits) {
+        // encode all the bits into the STATE variable
+        for (int i = 0; i < bits.length; i++) {
+            STATE.set(i, bits[i]);
+        }
     }
 
 }

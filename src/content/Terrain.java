@@ -11,7 +11,7 @@ public class Terrain extends Model {
 
     public Terrain(String name) {
         super("terrain", name, true);
-        direct();
+        queue();
     }
 
     public float height(float x, float z) {
