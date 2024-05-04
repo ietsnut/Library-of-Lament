@@ -14,7 +14,7 @@ public class Control {
     private static final boolean[] keys = new boolean[65536];
     private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY;
     private static float dWheel;
-    private static boolean mouseLocked, firstMouse;
+    private static boolean mouseLocked, firstMouse, clicked;
 
     public static void listen(long window) {
         GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
@@ -43,6 +43,9 @@ public class Control {
                     glfwSetCursorPos(Game.window, Game.WIDTH/2f, Game.HEIGHT/2f);
                     mouseLocked = false;
                     firstMouse = true;
+                }
+                if (mouseLocked && !firstMouse && button == 0 && action == 1) {
+                    clicked = true;
                 }
             }
         };
@@ -76,6 +79,14 @@ public class Control {
         scrollCallback.set(window);
         cursorPosCallback.set(window);
         keyCallback.set(window);
+    }
+
+    public static boolean isClicked() {
+        if (clicked) {
+            clicked = false;
+            return true;
+        }
+        return false;
     }
 
     public static boolean isKeyDown(int keycode) {

@@ -3,9 +3,8 @@
 in vec2     fragUV;
 in vec3     fragPosition;
 in vec3     fragNormal;
-in float    fragDepth;
 
-layout(location = 0) out vec3   color;
+layout(location = 0) out float  color;
 layout(location = 1) out vec3   normal;
 
 uniform sampler2D texture1;
@@ -72,7 +71,7 @@ void main(void) {
         }
     }
 
-    color = vec3(float(level) / 6, lightEffect, fragDepth);
+    color = float(float(level) / 6);
     normal = fragNormal;
 
 }

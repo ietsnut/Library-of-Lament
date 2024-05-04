@@ -4,37 +4,33 @@ import game.Game;
 import object.Model;
 import org.joml.Matrix4f;
 import property.Interactive;
-import property.Load;
-
-import java.util.BitSet;
 
 public class Vase extends Model implements Interactive {
 
     boolean reload = false;
+    long shake;
 
     public Vase(String model) {
-        super(model, true);
-        this.states = new boolean[1];
+        super(model, 3);
         queue();
     }
 
     @Override
     protected Matrix4f model() {
-        if (!this.states[0]) {
+        if (state.equals(0)) {
             rotation.y = Game.TIME / 1000.0f;
+        } else if (state.equals(1)) {
+            float elapsed = Game.TIME - shake;
+            if (elapsed < 500) {
+                rotation.x += (float) Math.sin(elapsed);
+                rotation.z += (float) Math.cos(elapsed);
+            } else {
+                rotation.x = 0;
+                rotation.z = 0;
+                state.set(0);
+            }
         }
         return super.model();
-    }
-
-    @Override
-    public void interact() {
-        if (!this.states[0]) {
-            this.states[0] = true;
-            this.name = "vase_broken";
-            textures.getFirst().name = "vase_broken";
-            textures.getFirst().reload = true;
-            reload = true;
-        }
     }
 
     @Override
@@ -44,6 +40,32 @@ public class Vase extends Model implements Interactive {
             return true;
         }
         return super.reload();
+    }
+
+    @Override
+    public void onClick() {
+        if (state.equals(0)) {
+            if (Math.random() < 0.8) {
+                shake = Game.TIME;
+                state.set(1);
+            } else {
+                state.set(2);
+                this.name = "vase_broken";
+                textures.getFirst().name = "vase_broken";
+                textures.getFirst().reload = true;
+                reload = true;
+            }
+        }
+    }
+
+    @Override
+    public void onEnter() {
+
+    }
+
+    @Override
+    public void onExit() {
+
     }
 
 }

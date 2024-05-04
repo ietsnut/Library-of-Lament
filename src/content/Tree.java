@@ -5,7 +5,7 @@ import object.Entity;
 public class Tree extends Entity {
 
     public Tree(String model) {
-        super(model, true);
+        super(model);
         queue();
     }
 

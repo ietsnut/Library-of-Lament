@@ -10,8 +10,12 @@ public abstract class Model extends Entity {
     private File file;
     long modified;
 
-    public Model(String model, boolean collidable) {
-        super(model, collidable);
+    public Model(String model) {
+        super(model);
+    }
+
+    public Model(String model, int states) {
+        super(model, states);
     }
 
     @Override

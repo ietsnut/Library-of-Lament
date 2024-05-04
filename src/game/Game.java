@@ -16,6 +16,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 import property.State;
+import property.Worker;
 
 import java.nio.*;
 
@@ -29,7 +30,7 @@ public class Game {
 
     public static int WIDTH;
     public static int HEIGHT;
-    public static float TIME;
+    public static long  TIME;
     public static float PLAYTIME;
 
     public static State STATE = new State(1);
@@ -88,13 +89,11 @@ public class Game {
         long lastFrameTime = time();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
-        System.out.println(STATE);
-        State test = State.of(2).set(3);
-        System.out.println(new State(STATE, test, test));
+        glDepthRange(0.0, 1.0);
         while (!glfwWindowShouldClose(window)) {
             Load.process();
             TIME = time();
-            PLAYTIME = (TIME - lastFrameTime) / 1000;
+            PLAYTIME = (TIME - lastFrameTime) / 1000f;
             if (TIME - lastFrameTime > 1000) {
                 glfwSetWindowTitle(window, Integer.toString(fps));
                 fps = 0;
@@ -108,6 +107,7 @@ public class Game {
     }
 
     public static void close() {
+        Worker.clear();
         Load.clear();
         Shader.unload();
         glfwFreeCallbacks(window);

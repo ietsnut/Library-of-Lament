@@ -3,11 +3,12 @@ package content;
 import object.Camera;
 import object.Entity;
 import org.joml.Matrix4f;
+import property.Interactive;
 
-public class Character extends Entity {
+public class Character extends Entity implements Interactive {
 
     public Character(String name) {
-        super(name, true);
+        super(name);
         queue();
     }
 
@@ -43,4 +44,18 @@ public class Character extends Entity {
         return super.model();
     }
 
+    @Override
+    public void onClick() {
+
+    }
+
+    @Override
+    public void onEnter() {
+
+    }
+
+    @Override
+    public void onExit() {
+
+    }
 }

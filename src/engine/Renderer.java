@@ -16,16 +16,10 @@ public class Renderer {
 
     public static void render(Scene scene) {
         fboShader.bind();
-        glEnable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         aabbShader.render(scene);
         modelShader.render(scene);
         fboShader.unbind();
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         fboShader.render(scene);
-        glDisable(GL_BLEND);
     }
 
 }

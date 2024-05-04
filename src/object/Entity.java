@@ -1,13 +1,12 @@
 package object;
 
-import game.Game;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL15;
 import property.Interactive;
 import property.Load;
+import property.State;
 import property.Transformation;
 
 import java.nio.Buffer;
@@ -16,7 +15,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
 
-import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 
 public abstract class Entity extends Transformation implements Load {
@@ -40,26 +38,35 @@ public abstract class Entity extends Transformation implements Load {
     public String name;
 
     public Collider collider;
-    public boolean collidable;
+    public boolean collidable = this instanceof Interactive;
     public boolean active;
 
-    public boolean[] states;
+    public final State state;
 
     public Entity() {
-        this.namespace  = getClass().getSimpleName().toLowerCase();
+        this.namespace  = null;
+        this.state      = null;
     }
 
-    public Entity(String name, boolean collidable) {
-        this();
+    public Entity(String name) {
+        this.namespace  = getClass().getSimpleName().toLowerCase();
         this.name       = name;
-        this.collidable = collidable;
+        this.state      = null;
+        // TODO: check if texCoords are beyond 0-1 and make texture repeat
+        textures.add(new Texture(namespace, name));
+    }
+
+    public Entity(String name, int states) {
+        this.namespace  = getClass().getSimpleName().toLowerCase();
+        this.name       = name;
+        this.state      = new State(states);
         // TODO: check if texCoords are beyond 0-1 and make texture repeat
         textures.add(new Texture(namespace, name));
     }
 
     @Override
     public String toString() {
-        return "<" + this.getClass().getSimpleName() + "> [" + namespace + " : " + name + "] : " + bound();
+        return "<" + this.getClass().getSimpleName() + "> [" + namespace + " : " + name + "] : " + position.x + ", " + position.y + ", " + position.z;
     }
 
     @Override
@@ -196,6 +203,11 @@ public abstract class Entity extends Transformation implements Load {
             };
         }
 
+        @Override
+        protected Matrix4f model() {
+            return null;
+        }
+
     }
 
     private Float collision() {
@@ -219,49 +231,37 @@ public abstract class Entity extends Transformation implements Load {
         float t6 = (collider.max.z - rayOriginModelSpace.z) * invDir.z;
         float tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
         float tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
-        // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
         if (tmax < 0) {
-            return -1f; // or some indicator for no intersection
+            return -1f;
         }
-        // if tmin > tmax, ray doesn't intersect AABB
         if (tmin > tmax) {
-            return -1f; // or some indicator for no intersection
+            return -1f;
         }
-        // if tmin < 0, the ray starts inside the AABB, so we consider the intersection distance to be 0
         return Math.max(tmin, 0);
     }
 
-    //camera is inside AABB
-    public boolean inside() {
-        return collision() == 0;
-    }
-
-    //camera is outside AABB, but ray intersects AABB
-    public boolean collide(float distance) {
-        return collision() > 0 && distance(distance);
+    public boolean lookingAt(float distance) {
+        return collision() > 0 && distance() < distance;
     }
 
     public float distance() {
         return new Vector3f(Camera.transformation.position).sub(this.position).length();
-        //return Vector3f.sub(Camera.transformation.position, this.position, null).length();
     }
 
-    public boolean distance(Float distance) {
-        return distance() < distance;
-    }
-
-    public static Entity collides(float distance, List<Entity> entities) {
-        //return the enemy with the least distance
+    public static Entity lookingAt(List<Entity> entities, float distance) {
         float min = Float.MAX_VALUE;
         Entity closest = null;
         for (Entity entity : entities) {
-            if (entity.bound() && entity.collider.bound() && entity.collide(distance) && entity.distance() < min) {
+             if (entity.collidable() && entity.lookingAt(distance) && entity.distance() < min) {
                 min = entity.distance();
                 closest = entity;
-            }
+             }
         }
         return closest;
-        //return entities.stream().filter(entity -> entity.collide(distance)).min(Comparator.comparing(Entity::distance)).orElse(null);
+    }
+
+    public boolean collidable() {
+        return this.collidable && this.collider != null && this.bound() && this.collider.bound();
     }
 
 }

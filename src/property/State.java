@@ -2,28 +2,38 @@ package property;
 
 public class State extends Number {
 
-    final boolean[] bits;
+    private final boolean[] bits;
 
-    public State(int b) {
+    /**
+     * @param limit possible states
+     */
+    public State(int limit) {
+        int b = 0;
+        for (int i = limit; i > 0; i >>= 1) {
+            b++;
+        }
         this.bits = new boolean[b];
     }
 
-    public State(State... bits) {
+    /**
+     * @param bits number of bits in the state
+     */
+    public static State of(int bits) {
+        return new State(1 << bits - 1);
+    }
+
+    public State(State... states) {
         int b = 0;
-        for (State state : bits) {
+        for (State state : states) {
             b += state.bits.length;
         }
         this.bits = new boolean[b];
         int index = 0;
-        for (State s : bits) {
+        for (State s : states) {
             for (int i = 0; i < s.bits.length; i++) {
                 this.bits[index++] = s.bits[i];
             }
         }
-    }
-
-    public State(boolean... bits) {
-        this.bits = bits;
     }
 
     public State(String state) {
@@ -31,14 +41,6 @@ public class State extends Number {
         for (int i = 0; i < state.length(); i++) {
             bits[i] = state.charAt(i) != '0';
         }
-    }
-
-    public static State of(int value) {
-        int b = 0;
-        for (int i = value; i > 0; i >>= 1) {
-            b++;
-        }
-        return new State(b);
     }
 
     public State reset() {
@@ -58,6 +60,10 @@ public class State extends Number {
             state += bits[i] ? 1 << i : 0;
         }
         return state;
+    }
+
+    public boolean equals(int i) {
+        return get() == i;
     }
 
     public State set(int i) {

@@ -3,25 +3,23 @@ package game;
 import content.Character;
 import content.Terrain;
 import content.Vase;
-import engine.Renderer;
 import object.*;
 import org.joml.Vector3f;
-import property.Load;
+import property.Interactive;
+import property.Worker;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-
 import static property.Transformation.*;
 
-public class Scene extends Thread {
+public class Scene implements Worker {
 
     public List<Light>  lights      = new ArrayList<>();
     public List<Entity> entities    = new ArrayList<>();
     public Terrain      terrain;
 
-    public Entity active;
+    public Entity last;
 
     public Scene() {
 
@@ -55,13 +53,24 @@ public class Scene extends Thread {
     }
 
     @Override
-    public void run() {
-        while (!glfwWindowShouldClose(Game.window)) {
-            lights.getFirst().position = new Vector3f(Camera.transformation.position);
-            for (Entity entity : entities) {
-                entity.remodel();
+    public void work() {
+        lights.getFirst().position = new Vector3f(Camera.transformation.position);
+        for (Entity entity : entities) {
+            entity.remodel();
+        }
+        Entity active = Entity.lookingAt(entities, 30f);
+        boolean clicked = Control.isClicked();
+        if (active != last) {
+            if (last instanceof Interactive interactive) {
+                interactive.onExit();
             }
-            this.active = Entity.collides(30f, entities);
+            last = active;
+            if (active instanceof Interactive interactive) {
+                interactive.onEnter();  // Call onEnter when a new entity becomes the active target
+            }
+        }
+        if (clicked && active instanceof Interactive interactive) {
+            interactive.onClick();
         }
     }
 

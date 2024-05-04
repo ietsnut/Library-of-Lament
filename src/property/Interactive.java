@@ -1,9 +1,11 @@
 package property;
 
+import object.Texture;
+
 public interface Interactive {
 
-    void interact();
-
-
+    void onClick();
+    void onEnter();
+    void onExit();
 
 }

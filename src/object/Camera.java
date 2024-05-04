@@ -8,51 +8,36 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import property.Transformation;
+import property.Worker;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static property.Transformation.*;
 
-public class Camera extends Thread {
+public class Camera implements Worker {
 
     public static Transformation transformation     = new Transformation(1, 1, 1.5f);
 
     public static final Matrix4f projection = new Matrix4f();
     public static final Matrix4f view       = new Matrix4f();
 
-    public static final long  RATE  = 100;
     public static final float SPEED = 5f / RATE;
-    public static final float SENS  = 10f  / RATE;
+    public static final float SENS  = 10f / RATE;
     public static final float SLOPE = 0.7071f;
+    public static final float NEAR  = 0.1f;
+    public static final float FAR   = Byte.MAX_VALUE;
 
-    public static float NEAR    = 0.001f;
-    public static float FAR     = Byte.MAX_VALUE * 4;
-    public static float FOV     = 75;
+    public static float FOV = 75;
 
     public static float DX, DY;
 
     private static float bob = 0;
 
-    public static void listen() {
-        new Camera().start();
-    }
-
     @Override
-    public void run() {
-        final long interval = 1000000000L / RATE; // Interval in nanoseconds to maintain the desired RATE
-        long lastTime = System.nanoTime();
-        while (!glfwWindowShouldClose(Game.window)) {
-            long now = System.nanoTime();
-            if (now - lastTime >= interval) {
-                translate();
-                rotate();
-                view();
-                projection();
-                lastTime += interval;
-            }
-            while (System.nanoTime() - lastTime < interval) {
-                Thread.yield();
-            }
-        }
+    public void work() {
+        translate();
+        rotate();
+        view();
+        projection();
     }
 
     public static void translate() {
@@ -129,6 +114,10 @@ public class Camera extends Thread {
 
     public static void projection() {
         projection.set(new Matrix4f().identity().perspective((float) Math.toRadians(Camera.FOV), (float) Game.WIDTH / (float) Game.HEIGHT, NEAR, FAR));
+    }
+
+    public static void listen() {
+        new Camera().start();
     }
 
 }

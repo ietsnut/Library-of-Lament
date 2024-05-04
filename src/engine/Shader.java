@@ -6,6 +6,7 @@ import java.util.*;
 
 import game.Game;
 import game.Scene;
+import object.Camera;
 import object.Entity;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
@@ -19,7 +20,7 @@ public abstract class Shader {
     public static final int LIGHTS = Byte.MAX_VALUE;
 
     private final HashMap<String, Integer> uniforms = new HashMap<>();
-    private final String[] attributes;
+    final String[] attributes;
 
     protected final int program, vertex, fragment;
 
@@ -74,7 +75,7 @@ public abstract class Shader {
         for (int i = 0; i < entity.textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).id);
-            uniform("texture" + i, i);
+            uniform("texture" + (i + 1), i);
         }
         glDrawElements(entity instanceof Entity.Collider ? GL_LINES : GL_TRIANGLES, entity.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < entity.textures.size(); i++) {
@@ -118,6 +119,8 @@ public abstract class Shader {
                     shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
                     shaderSource.append("#define WIDTH " + Game.WIDTH).append("//\n");
                     shaderSource.append("#define HEIGHT " + Game.HEIGHT).append("//\n");
+                    shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
+                    shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
                 } else {
                     shaderSource.append(line).append("//\n");
                 }
