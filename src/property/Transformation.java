@@ -31,18 +31,16 @@ public class Transformation {
 
     public Transformation() {}
 
-    private Transformation rot(float x, float y, float z, double angle) {
+    private void rot(float x, float y, float z, double angle) {
         Quaternionf deltaRotation = new Quaternionf().rotationAxis((float) angle, x, y, z);
         orientation.mul(deltaRotation);
-        return this;
     }
 
-    public Transformation orient() {
+    public void orient() {
         orientation.identity();
         rot(0, 1, 0, Math.toRadians(rotation.y));
         rot(1, 0, 0, Math.toRadians(rotation.x));
         rot(0, 0, 1, Math.toRadians(rotation.z));
-        return this;
     }
 
     protected Matrix4f model() {

@@ -50,6 +50,11 @@ public class Character extends Entity implements Interactive {
     }
 
     @Override
+    public void onHold() {
+
+    }
+
+    @Override
     public void onEnter() {
 
     }

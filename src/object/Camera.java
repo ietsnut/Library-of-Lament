@@ -28,8 +28,6 @@ public class Camera implements Worker {
 
     public static float FOV = 75;
 
-    public static float DX, DY;
-
     private static float bob = 0;
 
     @Override
@@ -82,10 +80,9 @@ public class Camera implements Worker {
     }
 
     public static void rotate() {
-        transformation.rotation.add(0, DX * -SENS, 0);
-        transformation.rotation.add(DY * -SENS, 0, 0);
+        transformation.rotation.add(0, Control.dx() * -SENS, 0);
+        transformation.rotation.add(Control.dy() * -SENS, 0, 0);
         transformation.rotation.x = Math.min(Math.max(transformation.rotation.x, -80), 80);
-        DX = DY = 0;
     }
 
     public static void view() {

@@ -10,7 +10,7 @@ import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 public interface Worker extends Runnable {
 
     long RATE = 100;
-    List<Thread> THREADS = new ArrayList<>();
+    List<Thread> WORKERS = new ArrayList<>();
 
     @Override
     default void run() {
@@ -31,13 +31,13 @@ public interface Worker extends Runnable {
     void work();
 
     default void start() {
-        Thread thread = new Thread(this);
-        THREADS.add(thread);
-        thread.start();
+        Thread worker = new Thread(this);
+        WORKERS.add(worker);
+        worker.start();
     }
 
-    static void clear() {
-        THREADS.forEach(Thread::interrupt);
+    static void stop() {
+        WORKERS.forEach(Thread::interrupt);
     }
 
 }

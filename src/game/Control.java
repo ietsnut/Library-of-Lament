@@ -12,9 +12,8 @@ import static org.lwjgl.glfw.GLFW.*;
 public class Control {
 
     private static final boolean[] keys = new boolean[65536];
-    private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY;
-    private static float dWheel;
-    private static boolean mouseLocked, firstMouse, clicked;
+    private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY, dWheel;
+    private static boolean mouseLocked, firstMouse, clicked, holding;
 
     public static void listen(long window) {
         GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
@@ -47,6 +46,12 @@ public class Control {
                 if (mouseLocked && !firstMouse && button == 0 && action == 1) {
                     clicked = true;
                 }
+                if (mouseLocked && !firstMouse && button == 0 && action == GLFW_PRESS) {
+                    holding = true;
+                }
+                if (mouseLocked && !firstMouse && button == 0 && action == GLFW_RELEASE) {
+                    holding = false;
+                }
             }
         };
         GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
@@ -68,10 +73,8 @@ public class Control {
                     prevMouseY = mouseY;
                     mouseX = (float) xpos;
                     mouseY = (float) ypos;
-                    deltaMouseX = mouseX - prevMouseX;
-                    deltaMouseY = mouseY - prevMouseY;
-                    Camera.DX += deltaMouseX;
-                    Camera.DY += deltaMouseY;
+                    deltaMouseX += mouseX - prevMouseX;
+                    deltaMouseY += mouseY - prevMouseY;
                 }
             }
         };
@@ -89,23 +92,29 @@ public class Control {
         return false;
     }
 
+    public static boolean isHolding() {
+        return holding;
+    }
+
     public static boolean isKeyDown(int keycode) {
         return keys[keycode];
     }
 
-    public static void update() {
-        dWheel = 0;
+    public static float dx() {
+        float dx = deltaMouseX;
+        deltaMouseX = 0;
+        return dx;
     }
 
-    public static float getDX() {
-        return deltaMouseX;
-    }
-
-    public static float getDY() {
-        return deltaMouseY;
+    public static float dy() {
+        float dy = deltaMouseY;
+        deltaMouseY = 0;
+        return dy;
     }
 
     public static float getDWheel() {
-        return dWheel;
+        float dw = dWheel;
+        dWheel = 0;
+        return dw;
     }
 }

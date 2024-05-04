@@ -48,6 +48,9 @@ public class Scene implements Worker {
         Light light1 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
         lights.add(light1);
 
+        Light light2 = new Light(new Vector3f(0, 2, 0), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
+        lights.add(light2);
+
         start();
 
     }
@@ -69,8 +72,13 @@ public class Scene implements Worker {
                 interactive.onEnter();  // Call onEnter when a new entity becomes the active target
             }
         }
-        if (clicked && active instanceof Interactive interactive) {
-            interactive.onClick();
+        if (active instanceof Interactive interactive) {
+            if (clicked) {
+                interactive.onClick();
+            }
+            if (Control.isHolding()) {
+                interactive.onHold();
+            }
         }
     }
 

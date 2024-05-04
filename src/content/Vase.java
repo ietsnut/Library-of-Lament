@@ -44,6 +44,11 @@ public class Vase extends Model implements Interactive {
 
     @Override
     public void onClick() {
+
+    }
+
+    @Override
+    public void onHold() {
         if (state.equals(0)) {
             if (Math.random() < 0.8) {
                 shake = Game.TIME;

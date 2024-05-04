@@ -107,7 +107,7 @@ public class Game {
     }
 
     public static void close() {
-        Worker.clear();
+        Worker.stop();
         Load.clear();
         Shader.unload();
         glfwFreeCallbacks(window);
