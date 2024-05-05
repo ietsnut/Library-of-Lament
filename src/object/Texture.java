@@ -1,10 +1,8 @@
 package object;
 
 import org.lwjgl.BufferUtils;
-import property.Load;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,7 +11,7 @@ import java.nio.*;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public class Texture implements Load {
+public final class Texture implements Load {
 
     private static final IndexColorModel ICM = new IndexColorModel(2, 4,
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
@@ -22,19 +20,16 @@ public class Texture implements Load {
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
     public int id;
-    long modified;
 
     public BufferedImage    image;
     public File             file;
     public ByteBuffer       buffer;
 
-    public String namespace;
+    public String type;
     public String name;
 
     public int width;
     public int height;
-
-    public boolean reload = false;
 
     public Texture() {
         this.id = glGenTextures();
@@ -47,13 +42,13 @@ public class Texture implements Load {
         BOUND.add(this);
     }
 
-    public Texture(String namespace, String name) {
-        this.namespace  = namespace;
-        this.name       = name;
+    public Texture(String type, String name) {
+        this.type   = type;
+        this.name   = name;
         queue();
     }
 
-    public static BufferedImage load(File file) {
+    public static BufferedImage load(String file) {
         BufferedImage image;
         try {
             image = ImageIO.read(new FileInputStream(file));
@@ -108,16 +103,8 @@ public class Texture implements Load {
     }
 
     @Override
-    public void preload() {
-        this.file   = new File("resource/" + namespace + "/" + name + ".png");
-        modified    = file.lastModified();
-        this.image  = null;
-        this.buffer = null;
-    }
-
-    @Override
     public void load() {
-        this.image  = load(this.file);
+        this.image  = load("resource" + File.separator + type + File.separator + name + ".png");
         this.image  = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();
@@ -126,7 +113,7 @@ public class Texture implements Load {
 
     @Override
     public void postload() {
-
+        this.image.flush();
     }
 
     @Override
@@ -146,19 +133,6 @@ public class Texture implements Load {
     @Override
     public void unbind() {
         glDeleteTextures(id);
-    }
-
-    @Override
-    public boolean reload() {
-        if (reload) {
-            reload = false;
-            return true;
-        }
-        if (file != null && file.exists() && file.lastModified() != modified) {
-            modified = file.lastModified();
-            return true;
-        }
-        return false;
     }
 
     @Override

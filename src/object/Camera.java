@@ -20,8 +20,8 @@ public class Camera implements Worker {
     public static final Matrix4f projection = new Matrix4f();
     public static final Matrix4f view       = new Matrix4f();
 
-    public static final float SPEED = 5f / RATE;
-    public static final float SENS  = 10f / RATE;
+    public static final float SPEED = 2f / Game.RATE;
+    public static final float SENS  = 10f / Game.RATE;
     public static final float SLOPE = 0.7071f;
     public static final float NEAR  = 0.1f;
     public static final float FAR   = Byte.MAX_VALUE;
@@ -66,12 +66,12 @@ public class Camera implements Worker {
                     if (bob <= 0.0f) {
                         bob = 360.0f;
                     } else {
-                        bob -= 10;
+                        bob -= 7.5f;
                     }
-                    transformation.position.y += (float) Math.sin(Math.toRadians(bob)) / 20.0f;
-                    FOV = Math.clamp(FOV + (20f / RATE), 75, 80);
+                    transformation.position.y += (float) Math.sin(Math.toRadians(bob)) / 30.0f;
+                    FOV = Math.clamp(FOV + (20f / Game.RATE), 75, 80);
                 } else {
-                    FOV = Math.clamp(FOV - (20f / RATE), 75, 80);
+                    FOV = Math.clamp(FOV - (20f / Game.RATE), 75, 80);
                 }
             }
 
@@ -114,7 +114,8 @@ public class Camera implements Worker {
     }
 
     public static void listen() {
-        new Camera().start();
+        Camera camera = new Camera();
+        camera.start();
     }
 
 }

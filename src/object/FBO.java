@@ -19,11 +19,6 @@ public class FBO extends Entity {
 
     public FBO() {
         super();
-        direct();
-    }
-
-    @Override
-    public void preload() {
 
         frameBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -55,6 +50,7 @@ public class FBO extends Entity {
             throw new RuntimeException("Framebuffer not complete");
         }
 
+        direct();
     }
 
     @Override

@@ -9,12 +9,11 @@ import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 public interface Worker extends Runnable {
 
-    long RATE = 100;
     List<Thread> WORKERS = new ArrayList<>();
 
     @Override
     default void run() {
-        final long interval = 1000000000L / RATE;
+        final long interval = 1000000000L / (Game.RATE * 2L);
         long lastTime = System.nanoTime();
         while (!glfwWindowShouldClose(Game.window)) {
             long now = System.nanoTime();

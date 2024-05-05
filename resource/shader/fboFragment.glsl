@@ -11,6 +11,7 @@ const float dx = 1.0 / WIDTH;
 const float dy = 1.0 / HEIGHT;
 
 const vec3[] palette = vec3[] (
+    vec3(0.0, 0.0, 0.0),
     vec3(0.227,0.212,0.208),
     vec3(0.278,0.278,0.263),
     vec3(0.341,0.365,0.357),
@@ -65,7 +66,7 @@ void main(void) {
         }
     } else {
         //color = vec4(vec3(texture(texture1, fragUV).r).rgb, 1.0);
-        vec3 albedo = palette[int(texture(texture1, fragUV).r * 6)];
+        vec3 albedo = palette[int(texture(texture1, fragUV).r * 8)];
         color = vec4(albedo, 1.0);
     }
     if(distance < 0.01 && distance > 0.01 - 0.001 || distance < 0.002) {

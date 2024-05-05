@@ -1,21 +1,18 @@
 package game;
 
-import content.Terrain;
 import engine.*;
 import object.*;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.Version;
 import org.lwjgl.system.MemoryStack;
-import property.Load;
+import object.Load;
 
 import java.util.*;
 
-import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
 import property.State;
+import property.Watcher;
 import property.Worker;
 
 import java.nio.*;
@@ -30,7 +27,8 @@ public class Game {
 
     public static int WIDTH;
     public static int HEIGHT;
-    public static long  TIME;
+    public static long TIME;
+    public static long RATE;
     public static float PLAYTIME;
 
     public static State STATE = new State(1);
@@ -52,6 +50,7 @@ public class Game {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        RATE = vidmode.refreshRate();
         WIDTH = vidmode.height() * 4 / 5;
         HEIGHT = vidmode.height() * 4 / 5;
         glfwDefaultWindowHints();
@@ -81,7 +80,9 @@ public class Game {
         }
         scene = new Scene();
         scenes.add(scene);
+        Renderer.init();
         Camera.listen();
+        Watcher.listen();
     }
 
     private static void loop() {

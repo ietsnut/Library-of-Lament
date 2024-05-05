@@ -10,9 +10,15 @@ import static org.lwjgl.opengl.GL40.*;
 
 public class Renderer {
 
-    private static final ModelShader   modelShader  = new ModelShader();
-    private static final FBOShader     fboShader    = new FBOShader();
-    private static final AABBShader    aabbShader   = new AABBShader();
+    private static ModelShader   modelShader;
+    private static FBOShader     fboShader;
+    private static AABBShader    aabbShader;
+
+    public static void init() {
+        modelShader  = new ModelShader();
+        fboShader    = new FBOShader();
+        aabbShader   = new AABBShader();
+    }
 
     public static void render(Scene scene) {
         fboShader.bind();

@@ -82,4 +82,14 @@ public class Scene implements Worker {
         }
     }
 
+    public List<Entity> getEntities(Class<? extends Entity> type) {
+        List<Entity> result = new ArrayList<>();
+        for (Entity entity : entities) {
+            if (type.isInstance(entity)) {
+                result.add(entity);
+            }
+        }
+        return result;
+    }
+
 }

@@ -5,7 +5,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import property.Interactive;
-import property.Load;
 import property.State;
 import property.Transformation;
 
@@ -17,7 +16,7 @@ import java.util.*;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public abstract class Entity extends Transformation implements Load {
+public abstract non-sealed class Entity extends Transformation implements Load {
 
     public int      vao = 0;
     public int[]    vbo = new int[4];
@@ -34,7 +33,7 @@ public abstract class Entity extends Transformation implements Load {
 
     public final List<Texture> textures = new ArrayList<>();
 
-    public final String namespace;
+    public final String type;
     public String name;
 
     public Collider collider;
@@ -44,50 +43,29 @@ public abstract class Entity extends Transformation implements Load {
     public final State state;
 
     public Entity() {
-        this.namespace  = null;
+        this.type       = this.getClass().getSimpleName();
         this.state      = null;
     }
 
     public Entity(String name) {
-        this.namespace  = getClass().getSimpleName().toLowerCase();
+        this.type       = this.getClass().getSimpleName();
         this.name       = name;
         this.state      = null;
         // TODO: check if texCoords are beyond 0-1 and make texture repeat
-        textures.add(new Texture(namespace, name));
+        textures.add(new Texture(type, name));
     }
 
     public Entity(String name, int states) {
-        this.namespace  = getClass().getSimpleName().toLowerCase();
+        this.type       = this.getClass().getSimpleName();
         this.name       = name;
         this.state      = new State(states);
         // TODO: check if texCoords are beyond 0-1 and make texture repeat
-        textures.add(new Texture(namespace, name));
+        textures.add(new Texture(type, name));
     }
 
     @Override
     public String toString() {
-        return "<" + this.getClass().getSimpleName() + "> [" + namespace + " : " + name + "] : " + position.x + ", " + position.y + ", " + position.z;
-    }
-
-    @Override
-    public void preload() {
-        this.vao = 0;
-        this.vbo = new int[4];
-
-        this.indices    = new int[0];
-        this.vertices   = new byte[0];
-        this.normals    = new float[0];
-        this.texCoords  = new float[0];
-
-        this.indicesBuffer      = null;
-        this.verticesBuffer     = null;
-        this.normalsBuffer      = null;
-        this.texCoordsBuffer    = null;
-    }
-
-    @Override
-    public boolean reload() {
-        return false;
+        return "<" + this.getClass().getTypeName() + "> [" + type + " : " + name + "] : " + position.x + ", " + position.y + ", " + position.z;
     }
 
     @Override
@@ -176,13 +154,6 @@ public abstract class Entity extends Transformation implements Load {
         public Collider() {
             super();
             queue();
-        }
-
-        @Override
-        public void preload() {
-            super.preload();
-            this.vertices   = new byte[24];
-            this.indices    = new int[24];
         }
 
         @Override

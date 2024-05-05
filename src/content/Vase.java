@@ -7,7 +7,6 @@ import property.Interactive;
 
 public class Vase extends Model implements Interactive {
 
-    boolean reload = false;
     long shake;
 
     public Vase(String model) {
@@ -34,15 +33,6 @@ public class Vase extends Model implements Interactive {
     }
 
     @Override
-    public boolean reload() {
-        if (reload) {
-            reload = false;
-            return true;
-        }
-        return super.reload();
-    }
-
-    @Override
     public void onClick() {
 
     }
@@ -57,8 +47,6 @@ public class Vase extends Model implements Interactive {
                 state.set(2);
                 this.name = "vase_broken";
                 textures.getFirst().name = "vase_broken";
-                textures.getFirst().reload = true;
-                reload = true;
             }
         }
     }

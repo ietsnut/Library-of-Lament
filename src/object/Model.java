@@ -4,11 +4,10 @@ import de.javagl.obj.*;
 import org.joml.Vector3f;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public abstract class Model extends Entity {
-
-    private File file;
-    long modified;
 
     public Model(String model) {
         super(model);
@@ -21,10 +20,8 @@ public abstract class Model extends Entity {
     @Override
     public void load() {
         Obj obj;
-        file = new File("resource/" + namespace + "/" + name + ".obj");
-        modified = file.lastModified();
         try {
-            obj = ObjReader.read(new FileInputStream(file));
+            obj = ObjReader.read(new FileInputStream("resource" + File.separator + type + File.separator + name + ".obj"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -37,15 +34,6 @@ public abstract class Model extends Entity {
         }
         texCoords   = ObjData.getTexCoordsArray(obj, 2, true);
         normals     = ObjData.getNormalsArray(obj);
-    }
-
-    @Override
-    public boolean reload() {
-        if (file != null && file.exists() && file.lastModified() != modified) {
-            modified = file.lastModified();
-            return true;
-        }
-        return false;
     }
 
 }
