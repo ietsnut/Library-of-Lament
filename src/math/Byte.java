@@ -1,4 +1,4 @@
-package property;
+package math;
 
 public class Byte extends Number {
 
@@ -6,7 +6,6 @@ public class Byte extends Number {
     public static final byte MIN = java.lang.Byte.MIN_VALUE;
 
     byte b;
-    byte scalar;
 
     public Byte(byte b) {
         this.b = b;

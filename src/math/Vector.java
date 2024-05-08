@@ -1,4 +1,4 @@
-package property;
+package math;
 
 import java.io.Serializable;
 

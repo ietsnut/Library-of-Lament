@@ -5,13 +5,12 @@ import object.*;
 
 import org.lwjgl.Version;
 import org.lwjgl.system.MemoryStack;
-import object.Load;
 
 import java.util.*;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import property.Byte;
+import math.Byte;
 import property.Resource;
 import property.State;
 import property.Worker;

@@ -1,10 +1,9 @@
 package object;
 
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import property.*;
-import property.Vector;
+import math.Vector;
 
 import java.io.File;
 import java.io.FilenameFilter;

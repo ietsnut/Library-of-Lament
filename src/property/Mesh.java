@@ -1,12 +1,12 @@
 package property;
 
+import math.Byte;
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
 import object.Camera;
 import object.Entity;
-import object.Load;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
