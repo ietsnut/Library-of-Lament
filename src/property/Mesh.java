@@ -172,8 +172,8 @@ public class Mesh extends Resource {
         @Override
         public void load() {
             byte[] vertices = Mesh.this.vertices;
-            min = new Vector3f(Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE);
-            max = new Vector3f(Byte.MIN_VALUE, Byte.MIN_VALUE, Byte.MIN_VALUE);
+            min = new Vector3f(Byte.MAX, Byte.MAX, Byte.MAX);
+            max = new Vector3f(Byte.MIN, Byte.MIN, Byte.MIN);
             for (int i = 0; i < vertices.length; i += 3) {
                 min.set(Math.min(min.x, vertices[i]), Math.min(min.y, vertices[i + 1]), Math.min(min.z, vertices[i + 2]));
                 max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));

@@ -26,7 +26,7 @@ public class ModelShader extends Shader {
         uniform("projection",       Camera.projection);
         uniform("view",             Camera.view);
         uniform("lights",           Math.min(scene.lights.size(), LIGHTS));
-        for (int i = 0; i < Math.min(scene.lights.size(), LIGHTS); i++) {
+        for (byte i = 0; i < Math.min(scene.lights.size(), LIGHTS); i++) {
             uniform("lightPosition[" + i + "]",     scene.lights.get(i).position);
             uniform("lightAttenuation[" + i + "]",  scene.lights.get(i).attenuation);
             uniform("lightIntensity[" + i + "]",    scene.lights.get(i).intensity);

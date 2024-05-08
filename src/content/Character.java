@@ -43,8 +43,6 @@ public class Character extends Entity implements Interactive {
     @Override
     public void update() {
         rotation.y = (byte) (Camera.rotation.y / 5f);
-        System.out.println(rotation.y);
-        System.out.println(Camera.rotation.y);
     }
 
     @Override

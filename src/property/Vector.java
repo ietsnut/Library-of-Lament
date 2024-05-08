@@ -31,7 +31,7 @@ public class Vector implements Cloneable, Serializable {
         return this;
     }
 
-    public Vector setComponent(int index, byte value) {
+    public Vector setComponent(byte index, byte value) {
         switch (index) {
             case 0:
                 x = value;
@@ -46,16 +46,13 @@ public class Vector implements Cloneable, Serializable {
         return this;
     }
 
-    public byte getComponent(int index) {
-        switch (index) {
-            case 0:
-                return x;
-            case 1:
-                return y;
-            case 2:
-                return z;
-        }
-        return 0;
+    public byte getComponent(byte index) {
+        return switch (index) {
+            case 0 -> x;
+            case 1 -> y;
+            case 2 -> z;
+            default -> 0;
+        };
     }
 
     public Vector add(Vector vector) {

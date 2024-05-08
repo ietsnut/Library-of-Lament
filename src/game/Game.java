@@ -11,6 +11,7 @@ import java.util.*;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
+import property.Byte;
 import property.Resource;
 import property.State;
 import property.Worker;
@@ -82,7 +83,10 @@ public class Game {
         scenes.add(scene);
         Renderer.init();
         Camera.listen();
-        //GLUtil.setupDebugMessageCallback();
+
+        Byte b = new Byte((byte) 100);
+        System.out.println(b);
+
     }
 
     private static void loop() {

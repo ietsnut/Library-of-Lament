@@ -2,12 +2,8 @@ package content;
 
 import object.Camera;
 import object.Entity;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import property.Mesh;
-
-import java.util.Arrays;
 
 public class Terrain extends Entity {
 

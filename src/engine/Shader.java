@@ -17,7 +17,7 @@ import static org.lwjgl.opengl.GL40.*;
 public abstract class Shader {
 
     public static final List<Shader> ALL = new ArrayList<>();
-    public static final int LIGHTS = Byte.MAX_VALUE;
+    public static final byte LIGHTS = Byte.MAX_VALUE;
 
     private final HashMap<String, Integer> uniforms = new HashMap<>();
     final String[] attributes;
