@@ -67,26 +67,7 @@ public abstract class Shader {
         stop();
     }
 
-    protected void render(Entity entity) {
-        glBindVertexArray(entity.vao);
-        for (int i = 0; i < attributes.length; i++) {
-            glEnableVertexAttribArray(i);
-        }
-        for (int i = 0; i < entity.textures.size(); i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, entity.textures.get(i).id);
-            uniform("texture" + (i + 1), i);
-        }
-        glDrawElements(entity instanceof Entity.Collider ? GL_LINES : GL_TRIANGLES, entity.indices.length, GL_UNSIGNED_INT, 0);
-        for (int i = 0; i < entity.textures.size(); i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
-        for (int i = 0; i < attributes.length; i++) {
-            glDisableVertexAttribArray(i);
-        }
-        glBindVertexArray(0);
-    }
+    protected abstract void render(Entity entity);
 
     public void start() {
         glUseProgram(program);

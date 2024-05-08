@@ -1,14 +1,22 @@
 package object;
 
+import property.Worker;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-public sealed interface Load extends Runnable permits Entity, Texture {
+public interface Load extends Runnable {
 
     ConcurrentLinkedQueue<Load> QUEUE = new ConcurrentLinkedQueue<>();
 
-    List<Load>      BOUND   = new ArrayList<>();
-    List<Thread>    THREADS = new ArrayList<>();
+    List<Load>              LOADED  = new ArrayList<>();
+    List<Thread>            THREADS = new ArrayList<>();
+
+    //Map<Resource, Load>   LOADERS = new HashMap<>();
+    //Map<String, Watch>    WATCHES = new HashMap<>();
 
     default void queue() {
         Thread thread = new Thread(this);
@@ -22,53 +30,48 @@ public sealed interface Load extends Runnable permits Entity, Texture {
         thread.start();
     }
 
-    static void queue(String type) {
-        new Thread(() -> {
-            Iterator<Load> loads = Load.BOUND.iterator();
-            while (loads.hasNext()) {
-                Load bound = loads.next();
-                if (bound.getClass().getSimpleName().toLowerCase().equals(type) || (bound instanceof Texture texture && texture.type != null && texture.type.equals(type))) {
-                    bound.queue();
-                    System.out.println("Queued: " + bound.getClass().getSimpleName());
-                }
-            }
-        }).start();
-    }
-
     default void direct() {
         this.load();
-        this.postload();
+        this.prepare();
         this.bind();
-        BOUND.add(this);
+        this.clean();
+        LOADED.add(this);
     }
 
     void load();
-    void postload();
-
+    void prepare();
     void bind();
+    void clean();
+
     void unbind();
 
-    default boolean bound() {
-        return BOUND.contains(this);
+    default boolean loaded() {
+        return LOADED.contains(this);
     }
 
     @Override
     default void run() {
         this.load();
-        this.postload();
+        this.prepare();
         QUEUE.add(this);
     }
 
     static void process() {
         Load load = QUEUE.poll();
         if (load != null) {
-            if (load.bound()) {
-                BOUND.remove(load);
+            if (load.loaded()) {
+                LOADED.remove(load);
                 load.unbind();
                 load.queue();
             } else {
                 load.bind();
-                BOUND.add(load);
+                load.clean();
+                LOADED.add(load);
+                /*
+                if (!WATCHES.containsKey(load.getClass().getSimpleName())) {
+                    WATCHES.put(resourcee.type, new Watch(resourcee.type));
+                }
+                 */
             }
         }
     }
@@ -76,10 +79,43 @@ public sealed interface Load extends Runnable permits Entity, Texture {
     static void clear() {
         THREADS.forEach(Thread::interrupt);
         QUEUE.clear();
-        for (Load load : BOUND) {
+        for (Load load : LOADED) {
             load.unbind();
         }
-        BOUND.clear();
+        LOADED.clear();
+    }
+
+    class Watch implements Worker {
+        private final Path path;
+        private final WatchService service;
+        public Watch(String type) {
+            this.path = Paths.get("resource" + File.separator + type);
+            try {
+                service = FileSystems.getDefault().newWatchService();
+                path.register(service, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            start();
+        }
+        @Override
+        public void work() {
+            try {
+                WatchKey key;
+                while ((key = service.take()) != null) {
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        Path type = (Path) event.context();
+                        if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE || event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+                            System.out.println("Changed resource: " + type.getFileName());
+                            //Resource.queue(type.getFileName().toString());
+                        }
+                    }
+                    key.reset();
+                }
+            } catch (InterruptedException e) {
+                start();
+            }
+        }
     }
 
 }

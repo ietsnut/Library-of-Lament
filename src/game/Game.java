@@ -11,8 +11,8 @@ import java.util.*;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
+import property.Resource;
 import property.State;
-import property.Watcher;
 import property.Worker;
 
 import java.nio.*;
@@ -82,7 +82,7 @@ public class Game {
         scenes.add(scene);
         Renderer.init();
         Camera.listen();
-        Watcher.listen();
+        //GLUtil.setupDebugMessageCallback();
     }
 
     private static void loop() {
@@ -92,7 +92,7 @@ public class Game {
         glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
         glDepthRange(0.0, 1.0);
         while (!glfwWindowShouldClose(window)) {
-            Load.process();
+            Resource.process();
             TIME = time();
             PLAYTIME = (TIME - lastFrameTime) / 1000f;
             if (TIME - lastFrameTime > 1000) {
@@ -109,7 +109,9 @@ public class Game {
 
     public static void close() {
         Worker.stop();
-        Load.clear();
+        Resource.clear();
+        glDeleteFramebuffers(FBOShader.fbo.id);
+        glDeleteBuffers(FBOShader.fbo.drawBuffers);
         Shader.unload();
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);

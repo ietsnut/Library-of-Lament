@@ -13,6 +13,7 @@ public class AABBShader extends Shader {
     }
 
     public void shader(Scene scene) {
+        /*
         Entity active = Entity.lookingAt(scene.entities, 30f);
         if (active == null) {
             return;
@@ -23,5 +24,12 @@ public class AABBShader extends Shader {
         uniform("time", Game.time() / 1000.0f);
         uniform("scale", active.collider.size);
         render(active.collider);
+
+         */
+    }
+
+    @Override
+    protected void render(Entity entity) {
+
     }
 }

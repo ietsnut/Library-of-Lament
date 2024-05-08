@@ -33,7 +33,6 @@ int t(sampler2D s, vec2 v) {
 }
 
 void main(void) {
-
     int albedo = t(texture1, fragUV);
     if (albedo == 0) {
         discard;
@@ -72,6 +71,7 @@ void main(void) {
     }
 
     color = float(float(level) / 6);
+
     normal = fragNormal;
 
 }

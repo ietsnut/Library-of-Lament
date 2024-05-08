@@ -1,4 +1,4 @@
-The following files are included in the resource archive:
+The following files are included in the resourcee archive:
 Footsteps.wav - from openal.org cvs
 ding.wav - from openal.org cvs
 left.wav - sampled by matzon

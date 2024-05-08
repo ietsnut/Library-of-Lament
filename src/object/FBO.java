@@ -2,46 +2,53 @@ package object;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
 
 import game.Game;
-import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.*;
+import property.Material;
+import property.Mesh;
+import property.Resource;
 
 import static org.lwjgl.opengl.GL40.*;
 
 public class FBO extends Entity {
 
-    public int frameBuffer;
-
+    public int id;
     public IntBuffer drawBuffers;
 
     public FBO() {
         super();
+        meshes.add(new Mesh() {
+            @Override
+            public void load() {
+                indices = new int[]{0, 1, 2, 2, 1, 3};
+                vertices = new byte[]{-1, 1, -1, -1, 1, 1, 1, -1};
+            }
+        });
+        meshes.getFirst().direct();
 
-        frameBuffer = glGenFramebuffers();
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        id = glGenFramebuffers();
+        glBindFramebuffer(GL_FRAMEBUFFER, id);
         drawBuffers = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();
         glDrawBuffers(drawBuffers);
 
-        Texture color = new Texture();
-        glBindTexture(GL_TEXTURE_2D, color.id);
+        Material color = new Material();
+        glBindTexture(GL_TEXTURE_2D, color.texture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, Game.WIDTH, Game.HEIGHT, 0, GL_RED, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.id, 0);
-        textures.add(color);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.texture, 0);
+        materials.add(color);
 
-        Texture normals = new Texture();
-        glBindTexture(GL_TEXTURE_2D, normals.id);
+        Material normals = new Material();
+        glBindTexture(GL_TEXTURE_2D, normals.texture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Game.WIDTH, Game.HEIGHT, 0, GL_RGB, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normals.id, 0);
-        textures.add(normals);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normals.texture, 0);
+        materials.add(normals);
 
-        Texture depth = new Texture();
-        glBindTexture(GL_TEXTURE_2D, depth.id);
+        Material depth = new Material();
+        glBindTexture(GL_TEXTURE_2D, depth.texture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, Game.WIDTH, Game.HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.id, 0);
-        textures.add(depth);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.texture, 0);
+        materials.add(depth);
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -49,26 +56,11 @@ public class FBO extends Entity {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             throw new RuntimeException("Framebuffer not complete");
         }
-
-        direct();
     }
 
     @Override
-    protected Matrix4f model() {
-        return null;
-    }
+    public void update() {
 
-    @Override
-    public void load() {
-        indices     = new int[] { 0, 1, 2, 2, 1, 3 };
-        vertices    = new byte[] { -1, 1, -1, -1, 1, 1, 1, -1 };
-    }
-
-    @Override
-    public void unbind() {
-        super.unbind();
-        glDeleteFramebuffers(frameBuffer);
-        glDeleteBuffers(drawBuffers);
     }
 
 }

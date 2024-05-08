@@ -1,24 +1,28 @@
 package content;
 
 import object.Camera;
-import object.Model;
-import object.Texture;
-import org.joml.*;
+import object.Entity;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import property.Mesh;
 
-import java.lang.Math;
+import java.util.Arrays;
 
-public class Terrain extends Model {
+public class Terrain extends Entity {
 
-    public Terrain(String name) {
-        super(name);
-        queue();
+    public Mesh terrain;
+
+    public Terrain(byte id) {
+        super(id);
+        terrain = meshes.getFirst();
     }
 
     public float height(float x, float z) {
-        for (int i = 0; i < vertices.length; i += 9) {
-            float[] bary = bary(vertices[i], vertices[i + 2], vertices[i + 3], vertices[i + 5], vertices[i + 6], vertices[i + 8], x, z);
+        for (int i = 0; i < terrain.vertices.length; i += 9) {
+            float[] bary = bary(terrain.vertices[i], terrain.vertices[i + 2], terrain.vertices[i + 3], terrain.vertices[i + 5], terrain.vertices[i + 6], terrain.vertices[i + 8], x, z);
             if (inside(bary)) {
-                return bary[0] * vertices[i + 1] + bary[1] * vertices[i + 4] + bary[2] * vertices[i + 7] + 1f;
+                return bary[0] * terrain.vertices[i + 1] + bary[1] * terrain.vertices[i + 4] + bary[2] * terrain.vertices[i + 7] + 1f;
             }
         }
         return 0;
@@ -26,34 +30,34 @@ public class Terrain extends Model {
 
     public Vector3f height(Vector3f origin, Vector3f movement) {
         Vector3f pos = new Vector3f(origin).add(movement);
-        for (int i = 0; i < vertices.length; i += 9) {
-            if (normals[i + 1] < Camera.SLOPE) {
+        for (int i = 0; i < terrain.vertices.length; i += 9) {
+            if (terrain.normals[i + 1] < Camera.SLOPE) {
                 continue;
             }
-            float[] bary = bary(vertices[i], vertices[i + 2], vertices[i + 3], vertices[i + 5], vertices[i + 6], vertices[i + 8], pos.x, pos.z);
+            float[] bary = bary(terrain.vertices[i], terrain.vertices[i + 2], terrain.vertices[i + 3], terrain.vertices[i + 5], terrain.vertices[i + 6], terrain.vertices[i + 8], pos.x, pos.z);
             if (inside(bary)) {
-                float y = bary[0] * vertices[i + 1] + bary[1] * vertices[i + 4] + bary[2] * vertices[i + 7] + 1f;
+                float y = bary[0] * terrain.vertices[i + 1] + bary[1] * terrain.vertices[i + 4] + bary[2] * terrain.vertices[i + 7] + 1f;
                 if (Math.abs(y - pos.y) < 0.5f) {
                     return pos.setComponent(1, y);
                 }
             }
         }
-        for (int i = 0; i < vertices.length; i += 9) {
-            if (normals[i + 1] < Camera.SLOPE) {
+        for (int i = 0; i < terrain.vertices.length; i += 9) {
+            if (terrain.normals[i + 1] < Camera.SLOPE) {
                 continue;
             }
-            float[] bary = bary(vertices[i], vertices[i + 2], vertices[i + 3], vertices[i + 5], vertices[i + 6], vertices[i + 8], origin.x, origin.z);
+            float[] bary = bary(terrain.vertices[i], terrain.vertices[i + 2], terrain.vertices[i + 3], terrain.vertices[i + 5], terrain.vertices[i + 6], terrain.vertices[i + 8], origin.x, origin.z);
             if (inside(bary)) {
-                float y = bary[0] * vertices[i + 1] + bary[1] * vertices[i + 4] + bary[2] * vertices[i + 7] + 1f;
+                float y = bary[0] * terrain.vertices[i + 1] + bary[1] * terrain.vertices[i + 4] + bary[2] * terrain.vertices[i + 7] + 1f;
                 if (Math.abs(y - origin.y) < 0.1f) {
                     Vector3f movementDirection = new Vector3f(movement).normalize();
                     Vector3f edgeVector = new Vector3f();
                     if (bary[0] < 0.05f) {
-                        edgeVector.set(vertices[i + 3] - vertices[i + 6], 0, vertices[i + 5] - vertices[i + 8]);
+                        edgeVector.set(terrain.vertices[i + 3] - terrain.vertices[i + 6], 0, terrain.vertices[i + 5] - terrain.vertices[i + 8]);
                     } else if (bary[1] < 0.05f) {
-                        edgeVector.set(vertices[i + 6] - vertices[i], 0, vertices[i + 8] - vertices[i + 2]);
+                        edgeVector.set(terrain.vertices[i + 6] - terrain.vertices[i], 0, terrain.vertices[i + 8] - terrain.vertices[i + 2]);
                     } else if (bary[2] < 0.05f) {
-                        edgeVector.set(vertices[i + 3] - vertices[i], 0, vertices[i + 5] - vertices[i + 2]);
+                        edgeVector.set(terrain.vertices[i + 3] - terrain.vertices[i], 0, terrain.vertices[i + 5] - terrain.vertices[i + 2]);
                     }
                     edgeVector.normalize();
                     float dotProduct = movementDirection.dot(edgeVector);
@@ -80,8 +84,8 @@ public class Terrain extends Model {
     }
 
     @Override
-    protected Matrix4f model() {
-        return this.model.identity().translate(position).scale(scale);
+    public void update() {
+
     }
 
 }

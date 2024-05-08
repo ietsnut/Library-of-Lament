@@ -5,29 +5,29 @@ import content.Terrain;
 import content.Vase;
 import object.*;
 import org.joml.Vector3f;
-import property.Interactive;
 import property.Worker;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static property.Transformation.*;
+import static object.Entity.*;
 
 public class Scene implements Worker {
 
     public List<Light>  lights      = new ArrayList<>();
+
     public List<Entity> entities    = new ArrayList<>();
-    public Terrain      terrain;
 
     public Entity last;
 
     public Scene() {
 
-        terrain = new Terrain("sewer");
+        entities.add(new Terrain((byte) 0));
 
         for (int i = 0; i < 30; i+=3) {
-            Vase vase = new Vase("vase");
+            Vase vase = new Vase((byte) 0);
             vase.scale = MICRO;
+            System.out.println(vase.scale);
             float x = (float) (Math.random() * i);
             float z = 1.5f;
             if (Math.random() > 0.5) {
@@ -36,13 +36,13 @@ public class Scene implements Worker {
             if (Math.random() > 0.5) {
                 z = -z;
             }
-            vase.position.set(x, 0, z);
-            entities.add(vase);
+            vase.position.set((byte) x, (byte) 0, (byte) z);
+            //entities.add(vase);
         }
 
-        Character character = new Character("1");
+        Character character = new Character((byte) 0);
         character.scale = DECI;
-        character.position.set(10, 0, 1.5f);
+        character.position.set((byte) 0, (byte) 0, (byte) 1);
         entities.add(character);
 
         Light light1 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
@@ -57,10 +57,17 @@ public class Scene implements Worker {
 
     @Override
     public void work() {
-        lights.getFirst().position = new Vector3f(Camera.transformation.position);
+        lights.getFirst().position = new Vector3f(Camera.position);
         for (Entity entity : entities) {
+            entity.update();
             entity.remodel();
         }
+        for (Entity entity : entities) {
+            if (entity instanceof Vase vase) {
+                //vase.rotation.y += 1;
+            }
+        }
+        /*
         Entity active = Entity.lookingAt(entities, 30f);
         boolean clicked = Control.isClicked();
         if (active != last) {
@@ -80,6 +87,16 @@ public class Scene implements Worker {
                 interactive.onHold();
             }
         }
+         */
+    }
+
+    public <T extends Entity> T getEntity(Class<T> type) {
+        for (Entity entity : entities) {
+            if (type.isInstance(entity)) {
+                return type.cast(entity);
+            }
+        }
+        return null;
     }
 
     public List<Entity> getEntities(Class<? extends Entity> type) {

@@ -1,4 +1,4 @@
-terrain sewer
+terrain tunnels
 vase vase 1 0 1
 vase vase
 vase vase

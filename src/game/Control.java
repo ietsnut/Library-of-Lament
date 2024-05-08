@@ -1,12 +1,6 @@
 package game;
 
-import object.Camera;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
-import property.Transformation;
-
-import java.nio.DoubleBuffer;
-
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Control {
