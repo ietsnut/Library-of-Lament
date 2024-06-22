@@ -1,10 +1,6 @@
 package engine;
 
 import game.Scene;
-import object.Entity;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_BLEND;
 
 public class Renderer {
 
@@ -15,12 +11,12 @@ public class Renderer {
     public static void init() {
         modelShader  = new ModelShader();
         fboShader    = new FBOShader();
-        //aabbShader   = new AABBShader();
+        aabbShader   = new AABBShader();
     }
 
     public static void render(Scene scene) {
         fboShader.bind();
-        //aabbShader.render(scene);
+        aabbShader.render(scene);
         modelShader.render(scene);
         fboShader.unbind();
         fboShader.render(scene);

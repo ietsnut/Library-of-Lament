@@ -1,23 +1,25 @@
 package game;
 
-import content.Character;
 import content.Terrain;
 import content.Vase;
 import object.*;
 import org.joml.Vector3f;
-import property.Worker;
+import property.Entity;
+import property.Interactive;
+import property.Machine;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static object.Entity.*;
+import static property.Entity.*;
 
-public class Scene implements Worker {
+public class Scene implements Machine {
 
     public List<Light>  lights      = new ArrayList<>();
 
     public List<Entity> entities    = new ArrayList<>();
 
+    public Entity active;
     public Entity last;
 
     public Scene() {
@@ -27,7 +29,6 @@ public class Scene implements Worker {
         for (int i = 0; i < 30; i+=3) {
             Vase vase = new Vase((byte) 0);
             vase.scale = MICRO;
-            System.out.println(vase.scale);
             float x = (float) (Math.random() * i);
             float z = 1.5f;
             if (Math.random() > 0.5) {
@@ -36,58 +37,73 @@ public class Scene implements Worker {
             if (Math.random() > 0.5) {
                 z = -z;
             }
-            vase.position.set((byte) x, (byte) 0, (byte) z);
-            //entities.add(vase);
+            vase.position.set(x,  0, z);
+            entities.add(vase);
         }
 
+        /*
         Character character = new Character((byte) 0);
         character.scale = DECI;
-        character.position.set((byte) 0, (byte) 0, (byte) 1);
+        character.position.set( 0, 0, 1);
         entities.add(character);
+        */
 
-        Light light1 = new Light(new Vector3f(-185f, 10f, -293f), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
+        Light light1 = new Light(new Vector3f(0, 2, 0), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
         lights.add(light1);
 
         Light light2 = new Light(new Vector3f(0, 2, 0), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
         lights.add(light2);
 
-        start();
+        start(1);
 
     }
 
     @Override
-    public void work() {
-        lights.getFirst().position = new Vector3f(Camera.position);
-        for (Entity entity : entities) {
-            entity.update();
-            entity.remodel();
-        }
-        for (Entity entity : entities) {
-            if (entity instanceof Vase vase) {
-                //vase.rotation.y += 1;
-            }
+    public void process() {
+        System.out.println("Scene.process");
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            System.out.println(i);
         }
         /*
-        Entity active = Entity.lookingAt(entities, 30f);
+        float min = Float.MAX_VALUE;
+        Entity closest = null;
+        for (Entity entity : entities) {
+            Mesh mesh = entity.meshes.get(entity.mesh);
+            if (!mesh.collider.bound) {
+                continue;
+            }
+            System.out.println("checking " + mesh);
+            System.out.println(mesh.collider);
+            System.out.println("fdf");
+            if (entity.interacive && mesh.collider.lookingAt(30f, entity) && mesh.collider.distance(entity) < min) {
+                min = mesh.collider.distance(entity);
+                closest = entity;
+            }
+        }
+        active = closest;
+
+         */
+        /*
+        active = Mesh.Collider.lookingAt(entities, 30f);
+        System.out.println(active);
         boolean clicked = Control.isClicked();
         if (active != last) {
             if (last instanceof Interactive interactive) {
-                interactive.onExit();
+                interactive.exit();
             }
             last = active;
             if (active instanceof Interactive interactive) {
-                interactive.onEnter();  // Call onEnter when a new entity becomes the active target
+                interactive.enter();  // Call onEnter when a new entity becomes the active target
             }
         }
         if (active instanceof Interactive interactive) {
             if (clicked) {
-                interactive.onClick();
+                interactive.click();
             }
             if (Control.isHolding()) {
-                interactive.onHold();
+                interactive.hold();
             }
-        }
-         */
+        }*/
     }
 
     public <T extends Entity> T getEntity(Class<T> type) {

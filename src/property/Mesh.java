@@ -1,12 +1,10 @@
 package property;
 
-import math.Byte;
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
 import object.Camera;
-import object.Entity;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -16,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.*;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL40.*;
 
@@ -29,26 +28,33 @@ public class Mesh extends Resource {
     public float[]  normals     = new float[0];
     public float[]  texCoords   = new float[0];
 
-    private IntBuffer   indicesBuffer   = null;
-    private ByteBuffer  verticesBuffer  = null;
-    private FloatBuffer normalsBuffer   = null;
-    private FloatBuffer texCoordsBuffer = null;
+    private IntBuffer    indicesBuffer;
+    private ByteBuffer   verticesBuffer;
+    private FloatBuffer  normalsBuffer;
+    private FloatBuffer  texCoordsBuffer;
 
     public Collider collider;
 
     public Mesh() {
         super();
+        load();
+        buffer();
+        bind();
+        prepare();
+        RESOURCES.add(this);
+        loaded = true;
+        bound = true;
     }
 
     public Mesh(Entity entity) {
         super(entity.id, entity.type);
     }
 
-    public Mesh(byte id, String type) {
+    public Mesh(int id, String type) {
         super(id, type);
     }
 
-    public Mesh(byte id, String type, String state) {
+    public Mesh(int id, String type, String state) {
         super(id, type, state);
     }
 
@@ -76,7 +82,7 @@ public class Mesh extends Resource {
     }
 
     @Override
-    public void postload() {
+    public void buffer() {
         if (this.indices.length > 0) {
             indicesBuffer = BufferUtils.createIntBuffer(indices.length);
             indicesBuffer.put(indices);
@@ -89,18 +95,13 @@ public class Mesh extends Resource {
         }
         if (this.texCoords.length > 0) {
             texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
-            texCoordsBuffer.position(0);
             texCoordsBuffer.put(texCoords);
             texCoordsBuffer.flip();
         }
         if (this.normals.length > 0) {
             normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
-            normalsBuffer.position(0);
             normalsBuffer.put(normals);
             normalsBuffer.flip();
-        }
-        if (!(this instanceof Collider) && type != null) {
-            this.collider = new Collider();
         }
     }
 
@@ -131,24 +132,30 @@ public class Mesh extends Resource {
     public void bind() {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
-        if (this.indicesBuffer != null) {
-            buffer(0, 0, this.indicesBuffer);
+        if (indices.length  > 0) {
+            buffer(0, 0, indicesBuffer);
         }
-        if (this.verticesBuffer != null) {
-            buffer(0, type == null ? 2 : 3, this.verticesBuffer);
+        if (vertices.length > 0) {
+            buffer(0, type == null ? 2 : 3, verticesBuffer);
         }
-        if (this.texCoordsBuffer != null) {
-            buffer(1, 2, this.texCoordsBuffer);
+        if (texCoords.length > 0) {
+            buffer(1, 2, texCoordsBuffer);
         }
-        if (this.normalsBuffer != null) {
-            buffer(2, 3, this.normalsBuffer);
+        if (normals.length > 0) {
+            buffer(2, 3, normalsBuffer);
         }
         glBindVertexArray(0);
+        if (type != null && id != -1 && !(this instanceof Collider)) {
+            this.collider = new Collider(this);
+        }
     }
 
     @Override
-    public void postbind() {
-
+    public void prepare() {
+        indicesBuffer = null;
+        verticesBuffer = null;
+        texCoordsBuffer = null;
+        normalsBuffer = null;
     }
 
     @Override
@@ -165,15 +172,18 @@ public class Mesh extends Resource {
         public Vector3f max;
         public float size;
 
-        public Collider() {
-            super();
+        private static int ID = 0;
+
+        public Collider(Mesh mesh) {
+            super(mesh.id, "collider" + ID);
+            ID++;
         }
 
         @Override
         public void load() {
             byte[] vertices = Mesh.this.vertices;
-            min = new Vector3f(Byte.MAX, Byte.MAX, Byte.MAX);
-            max = new Vector3f(Byte.MIN, Byte.MIN, Byte.MIN);
+            min = new Vector3f(Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE);
+            max = new Vector3f(Byte.MIN_VALUE, Byte.MIN_VALUE, Byte.MIN_VALUE);
             for (int i = 0; i < vertices.length; i += 3) {
                 min.set(Math.min(min.x, vertices[i]), Math.min(min.y, vertices[i + 1]), Math.min(min.z, vertices[i + 2]));
                 max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));
@@ -217,31 +227,29 @@ public class Mesh extends Resource {
             return Math.max(tmin, 0);
         }
 
-    /*
-    public boolean lookingAt(float distance) {
-        return collision() > 0 && distance() < distance;
-    }
 
-    public float distance() {
-        return new Vector3f(Camera.position).sub(this.position).length();
-    }
-
-    public static Entity lookingAt(List<Entity> entities, float distance) {
-        float min = Float.MAX_VALUE;
-        Entity closest = null;
-        for (Entity entity : entities) {
-            if (entity.collidable() && entity.lookingAt(distance) && entity.distance() < min) {
-                min = entity.distance();
-                closest = entity;
-            }
+        public boolean lookingAt(float distance, Entity entity) {
+            //return collision(entity) > 0 && distance(entity) < distance;
+            return true;
         }
-        return closest;
-    }
 
-    public boolean collidable() {
-        return this.collidable && this.collider != null && this.loaded && this.collider.bound();
-    }
-     */
+        public float distance(Entity entity) {
+            System.out.println("a");
+            return new Vector3f(Camera.position).sub(entity.position).length();
+        }
+
+        public static Entity lookingAt(List<Entity> entities, float distance) {
+            float min = Float.MAX_VALUE;
+            Entity closest = null;
+            for (Entity entity : entities) {
+                Mesh mesh = entity.meshes.get(entity.mesh);
+                if (entity.interacive && mesh.collider.lookingAt(distance, entity) && mesh.collider.distance(entity) < min) {
+                    min = mesh.collider.distance(entity);
+                    closest = entity;
+                }
+            }
+            return closest;
+        }
 
     }
 

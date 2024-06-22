@@ -58,8 +58,7 @@ void main(void) {
         color = vec4(vec3(0.5), 1.0);
         if (depth < 0.98) {
             color = vec4(vec3(0.75), 1.0);
-        }
-        if (depth < 0.97) {
+        } if (depth < 0.97) {
             color = vec4(1.0);
         }
     } else {

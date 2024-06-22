@@ -1,6 +1,5 @@
 package property;
 
-import object.Load;
 import org.lwjgl.BufferUtils;
 
 import javax.imageio.ImageIO;
@@ -13,11 +12,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.glDeleteTextures;
-import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
-import static org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R;
-import static org.lwjgl.opengl.GL30.GL_R8;
+import static org.lwjgl.opengl.GL40.*;
 
 public class Material extends Resource {
 
@@ -27,25 +22,20 @@ public class Material extends Resource {
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
-    public int texture;
+    public  final ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());
 
-    public BufferedImage image;
-    public File file;
-    public ByteBuffer buffer;
+    public int texture;
+    public byte[] image = new byte[0];
 
     public int width;
     public int height;
 
     public Material() {
         super();
-        this.texture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        this.bind();
         RESOURCES.add(this);
+        loaded = true;
+        bound = true;
     }
 
     public Material(byte id, String type) {
@@ -92,58 +82,63 @@ public class Material extends Resource {
         return image;
     }
 
-    public ByteBuffer load(BufferedImage image) {
-        byte[] imgData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        ByteBuffer buffer = BufferUtils.createByteBuffer(imgData.length / 4).order(ByteOrder.nativeOrder());
+    @Override
+    public void load() {
+        if (this.id == -1 || this.type == null) {
+            return;
+        }
+        BufferedImage image;
+        if (state != null) {
+            image  = load("resource" + File.separator + type + File.separator + id + "_" + state + ".png");
+        } else {
+            image  = load("resource" + File.separator + type + File.separator + id + ".png");
+        }
+        image       = dither(image);
+        this.width  = image.getWidth();
+        this.height = image.getHeight();
+        this.image  = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+    }
+
+    @Override
+    public void buffer() {
+        if (this.id == -1 || this.type == null) {
+            return;
+        }
+        buffer.clear();
         byte packedData;
-        for (int i = 0; i < imgData.length; i += 4) {
+        for (int i = 0; i < image.length; i += 4) {
             packedData = 0;
             for (int j = 0; j < 4; j++) {
-                if (i + j < imgData.length) {
-                    int pixelValue = (imgData[i + j] & 0xFF) & 0x03;
+                if (i + j < image.length) {
+                    int pixelValue = (image[i + j] & 0xFF) & 0x03;
                     packedData |= (byte) (pixelValue << (6 - 2 * j));
                 }
             }
             buffer.put(packedData);
         }
         buffer.flip();
-        return buffer;
-    }
-
-    @Override
-    public void load() {
-        if (state != null) {
-            this.image  = load("resource" + File.separator + type + File.separator + id + "_" + state + ".png");
-        } else {
-            this.image  = load("resource" + File.separator + type + File.separator + id + ".png");
-        }
-        this.image  = dither(image);
-        this.width  = image.getWidth();
-        this.height = image.getHeight();
-        this.buffer = load(image);
-    }
-
-    @Override
-    public void postload() {
-
     }
 
     @Override
     public void bind() {
         this.texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.texture);
+        if (this.image.length == 0) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     @Override
-    public void postbind() {
+    public void prepare() {
 
     }
 

@@ -1,9 +1,10 @@
 package content;
 
-import object.Entity;
+import property.Entity;
 import property.Interactive;
+import property.Machine;
 
-public class Vase extends Entity implements Interactive {
+public class Vase extends Entity implements Interactive, Machine {
 
     long shake;
 
@@ -12,28 +13,28 @@ public class Vase extends Entity implements Interactive {
     }
 
     @Override
-    public void update() {
+    public void click() {
 
     }
 
     @Override
-    public void onClick() {
+    public void hold() {
 
     }
 
     @Override
-    public void onHold() {
-        System.out.println("Holding Vase");
-    }
-
-    @Override
-    public void onEnter() {
+    public void enter() {
 
     }
 
     @Override
-    public void onExit() {
+    public void exit() {
 
     }
 
+    @Override
+    public void process() {
+        this.rotation.y += 1;
+        remodel();
+    }
 }

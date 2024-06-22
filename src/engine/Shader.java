@@ -7,7 +7,7 @@ import java.util.*;
 import game.Game;
 import game.Scene;
 import object.Camera;
-import object.Entity;
+import property.Entity;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
 
@@ -42,21 +42,40 @@ public abstract class Shader {
 
     final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
-    protected void uniform(String location, Object data) {
+    protected void uniform(String location, float data) {
         int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        switch (data) {
-            case Float      f -> glUniform1f(uniform, f);
-            case Integer    i -> glUniform1i(uniform, i);
-            case Boolean    b -> glUniform1f(uniform, b ? 1.0f : 0.0f);
-            case Vector2f   v -> glUniform2f(uniform, v.x, v.y);
-            case Vector3f   v -> glUniform3f(uniform, v.x, v.y, v.z);
-            case Vector4f   v -> glUniform4f(uniform, v.x, v.y, v.z, v.w);
-            case Matrix4f   m -> {
-                m.get(buffer);
-                glUniformMatrix4fv(uniform, false, buffer);
-            }
-            default -> throw new IllegalArgumentException("Unsupported uniform type: " + data.getClass());
-        }
+        glUniform1f(uniform, data);
+    }
+
+    protected void uniform(String location, int data) {
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
+        glUniform1i(uniform, data);
+    }
+
+    protected void uniform(String location, boolean data) {
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
+        glUniform1f(uniform, data ? 1.0f : 0.0f);
+    }
+
+    protected void uniform(String location, Vector2f data) {
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
+        glUniform2f(uniform, data.x, data.y);
+    }
+
+    protected void uniform(String location, Vector3f data) {
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
+        glUniform3f(uniform, data.x, data.y, data.z);
+    }
+
+    protected void uniform(String location, Vector4f data) {
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
+        glUniform4f(uniform, data.x, data.y, data.z, data.w);
+    }
+
+    protected void uniform(String location, Matrix4f data) {
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
+        data.get(buffer);
+        glUniformMatrix4fv(uniform, false, buffer);
     }
 
     protected abstract void shader(Scene scene);
@@ -88,7 +107,7 @@ public abstract class Shader {
         }
     }
 
-    private static int loadShader(String file, int type){
+    private static int loadShader(String file, int type) {
         StringBuilder shaderSource = new StringBuilder();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));

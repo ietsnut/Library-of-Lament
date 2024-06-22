@@ -7,14 +7,15 @@ import org.joml.Math;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import property.Worker;
+import property.Machine;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Camera implements Worker {
+public class Camera implements Machine {
 
     public static final Matrix4f projection = new Matrix4f();
     public static final Matrix4f view       = new Matrix4f();
+    private static final Matrix4f viewBuffer = new Matrix4f();
 
     public static final Quaternionf orientation     = new Quaternionf();
     public static final Vector3f    rotation        = new Vector3f(0, 0, 0);
@@ -31,7 +32,7 @@ public class Camera implements Worker {
     private static float bob = 0;
 
     @Override
-    public void work() {
+    public void process() {
         update();
         view();
         projection();
@@ -77,36 +78,35 @@ public class Camera implements Worker {
     }
 
     private static void view() {
-        Matrix4f view = new Matrix4f();
         orient();
-        view.identity();
-        view.m00(1.0f - 2.0f * (orientation.y * orientation.y + orientation.z * orientation.z));
-        view.m01(2.0f * (orientation.x * orientation.y - orientation.z * orientation.w));
-        view.m02(2.0f * (orientation.x * orientation.z + orientation.y * orientation.w));
-        view.m03(0);
-        view.m10(2.0f * (orientation.x * orientation.y + orientation.z * orientation.w));
-        view.m11(1.0f - 2.0f * (orientation.x * orientation.x + orientation.z * orientation.z));
-        view.m12(2.0f * (orientation.y * orientation.z - orientation.x * orientation.w));
-        view.m13(0);
-        view.m20(2.0f * (orientation.x * orientation.z - orientation.y * orientation.w));
-        view.m21(2.0f * (orientation.y * orientation.z + orientation.x * orientation.w));
-        view.m22(1.0f - 2.0f * (orientation.x * orientation.x + orientation.y * orientation.y));
-        view.m23(0);
-        view.m30(0);
-        view.m31(0);
-        view.m32(0);
-        view.m33(1.0f);
-        view.translate(-position.x, -position.y, -position.z);
-        Camera.view.set(view);
+        viewBuffer.identity();
+        viewBuffer.m00(1.0f - 2.0f * (orientation.y * orientation.y + orientation.z * orientation.z));
+        viewBuffer.m01(2.0f * (orientation.x * orientation.y - orientation.z * orientation.w));
+        viewBuffer.m02(2.0f * (orientation.x * orientation.z + orientation.y * orientation.w));
+        viewBuffer.m03(0);
+        viewBuffer.m10(2.0f * (orientation.x * orientation.y + orientation.z * orientation.w));
+        viewBuffer.m11(1.0f - 2.0f * (orientation.x * orientation.x + orientation.z * orientation.z));
+        viewBuffer.m12(2.0f * (orientation.y * orientation.z - orientation.x * orientation.w));
+        viewBuffer.m13(0);
+        viewBuffer.m20(2.0f * (orientation.x * orientation.z - orientation.y * orientation.w));
+        viewBuffer.m21(2.0f * (orientation.y * orientation.z + orientation.x * orientation.w));
+        viewBuffer.m22(1.0f - 2.0f * (orientation.x * orientation.x + orientation.y * orientation.y));
+        viewBuffer.m23(0);
+        viewBuffer.m30(0);
+        viewBuffer.m31(0);
+        viewBuffer.m32(0);
+        viewBuffer.m33(1.0f);
+        viewBuffer.translate(-position.x, -position.y, -position.z);
+        Camera.view.set(viewBuffer);
     }
 
     public static void projection() {
-        projection.set(new Matrix4f().identity().perspective((float) Math.toRadians(Camera.FOV), (float) Game.WIDTH / (float) Game.HEIGHT, NEAR, FAR));
+        projection.identity().perspective(Math.toRadians(Camera.FOV), (float) Game.WIDTH / (float) Game.HEIGHT, NEAR, FAR);
     }
 
     public static void listen() {
         Camera camera = new Camera();
-        camera.start();
+        camera.start(Game.RATE * 2);
     }
 
     private static void rot(float x, float y, float z, double angle) {

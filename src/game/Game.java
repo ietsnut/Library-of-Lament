@@ -4,16 +4,16 @@ import engine.*;
 import object.*;
 
 import org.lwjgl.Version;
+import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import java.util.*;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import math.Byte;
+import property.Machine;
 import property.Resource;
 import property.State;
-import property.Worker;
 
 import java.nio.*;
 
@@ -31,11 +31,13 @@ public class Game {
     public static long RATE;
     public static float PLAYTIME;
 
-    public static State STATE = new State(1);
+    public static State STATE = new State(8);
 
     public static List<Scene>   scenes = new ArrayList<>();
     public static Scene         scene;
     public static long          window;
+
+    public static Callback debugProc;
 
     public static void run() {
         open();
@@ -54,6 +56,8 @@ public class Game {
         WIDTH = vidmode.height() * 4 / 5;
         HEIGHT = vidmode.height() * 4 / 5;
         glfwDefaultWindowHints();
+        // DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -77,15 +81,12 @@ public class Game {
             glfwSwapInterval(1);
             glfwShowWindow(window);
             GL.createCapabilities();
+            //debugProc = GLUtil.setupDebugMessageCallback();
         }
         scene = new Scene();
         scenes.add(scene);
         Renderer.init();
         Camera.listen();
-
-        Byte b = new Byte((byte) 100);
-        System.out.println(b);
-
     }
 
     private static void loop() {
@@ -111,7 +112,7 @@ public class Game {
     }
 
     public static void close() {
-        Worker.stop();
+        Machine.stop();
         Resource.clear();
         glDeleteFramebuffers(FBOShader.fbo.id);
         glDeleteBuffers(FBOShader.fbo.drawBuffers);
@@ -121,6 +122,7 @@ public class Game {
         glfwTerminate();
         glfwSetErrorCallback(null).free();
     }
+
 
     public static long time() {
         return (long) (GLFW.glfwGetTime() * 1000);

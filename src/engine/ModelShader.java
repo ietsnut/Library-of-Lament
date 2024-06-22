@@ -1,13 +1,10 @@
 package engine;
 
-import content.Terrain;
 import game.Scene;
 import org.joml.Math;
 import object.*;
-import property.Material;
-import property.Mesh;
-
-import java.util.Arrays;
+import org.joml.Vector3f;
+import property.Entity;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -26,10 +23,14 @@ public class ModelShader extends Shader {
         uniform("projection",       Camera.projection);
         uniform("view",             Camera.view);
         uniform("lights",           Math.min(scene.lights.size(), LIGHTS));
+
+        uniform("lightPosition[0]",     Camera.position);
+        uniform("lightAttenuation[0]",  new Vector3f(1.0f, 0.7f, 0.07f));
+        uniform("lightIntensity[0]",    2f);
         for (byte i = 0; i < Math.min(scene.lights.size(), LIGHTS); i++) {
-            uniform("lightPosition[" + i + "]",     scene.lights.get(i).position);
-            uniform("lightAttenuation[" + i + "]",  scene.lights.get(i).attenuation);
-            uniform("lightIntensity[" + i + "]",    scene.lights.get(i).intensity);
+            uniform("lightPosition[" + (i + 1) + "]",     scene.lights.get(i).position);
+            uniform("lightAttenuation[" + (i + 1) + "]",  scene.lights.get(i).attenuation);
+            uniform("lightIntensity[" + (i + 1) + "]",    scene.lights.get(i).intensity);
         }
         for (Entity entity : scene.entities) {
             if (entity.meshes.get(entity.mesh).bound) {
@@ -42,7 +43,7 @@ public class ModelShader extends Shader {
     protected void render(Entity entity) {
         uniform("model",        entity.model);
         glBindVertexArray(entity.meshes.get(entity.mesh).vao);
-        for (int i = 0; i < attributes.length; i++) {
+        for (byte i = 0; i < attributes.length; i++) {
             glEnableVertexAttribArray(i);
         }
         glActiveTexture(GL_TEXTURE0);

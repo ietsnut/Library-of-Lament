@@ -1,11 +1,12 @@
 package content;
 
 import object.Camera;
-import object.Entity;
+import property.Entity;
 import org.joml.Vector3f;
 import property.Mesh;
+import property.Persistent;
 
-public class Terrain extends Entity {
+public class Terrain extends Entity implements Persistent {
 
     public Mesh terrain;
 
@@ -77,11 +78,6 @@ public class Terrain extends Entity {
         float l2 = ((z3 - z1) * (x - x3) + (x1 - x3) * (y - z3)) / det;
         float l3 = 1.0f - l1 - l2;
         return new float[]{ l1, l2, l3 };
-    }
-
-    @Override
-    public void update() {
-
     }
 
 }

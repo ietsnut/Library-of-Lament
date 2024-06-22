@@ -2,7 +2,7 @@ package engine;
 
 import game.Game;
 import game.Scene;
-import object.Entity;
+import property.Entity;
 import object.FBO;
 
 import static org.lwjgl.opengl.GL40.*;

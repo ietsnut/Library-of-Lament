@@ -1,72 +1,79 @@
 package network;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import property.Machine;
+
+import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
 
 public class Node {
 
-    private final Socket socket;
-    private final In in;
-    private final Out out;
+    public static final String ADDRESS = "192.168.1.177";
+    public static final int PORT = 80;
 
-    public final HashMap<Integer, State> states;
-    public State state;
+    private final Socket    socket;
+    private final In        in;
+    private final Out       out;
 
     public Node() {
         try {
-            this.states = new HashMap<>();
-            this.state = new State();
-            this.socket = new Socket(Relay.ADDRESS, Relay.PORT);
-            this.out = new Out(socket);
-            this.in = new In(socket);
+            this.socket = new Socket(ADDRESS, PORT);
+            this.out    = new Out(socket);
+            this.in     = new In(socket);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    class In extends Thread {
-        private final ObjectInputStream in;
+    class In implements Machine {
+
+        private final InputStream in;
+        byte[] buffer = new byte[32];
+        int bytesRead;
+
         protected In(Socket socket) throws IOException {
-            this.in = new ObjectInputStream(socket.getInputStream());
-            this.start();
+            this.in = socket.getInputStream();
+            this.start(32);
         }
+
         @Override
-        public void run() {
-            while (!socket.isClosed() && isAlive()) {
+        public void process() {
+            if (!socket.isClosed()) {
                 try {
-                    Object object = in.readObject();
-                    System.out.println(this.getId() + " NODE: IN");
-                    if (object instanceof network.State state) {
-                        states.put(state.id, state);
+                    if ((bytesRead = in.read(buffer)) != -1) {
+                        String receivedData = new String(buffer, 0, bytesRead);
+                        System.out.println("NODE IN:\t" + receivedData);
                     }
-                } catch (IOException | ClassNotFoundException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
+
     }
 
-    class Out extends Thread {
-        private final ObjectOutputStream out;
+    class Out implements Machine {
+
+        private final OutputStream out;
+
         protected Out(Socket socket) throws IOException {
-            this.out = new ObjectOutputStream(socket.getOutputStream());
+            this.out = socket.getOutputStream();
             this.start();
         }
+
         @Override
-        public void run() {
-            while (!socket.isClosed() && isAlive()) {
+        public void process() {
+            if (!socket.isClosed()) {
+                System.out.println("NODE OUT:\ttest");
                 try {
-                    System.out.println(this.getId() + " NODE: OUT");
-                    out.writeObject(state);
+                    byte[] message = "a".getBytes();
+                    out.write(message);
                     out.flush();
-                    Thread.sleep(16);
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
+
     }
+
 }

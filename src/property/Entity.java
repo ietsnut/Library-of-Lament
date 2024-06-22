@@ -1,15 +1,13 @@
-package object;
+package property;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import property.*;
-import math.Vector;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.*;
 
-public abstract class Entity {
+public sealed abstract class Entity implements Intention {
 
     public static final float UNIT  = 1f;
     public static final float DECI  = 1f / 2;
@@ -21,22 +19,15 @@ public abstract class Entity {
     public static final float FEMTO = 1f / 128;
     public static final float ATTO  = 1f / 256;
 
-    public final Vector position    = new Vector();
-    public final Vector rotation    = new Vector();
-    public float scale              = UNIT;
+    public final Vector3f position  = new Vector3f();
+    public final Vector3f rotation  = new Vector3f();
+    public float scale           = UNIT;
 
-    public final Matrix4f model     = new Matrix4f();
+    public final Matrix4f   model   = new Matrix4f();
 
-    public final List<Material> materials = new ArrayList<>();
-    public final List<Mesh>     meshes    = new ArrayList<>();
-
-    public final byte id;
-    public final String type;
-
-    public byte mesh        = 0;
-    public byte material    = 0;
-
-    public boolean collidable = this instanceof Interactive;
+    public final byte       id;
+    public final String     type;
+    public String        state;
 
     public Entity() {
         this.type   = this.getClass().getSimpleName().toLowerCase();
@@ -46,23 +37,20 @@ public abstract class Entity {
     public Entity(byte id) {
         this.type   = this.getClass().getSimpleName().toLowerCase();
         this.id     = id;
-        allocate(true, true);
-    }
-
-    public Entity(byte id, Mesh mesh) {
-        this.type   = this.getClass().getSimpleName().toLowerCase();
-        this.id     = id;
-        this.meshes.add(mesh);
-        allocate(false, true);
+        allocate();
     }
 
     public Entity(byte id, String type) {
         this.type   = type;
         this.id     = id;
-        allocate(true, true);
+        allocate();
     }
 
-    public void allocate(boolean mesh, boolean material) {
+    public void allocate() {
+        remodel();
+        if (this instanceof Machine machine) {
+            machine.start();
+        }
         String directoryPath = "resource/" + type;
         File directory = new File(directoryPath);
         FilenameFilter filter = (dir, name) -> name.startsWith(String.valueOf(id));
@@ -74,16 +62,16 @@ public abstract class Entity {
                 if (parts.length > 1) {
                     String state = parts[1].split("\\.")[0];
                     String fileExtension = parts[1].split("\\.")[1];
-                    if (fileExtension.equals("png") && material) {
+                    if (fileExtension.equals("png")) {
                         materials.add(new Material(id, type, state));
-                    } else if (fileExtension.equals("obj") && mesh) {
+                    } else if (fileExtension.equals("obj")) {
                         meshes.add(new Mesh(id, type, state));
                     }
                 } else {
                     String fileExtension = parts[0].split("\\.")[1];
-                    if (fileExtension.equals("png") && material) {
+                    if (fileExtension.equals("png")) {
                         materials.add(new Material(id, type));
-                    } else if (fileExtension.equals("obj") && mesh) {
+                    } else if (fileExtension.equals("obj")) {
                         meshes.add(new Mesh(id, type));
                     }
                 }
@@ -93,28 +81,17 @@ public abstract class Entity {
         }
     }
 
-    public abstract void update();
-
     @Override
     public String toString() {
         return "<" + this.getClass().getTypeName() + "> [" + type + " : " + id + "] : " + position.x + ", " + position.y + ", " + position.z;
     }
 
     private Matrix4f model() {
-        Matrix4f model = new Matrix4f();
-
-        model.translate(position.x, position.y, position.z);
-        model.scale(scale);
-        model.rotate((float) Math.toRadians(rotation.y * 5), new Vector3f(0, 1, 0));
-        model.rotate((float) Math.toRadians(rotation.x * 5), new Vector3f(1, 0, 0));
-        model.rotate((float) Math.toRadians(rotation.z * 5), new Vector3f(0, 0, 1));
-
-        return model;
+        return model.identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y * 5), new Vector3f(0, 1, 0)).rotate((float) Math.toRadians(rotation.x * 5), new Vector3f(1, 0, 0)).rotate((float) Math.toRadians(rotation.z * 5), new Vector3f(0, 0, 1));
     }
 
     public void remodel() {
         this.model.set(model());
     }
-
 
 }
