@@ -25,18 +25,18 @@ public class AABBShader extends Shader {
         uniform("projection",   Camera.projection);
         uniform("view",         Camera.view);
         uniform("time",         Game.time() / 1000.0f);
-        uniform("scale",        scene.active.meshes.get(scene.active.mesh).collider.size);
+        uniform("scale",        scene.active.meshes.getFirst().collider.size);
         render(scene.active);
     }
 
     @Override
     protected void render(Entity entity) {
         System.out.println("AABBShader.render");
-        glBindVertexArray(entity.meshes.get(entity.mesh).collider.vao);
+        glBindVertexArray(entity.meshes.getFirst().collider.vao);
         for (byte i = 0; i < attributes.length; i++) {
             glEnableVertexAttribArray(i);
         }
-        glDrawElements(GL_LINES, entity.meshes.get(entity.mesh).collider.indices.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, entity.meshes.getFirst().collider.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
             glDisableVertexAttribArray(i);
         }

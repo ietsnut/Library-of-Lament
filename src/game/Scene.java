@@ -5,7 +5,6 @@ import content.Vase;
 import object.*;
 import org.joml.Vector3f;
 import property.Entity;
-import property.Interactive;
 import property.Machine;
 
 import java.util.ArrayList;
@@ -61,9 +60,6 @@ public class Scene implements Machine {
     @Override
     public void process() {
         System.out.println("Scene.process");
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
-            System.out.println(i);
-        }
         /*
         float min = Float.MAX_VALUE;
         Entity closest = null;

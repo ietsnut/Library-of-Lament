@@ -27,7 +27,7 @@ public class FBOShader extends Shader {
 
     @Override
     protected void render(Entity entity) {
-        glBindVertexArray(fbo.meshes.get(fbo.mesh).vao);
+        glBindVertexArray(fbo.meshes.getFirst().vao);
         for (int i = 0; i < attributes.length; i++) {
             glEnableVertexAttribArray(i);
         }

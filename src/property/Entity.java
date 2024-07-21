@@ -6,8 +6,9 @@ import property.*;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 
-public sealed abstract class Entity implements Intention {
+public abstract class Entity {
 
     public static final float UNIT  = 1f;
     public static final float DECI  = 1f / 2;
@@ -24,6 +25,9 @@ public sealed abstract class Entity implements Intention {
     public float scale           = UNIT;
 
     public final Matrix4f   model   = new Matrix4f();
+
+    public ArrayList<Mesh> meshes   = new ArrayList<>();
+    public ArrayList<Material> materials = new ArrayList<>();
 
     public final byte       id;
     public final String     type;

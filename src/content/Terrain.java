@@ -4,9 +4,8 @@ import object.Camera;
 import property.Entity;
 import org.joml.Vector3f;
 import property.Mesh;
-import property.Persistent;
 
-public class Terrain extends Entity implements Persistent {
+public class Terrain extends Entity {
 
     public Mesh terrain;
 

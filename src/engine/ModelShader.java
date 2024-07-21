@@ -33,7 +33,7 @@ public class ModelShader extends Shader {
             uniform("lightIntensity[" + (i + 1) + "]",    scene.lights.get(i).intensity);
         }
         for (Entity entity : scene.entities) {
-            if (entity.meshes.get(entity.mesh).bound) {
+            if (entity.meshes.getFirst().bound) {
                 render(entity);
             }
         }
@@ -42,14 +42,14 @@ public class ModelShader extends Shader {
     @Override
     protected void render(Entity entity) {
         uniform("model",        entity.model);
-        glBindVertexArray(entity.meshes.get(entity.mesh).vao);
+        glBindVertexArray(entity.meshes.getFirst().vao);
         for (byte i = 0; i < attributes.length; i++) {
             glEnableVertexAttribArray(i);
         }
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, entity.materials.get(entity.material).texture);
+        glBindTexture(GL_TEXTURE_2D, entity.materials.getFirst().texture);
         uniform("texture1", 0);
-        glDrawElements(GL_TRIANGLES, entity.meshes.get(entity.mesh).indices.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, entity.meshes.getFirst().indices.length, GL_UNSIGNED_INT, 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
         for (int i = 0; i < attributes.length; i++) {

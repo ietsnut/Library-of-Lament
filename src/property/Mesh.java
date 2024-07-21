@@ -197,6 +197,8 @@ public class Mesh extends Resource {
             };
         }
 
+        /*
+
         private Float collision(Entity entity) {
             if (collider == null) {
                 return -1f;
@@ -250,6 +252,8 @@ public class Mesh extends Resource {
             }
             return closest;
         }
+
+         */
 
     }
 
