@@ -7,12 +7,22 @@ import java.net.Socket;
 
 public class Node {
 
-    public static final String ADDRESS = "192.168.1.177";
-    public static final int PORT = 80;
+    public static final String ADDRESS = "127.0.0.1";
+    public static final int PORT = 8080;
 
     private final Socket    socket;
     private final In        in;
     private final Out       out;
+
+    public Node(Socket socket) {
+        try {
+            this.socket = socket;
+            this.out    = new Out(socket);
+            this.in     = new In(socket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Node() {
         try {
@@ -32,7 +42,7 @@ public class Node {
 
         protected In(Socket socket) throws IOException {
             this.in = socket.getInputStream();
-            this.start(32);
+            this.start(64);
         }
 
         @Override
@@ -57,15 +67,15 @@ public class Node {
 
         protected Out(Socket socket) throws IOException {
             this.out = socket.getOutputStream();
-            this.start();
+            this.start(4);
         }
 
         @Override
         public void process() {
             if (!socket.isClosed()) {
-                System.out.println("NODE OUT:\ttest");
+                System.out.println("NODE OUT:\tHello from the big server!");
                 try {
-                    byte[] message = "a".getBytes();
+                    byte[] message = "Hello from the big server!".getBytes();
                     out.write(message);
                     out.flush();
                 } catch (IOException e) {

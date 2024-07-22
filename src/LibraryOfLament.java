@@ -1,13 +1,17 @@
 import game.Game;
 import network.Node;
+import network.Server;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class LibraryOfLament {
 
-    static Node node;
-
     public static void main(String[] args) {
-        Game.run();
-        //node = new Node();
+        //Game.run();
+        Server.listen();
     }
 
 }
