@@ -16,4 +16,5 @@ public class Vase extends Entity implements Machine {
         this.rotation.y += 1;
         remodel();
     }
+
 }

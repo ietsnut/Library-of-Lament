@@ -101,6 +101,7 @@ public class Window extends JFrame implements Runnable, MouseListener, MouseMoti
             //return window.image == null ? new Dimension(W, H) : new Dimension(window.image.getWidth(), window.image.getHeight());
             return new Dimension(W, H);
         }
+
     }
 
     @Override
