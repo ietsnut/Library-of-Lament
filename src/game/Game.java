@@ -1,5 +1,7 @@
 package game;
 
+import content.Sewer;
+import property.Train;
 import engine.*;
 import object.*;
 
@@ -7,13 +9,10 @@ import org.lwjgl.Version;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
-import java.util.*;
-
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import property.Machine;
 import property.Resource;
-import property.State;
 
 import java.nio.*;
 
@@ -31,18 +30,19 @@ public class Game {
     public static long RATE;
     public static float PLAYTIME;
 
-    public static State STATE = new State(8);
-
-    public static List<Scene>   scenes = new ArrayList<>();
     public static Scene         scene;
+    public static Train         train;
     public static long          window;
 
     public static Callback debugProc;
 
     public static void run() {
-        open();
-        loop();
-        close();
+        try {
+            open();
+            loop();
+        } finally {
+            close();
+        }
     }
 
     public static void open() {
@@ -83,8 +83,7 @@ public class Game {
             GL.createCapabilities();
             //debugProc = GLUtil.setupDebugMessageCallback();
         }
-        scene = new Scene();
-        scenes.add(scene);
+        scene = new Sewer();
         Renderer.init();
         Camera.listen();
     }
@@ -96,7 +95,6 @@ public class Game {
         glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
         glDepthRange(0.0, 1.0);
         while (!glfwWindowShouldClose(window)) {
-            Resource.process();
             TIME = time();
             PLAYTIME = (TIME - lastFrameTime) / 1000f;
             if (TIME - lastFrameTime > 1000) {
@@ -105,18 +103,18 @@ public class Game {
                 lastFrameTime += 1000;
             }
             fps++;
-            Renderer.render(scene);
+            Renderer.render();
             glfwPollEvents();
             glfwSwapBuffers(window);
         }
     }
 
     public static void close() {
-        Machine.stop();
+        Machine.clear();
         Resource.clear();
         glDeleteFramebuffers(FBOShader.fbo.id);
         glDeleteBuffers(FBOShader.fbo.drawBuffers);
-        Shader.unload();
+        Shader.clear();
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
         glfwTerminate();

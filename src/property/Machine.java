@@ -7,19 +7,19 @@ public interface Machine {
 
     List<ScheduledExecutorService> MACHINES = new ArrayList<>();
 
-    void process();
+    void turn();
 
     default void start(long interval) {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         MACHINES.add(scheduler);
-        scheduler.scheduleAtFixedRate(this::process, 0, 1000L / interval, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(this::turn, 0, 1000L / interval, TimeUnit.MILLISECONDS);
     }
 
     default void start() {
         start(8);
     }
 
-    static void stop() {
+    static void clear() {
         MACHINES.forEach(ScheduledExecutorService::shutdownNow);
     }
 

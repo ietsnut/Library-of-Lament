@@ -10,11 +10,12 @@ import object.Camera;
 import property.Entity;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
+import property.Resource;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 
-public abstract class Shader {
+public abstract class Shader implements Resource {
 
     public static final List<Shader> ALL = new ArrayList<>();
     public static final byte LIGHTS = Byte.MAX_VALUE;
@@ -37,7 +38,6 @@ public abstract class Shader {
         glLinkProgram(program);
         glValidateProgram(program);
         ALL.add(this);
-
     }
 
     final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
@@ -78,11 +78,11 @@ public abstract class Shader {
         glUniformMatrix4fv(uniform, false, buffer);
     }
 
-    protected abstract void shader(Scene scene);
+    protected abstract void shader();
 
-    protected final void render(Scene scene) {
+    protected final void render() {
         start();
-        shader(scene);
+        shader();
         stop();
     }
 
@@ -96,7 +96,7 @@ public abstract class Shader {
         glUseProgram(0);
     }
 
-    public static void unload() {
+    public static void clear() {
         for (Shader shader : Shader.ALL) {
             shader.stop();
             glDetachShader(shader.program, shader.vertex);
@@ -124,7 +124,6 @@ public abstract class Shader {
                 } else {
                     shaderSource.append(line).append("//\n");
                 }
-
             }
             reader.close();
         } catch (IOException e){

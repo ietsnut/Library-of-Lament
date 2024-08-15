@@ -1,6 +1,6 @@
 package object;
 
-import content.Terrain;
+import property.Terrain;
 import game.Control;
 import game.Game;
 import org.joml.Math;
@@ -32,7 +32,7 @@ public class Camera implements Machine {
     private static float bob = 0;
 
     @Override
-    public void process() {
+    public void turn() {
         update();
         view();
         projection();
@@ -58,7 +58,7 @@ public class Camera implements Machine {
             if (Control.isKeyDown(GLFW_KEY_A) || Control.isKeyDown(GLFW_KEY_LEFT)) {
                 movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
             }
-            Terrain terrain = Game.scene.getEntity(Terrain.class);
+            Terrain terrain = Game.scene.getEntities(Terrain.class).getFirst();
             if (terrain.terrain.loaded) {
                 Vector3f position = terrain.height(origin, new Vector3f(movement));
                 Camera.position.set(position);

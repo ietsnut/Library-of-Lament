@@ -3,82 +3,57 @@ package property;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public abstract class Resource implements Runnable {
+public interface Resource extends Runnable {
 
-    public static final ConcurrentLinkedQueue<Resource>     LOADED      = new ConcurrentLinkedQueue<>();
-    public static final List<Resource>                      RESOURCES   = new ArrayList<>();
-    public static final List<Thread>                        THREADS     = new ArrayList<>();
+    ConcurrentLinkedQueue<Resource>     LOADED      = new ConcurrentLinkedQueue<>();
+    List<Resource>                      BINDED      = new ArrayList<>();
+    List<Thread>                        THREADS     = new ArrayList<>();
 
-    public final String extension = this.getClass().getSimpleName().toLowerCase();
-    public final String type, state;
-    public final int id;
+    void load();
+    void unload();
 
-    public boolean loaded;
-    public boolean bound;
+    void bind();
+    void unbind();
 
-    public Resource() {
-        this.id     = -1;
-        this.type   = null;
-        this.state  = null;
+    void buffer();
+
+    default Resource direct() {
+        this.load();
+        this.buffer();
+        this.bind();
+        BINDED.add(this);
+        return this;
     }
 
-    public Resource(int id, String type) {
-        this.id     = id;
-        this.type   = type;
-        this.state  = null;
-        queue();
-    }
-
-    public Resource(int id, String type, String state) {
-        this.id = id;
-        this.type = type;
-        this.state = state;
-        queue();
-    }
-
-    public abstract void load();
-    public abstract void buffer();
-
-    public abstract void bind();
-    public abstract void prepare();
-
-    public abstract void unbind();
-
-    @Override
-    public String toString() {
-        return "<" + extension + ">  [" + type + " : " + id + " : " + state + " ] = " + loaded + ", " + bound;
-    }
-
-    @Override
-    public void run() {
+    default void run() {
         this.load();
         this.buffer();
         LOADED.add(this);
-        loaded = true;
     }
 
-    public void queue() {
+    default Resource queue() {
         Thread thread = new Thread(this);
         THREADS.add(thread);
         thread.start();
+        return this;
     }
 
-    public static void process() {
+    static Resource process() {
         Resource loaded = LOADED.poll();
         if (loaded != null) {
             loaded.bind();
-            loaded.prepare();
-            RESOURCES.add(loaded);
-            loaded.bound = true;
-            System.gc();
+            BINDED.add(loaded);
+            java.lang.System.gc();
         }
+        return loaded;
     }
 
-    public static void clear() {
+    static void clear() {
         THREADS.forEach(Thread::interrupt);
         LOADED.clear();
-        RESOURCES.forEach(Resource::unbind);
-        RESOURCES.clear();
+        BINDED.forEach(Resource::unload);
+        BINDED.forEach(Resource::unbind);
+        BINDED.clear();
     }
 
 }

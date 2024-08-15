@@ -1,5 +1,6 @@
 package engine;
 
+import game.Game;
 import game.Scene;
 
 public class Renderer {
@@ -14,12 +15,12 @@ public class Renderer {
         aabbShader   = new AABBShader();
     }
 
-    public static void render(Scene scene) {
+    public static void render() {
         fboShader.bind();
-        aabbShader.render(scene);
-        modelShader.render(scene);
+        aabbShader.render();
+        modelShader.render();
         fboShader.unbind();
-        fboShader.render(scene);
+        fboShader.render();
     }
 
 }

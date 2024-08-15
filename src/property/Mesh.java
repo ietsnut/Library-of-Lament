@@ -4,21 +4,17 @@ import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
-import object.Camera;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.*;
-import java.util.List;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public class Mesh extends Resource {
+public class Mesh implements Resource {
 
     public int      vao = 0;
     public int[]    vbo = new int[4];
@@ -37,25 +33,11 @@ public class Mesh extends Resource {
 
     public Mesh() {
         super();
-        load();
-        buffer();
-        bind();
-        prepare();
-        RESOURCES.add(this);
-        loaded = true;
-        bound = true;
+        direct();
     }
 
-    public Mesh(Entity entity) {
+    public Mesh(String name) {
         super(entity.id, entity.type);
-    }
-
-    public Mesh(int id, String type) {
-        super(id, type);
-    }
-
-    public Mesh(int id, String type, String state) {
-        super(id, type, state);
     }
 
     @Override

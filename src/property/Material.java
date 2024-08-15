@@ -14,7 +14,7 @@ import java.nio.ByteOrder;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public class Material extends Resource {
+public class Material implements Resource {
 
     private static final IndexColorModel ICM = new IndexColorModel(2, 4,
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
@@ -22,7 +22,7 @@ public class Material extends Resource {
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
-    public  final ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());
+    public final ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());
 
     public int texture;
     public byte[] image = new byte[0];
@@ -30,20 +30,16 @@ public class Material extends Resource {
     public int width;
     public int height;
 
+    final String name;
+
     public Material() {
-        super();
-        this.bind();
-        RESOURCES.add(this);
-        loaded = true;
-        bound = true;
+        this.name = null;
+        this.direct();
     }
 
-    public Material(byte id, String type) {
-        super(id, type);
-    }
-
-    public Material(byte id, String type, String state) {
-        super(id, type, state);
+    public Material(String name) {
+        this.name = name;
+        queue();
     }
 
     public static BufferedImage load(String file) {
@@ -84,15 +80,11 @@ public class Material extends Resource {
 
     @Override
     public void load() {
-        if (this.id == -1 || this.type == null) {
+        if (this.name == null) {
             return;
         }
         BufferedImage image;
-        if (state != null) {
-            image  = load("resource" + File.separator + type + File.separator + id + "_" + state + ".png");
-        } else {
-            image  = load("resource" + File.separator + type + File.separator + id + ".png");
-        }
+        image       = load("resource" + File.separator + "material" + File.separator + name + ".png");
         image       = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();
@@ -101,7 +93,7 @@ public class Material extends Resource {
 
     @Override
     public void buffer() {
-        if (this.id == -1 || this.type == null) {
+        if (this.name == null) {
             return;
         }
         buffer.clear();
@@ -123,7 +115,7 @@ public class Material extends Resource {
     public void bind() {
         this.texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.texture);
-        if (this.image.length == 0) {
+        if (this.name == null) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         } else {
@@ -138,8 +130,9 @@ public class Material extends Resource {
     }
 
     @Override
-    public void prepare() {
-
+    public void unload() {
+        this.image = null;
+        this.name = null;
     }
 
     @Override

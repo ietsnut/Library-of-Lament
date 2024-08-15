@@ -17,7 +17,6 @@ public class FBO extends Entity {
     public IntBuffer drawBuffers;
 
     public FBO() {
-        super();
 
         meshes.add(new Mesh() {
             @Override
