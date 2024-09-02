@@ -1,48 +1,94 @@
 package property;
 
+import component.Component;
+import component.Light;
+import resource.Material;
+import resource.Mesh;
+import resource.Music;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import property.*;
+import resource.Resource;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public abstract class Entity {
+public class Entity extends State {
 
-    public final Vector3f position  = new Vector3f();
-    public final Vector3f rotation  = new Vector3f();
-    public float scale              = 1;
+    public final String type = this.getClass().getSimpleName().toLowerCase();
 
-    public final Matrix4f   model       = new Matrix4f();
+    public final Vector3f position  = new Vector3f(0);
+    public final Vector3f rotation  = new Vector3f(0);
+    public final Vector3f scale     = new Vector3f(1);
 
-    public List<Component>  components  = new ArrayList<>();
+    public final Matrix4f model = new Matrix4f();
 
-    public List<Material>   materials   = new ArrayList<>();
-    public List<Mesh>       meshes      = new ArrayList<>();
-    public List<Music>      music       = new ArrayList<>();
+    public final Material[] materials;
+    public final Mesh[]     meshes;
+    public final Music[]    musics;
 
-    public final String     type        = this.getClass().getSimpleName().toLowerCase();
-    public final String     name;
+    public int material = 0;
+    public int mesh     = 0;
+    public int music    = 0;
 
-    public int states;
+    public final Map<Class<? extends Component>, List<Component>> components = new HashMap<>();
 
-    public Entity(String name) {
-        this.name   = name;
-        this.states = 1;
-    }
+    public Entity(int states) {
+        super(states);
+        File[] files = new File("resource" + File.separator + type).listFiles();
+        assert files != null;
 
-    public Entity(String name, int states) {
-        this.name   = name;
-        this.states = states;
+        int materialsCount  = 0;
+        int meshesCount     = 0;
+        int musicsCount     = 0;
+
+        for (File file : files) {
+            if (file.isFile()) {
+                String fileName = file.getName();
+                String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+                switch (ext) {
+                    case "png":
+                        materialsCount++;
+                        break;
+                    case "obj":
+                        meshesCount++;
+                        break;
+                    case "mp3":
+                        musicsCount++;
+                        break;
+                }
+            }
+        }
+
+        this.materials  = new Material[materialsCount];
+        this.meshes     = new Mesh[meshesCount];
+        this.musics     = new Music[musicsCount];
+
+        materialsCount = 0;
+        meshesCount = 0;
+        musicsCount = 0;
+
+        for (File file : files) {
+            if (file.isFile()) {
+                String fileName = file.getName();
+                String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+                switch (ext) {
+                    case "png":
+                        this.materials[materialsCount++] = new Material(type, fileName.substring(0, fileName.lastIndexOf('.')));
+                        break;
+                    case "obj":
+                        this.meshes[meshesCount++] = new Mesh(type, fileName.substring(0, fileName.lastIndexOf('.')));
+                        break;
+                    case "mp3":
+                        //this.musics[musicsCount++] = new Music(type, fileName.substring(0, fileName.lastIndexOf('.')));
+                        break;
+                }
+            }
+        }
     }
 
     @Override
     public String toString() {
-        return "<" + type + "> [" + type + "] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
+        return "< " + type + " > [ state: " + state() + " ] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
     }
 
     private Matrix4f model() {
@@ -51,6 +97,19 @@ public abstract class Entity {
 
     public void remodel() {
         this.model.set(model());
+    }
+
+    public void add(Component component) {
+        components.computeIfAbsent(component.getClass(), k -> new ArrayList<>()).add(component);
+    }
+
+    public void remove(Component component) {
+        components.computeIfAbsent(component.getClass(), k -> new ArrayList<>()).remove(component);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Component> List<T> components(Class<T> type) {
+        return (List<T>) components.getOrDefault(type, new ArrayList<>());
     }
 
 }

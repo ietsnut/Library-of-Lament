@@ -3,11 +3,11 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms,
+Redistribution and use of this software in resource and binary forms,
 with or without modification, are permitted provided that the
 following conditions are met:
 
-* Redistributions of source code must retain the above
+* Redistributions of resource code must retain the above
   copyright notice, this list of conditions and the
   following disclaimer.
 
@@ -42,7 +42,7 @@ These are 3d models for testing purposes, from various free sources
 on the internet. They are - unless otherwise stated - copyright of
 their respective creators, which may impose additional requirements
 on the use of their work. For any of these models, see
-<model-name>.source.txt for more legal information. Contact us if you
+<model-name>.resource.txt for more legal information. Contact us if you
 are a copyright holder and believe that we credited you inproperly or
 if you don't want your files to appear in the repository.
 
@@ -53,10 +53,10 @@ Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
 http://code.google.com/p/poly2tri/
 
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification,
+Redistribution and use in resource and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above copyright notice,
+* Redistributions of resource code must retain the above copyright notice,
   this list of conditions and the following disclaimer.
 * Redistributions in binary form must reproduce the above copyright notice,
   this list of conditions and the following disclaimer in the documentation

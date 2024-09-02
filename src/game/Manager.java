@@ -1,7 +1,6 @@
 package game;
 
 import content.Sewer;
-import property.Train;
 import engine.*;
 import object.*;
 
@@ -11,8 +10,8 @@ import org.lwjgl.system.MemoryStack;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import property.Machine;
-import property.Resource;
+import component.Machine;
+import resource.Resource;
 
 import java.nio.*;
 
@@ -22,7 +21,7 @@ import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-public class Game {
+public class Manager {
 
     public static int WIDTH;
     public static int HEIGHT;
@@ -31,7 +30,6 @@ public class Game {
     public static float PLAYTIME;
 
     public static Scene         scene;
-    public static Train         train;
     public static long          window;
 
     public static Callback debugProc;
@@ -92,7 +90,7 @@ public class Game {
         int fps = 0;
         long lastFrameTime = time();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glViewport(0, 0, Game.WIDTH, Game.HEIGHT);
+        glViewport(0, 0, Manager.WIDTH, Manager.HEIGHT);
         glDepthRange(0.0, 1.0);
         while (!glfwWindowShouldClose(window)) {
             TIME = time();
@@ -103,7 +101,8 @@ public class Game {
                 lastFrameTime += 1000;
             }
             fps++;
-            Renderer.render();
+            Resource.process();
+            Renderer.render(scene);
             glfwPollEvents();
             glfwSwapBuffers(window);
         }
@@ -112,8 +111,8 @@ public class Game {
     public static void close() {
         Machine.clear();
         Resource.clear();
-        glDeleteFramebuffers(FBOShader.fbo.id);
-        glDeleteBuffers(FBOShader.fbo.drawBuffers);
+        glDeleteFramebuffers(FBO.ID);
+        glDeleteBuffers(FBO.DRAWBUFFERS);
         Shader.clear();
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);

@@ -26,14 +26,14 @@ public class Control {
             @Override
             public void invoke(long window, int button, int action, int mods) {
                 if (button == 0 && action == 1 && !mouseLocked) {
-                    glfwSetCursorPos(Game.window, Game.WIDTH/2f, Game.HEIGHT/2f);
-                    glfwSetInputMode(Game.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
+                    glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                     mouseLocked = true;
                     firstMouse = true;
                 }
                 if (button == 1 && action == 1 && mouseLocked) {
-                    glfwSetInputMode(Game.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                    glfwSetCursorPos(Game.window, Game.WIDTH/2f, Game.HEIGHT/2f);
+                    glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
                     mouseLocked = false;
                     firstMouse = true;
                 }

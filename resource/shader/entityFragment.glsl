@@ -9,24 +9,11 @@ layout(location = 1) out vec3   normal;
 
 uniform sampler2D texture1;
 
-uniform int     tile;
-uniform int     tiles;
 uniform int     lights;
 
 uniform vec3    lightPosition[LIGHTS];
 uniform vec3    lightAttenuation[LIGHTS];
 uniform float   lightIntensity[LIGHTS];
-
-int get(sampler2D samp, vec2 uv) {
-    float texelSize = 1.0 / textureSize(samp, 0).x;
-    float texColor = texture(samp, uv).r;
-    float positionInTexel = mod(uv.x / texelSize * 4.0, 4.0);
-    int index = int(positionInTexel);
-    int value = int(texColor * 255.0);
-    int shift = (3 - index) * 2;
-    int code = (value >> shift) & 0x03;
-    return code;
-}
 
 int t(sampler2D s, vec2 v) {
     return int(texture(s,v).x*255.)>>(3-int(mod(v.x/(1./textureSize(s,0).x)*4.,4.)))*2&3;

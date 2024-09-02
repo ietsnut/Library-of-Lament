@@ -1,13 +1,15 @@
-package property;
+package resource;
+
+import component.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public interface Resource extends Runnable {
+public interface Resource extends Runnable, Component {
 
-    ConcurrentLinkedQueue<Resource>     LOADED      = new ConcurrentLinkedQueue<>();
-    List<Resource>                      BINDED      = new ArrayList<>();
-    List<Thread>                        THREADS     = new ArrayList<>();
+    ConcurrentLinkedQueue<Resource>   LOADED      = new ConcurrentLinkedQueue<>();
+    List<Resource>                    BINDED      = new ArrayList<>();
+    List<Thread>                      THREADS     = new ArrayList<>();
 
     void load();
     void unload();
@@ -17,12 +19,15 @@ public interface Resource extends Runnable {
 
     void buffer();
 
-    default Resource direct() {
+    boolean loaded();
+    boolean binded();
+
+    default void direct() {
         this.load();
         this.buffer();
         this.bind();
+        this.unload();
         BINDED.add(this);
-        return this;
     }
 
     default void run() {
@@ -31,17 +36,16 @@ public interface Resource extends Runnable {
         LOADED.add(this);
     }
 
-    default Resource queue() {
-        Thread thread = new Thread(this);
+    default void queue() {
+        Thread thread = Thread.ofVirtual().start(this);
         THREADS.add(thread);
-        thread.start();
-        return this;
     }
 
     static Resource process() {
         Resource loaded = LOADED.poll();
         if (loaded != null) {
             loaded.bind();
+            loaded.unload();
             BINDED.add(loaded);
             java.lang.System.gc();
         }
@@ -50,8 +54,8 @@ public interface Resource extends Runnable {
 
     static void clear() {
         THREADS.forEach(Thread::interrupt);
+        THREADS.clear();
         LOADED.clear();
-        BINDED.forEach(Resource::unload);
         BINDED.forEach(Resource::unbind);
         BINDED.clear();
     }

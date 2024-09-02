@@ -4,21 +4,19 @@ import java.io.*;
 import java.nio.FloatBuffer;
 import java.util.*;
 
-import game.Game;
+import game.Manager;
 import game.Scene;
 import object.Camera;
 import property.Entity;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
-import property.Resource;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 
-public abstract class Shader implements Resource {
+public abstract class Shader {
 
     public static final List<Shader> ALL = new ArrayList<>();
-    public static final byte LIGHTS = Byte.MAX_VALUE;
 
     private final HashMap<String, Integer> uniforms = new HashMap<>();
     final String[] attributes;
@@ -42,51 +40,44 @@ public abstract class Shader implements Resource {
 
     final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
-    protected void uniform(String location, float data) {
+    protected Shader uniform(String location, Serializable data) {
         int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        glUniform1f(uniform, data);
+        switch (data) {
+            case Float f:
+                glUniform1f(uniform, f);
+                break;
+            case Integer i:
+                glUniform1i(uniform, i);
+                break;
+            case Boolean b:
+                glUniform1f(uniform, b ? 1.0f : 0.0f);
+                break;
+            case Vector2f v:
+                glUniform2f(uniform, v.x, v.y);
+                break;
+            case Vector3f v:
+                glUniform3f(uniform, v.x, v.y, v.z);
+                break;
+            case Vector4f v:
+                glUniform4f(uniform, v.x, v.y, v.z, v.w);
+                break;
+            case Matrix4f m:
+                m.get(buffer);
+                glUniformMatrix4fv(uniform, false, buffer);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported data type: " + data.getClass());
+        }
+        return this;
     }
 
-    protected void uniform(String location, int data) {
-        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        glUniform1i(uniform, data);
-    }
+    protected abstract void shader(Scene scene);
 
-    protected void uniform(String location, boolean data) {
-        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        glUniform1f(uniform, data ? 1.0f : 0.0f);
-    }
-
-    protected void uniform(String location, Vector2f data) {
-        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        glUniform2f(uniform, data.x, data.y);
-    }
-
-    protected void uniform(String location, Vector3f data) {
-        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        glUniform3f(uniform, data.x, data.y, data.z);
-    }
-
-    protected void uniform(String location, Vector4f data) {
-        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        glUniform4f(uniform, data.x, data.y, data.z, data.w);
-    }
-
-    protected void uniform(String location, Matrix4f data) {
-        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
-        data.get(buffer);
-        glUniformMatrix4fv(uniform, false, buffer);
-    }
-
-    protected abstract void shader();
-
-    protected final void render() {
+    protected final void render(Scene scene) {
         start();
-        shader();
+        shader(scene);
         stop();
     }
-
-    protected abstract void render(Entity entity);
 
     public void start() {
         glUseProgram(program);
@@ -114,11 +105,11 @@ public abstract class Shader implements Resource {
             String line;
             while((line = reader.readLine())!=null){
                 if (line.startsWith("#version")) {
-                    shaderSource.append("#version ").append(glfwGetWindowAttrib(Game.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Game.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
-                    shaderSource.append("#define LIGHTS " + LIGHTS).append("//\n");
+                    shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
+                    shaderSource.append("#define LIGHTS " + Byte.MAX_VALUE).append("//\n");
                     shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
-                    shaderSource.append("#define WIDTH " + Game.WIDTH).append("//\n");
-                    shaderSource.append("#define HEIGHT " + Game.HEIGHT).append("//\n");
+                    shaderSource.append("#define WIDTH " + Manager.WIDTH).append("//\n");
+                    shaderSource.append("#define HEIGHT " + Manager.HEIGHT).append("//\n");
                     shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
                     shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
                 } else {

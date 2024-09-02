@@ -1,15 +1,17 @@
 package property;
 
+import resource.Material;
+import resource.Mesh;
 import object.Camera;
 import org.joml.Vector3f;
 
 public class Terrain extends Entity {
 
-    public Mesh terrain;
+    Mesh terrain;
 
     public Terrain(String name) {
-        super(name);
-        terrain = new Mesh("terrain");
+        super(0);
+        terrain = meshes[mesh];
     }
 
     public float height(float x, float z) {

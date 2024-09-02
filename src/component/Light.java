@@ -1,15 +1,13 @@
-package object;
+package component;
 
 import org.joml.Vector3f;
 
-public class Light {
+public class Light implements Component {
 
-    public Vector3f     position;
     public Vector3f     attenuation;
     public float        intensity;
 
-    public Light(Vector3f position, Vector3f attenuation, float intensity) {
-        this.position       = position;
+    public Light(Vector3f attenuation, float intensity) {
         this.attenuation    = attenuation;
         this.intensity      = intensity;
     }

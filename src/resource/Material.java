@@ -1,4 +1,4 @@
-package property;
+package resource;
 
 import org.lwjgl.BufferUtils;
 
@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 
 import static org.lwjgl.opengl.GL40.*;
 
@@ -22,7 +23,7 @@ public class Material implements Resource {
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
-    public final ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());
+    private ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());
 
     public int texture;
     public byte[] image = new byte[0];
@@ -30,16 +31,16 @@ public class Material implements Resource {
     public int width;
     public int height;
 
-    final String name;
+    private final String file;
 
     public Material() {
-        this.name = null;
+        this.file = null;
         this.direct();
     }
 
-    public Material(String name) {
-        this.name = name;
-        queue();
+    public Material(String type, String name) {
+        this.file = File.separator + type + File.separator + name;
+        this.queue();
     }
 
     public static BufferedImage load(String file) {
@@ -52,7 +53,7 @@ public class Material implements Resource {
         return image;
     }
 
-    public BufferedImage dither(BufferedImage original) {
+    public static BufferedImage dither(BufferedImage original) {
         BufferedImage image = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
         for (int y = 0; y < original.getHeight(); y++) {
             for (int x = 0; x < original.getWidth(); x++) {
@@ -80,11 +81,11 @@ public class Material implements Resource {
 
     @Override
     public void load() {
-        if (this.name == null) {
+        if (file == null) {
             return;
         }
         BufferedImage image;
-        image       = load("resource" + File.separator + "material" + File.separator + name + ".png");
+        image       = load("resource" + file + ".png");
         image       = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();
@@ -93,7 +94,7 @@ public class Material implements Resource {
 
     @Override
     public void buffer() {
-        if (this.name == null) {
+        if (this.image.length == 0) {
             return;
         }
         buffer.clear();
@@ -112,10 +113,20 @@ public class Material implements Resource {
     }
 
     @Override
+    public boolean loaded() {
+        return this.image.length > 0;
+    }
+
+    @Override
+    public boolean binded() {
+        return this.texture != 0;
+    }
+
+    @Override
     public void bind() {
         this.texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.texture);
-        if (this.name == null) {
+        if (!this.buffer.hasRemaining()) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         } else {
@@ -131,13 +142,22 @@ public class Material implements Resource {
 
     @Override
     public void unload() {
-        this.image = null;
-        this.name = null;
+        this.buffer = null;
     }
 
     @Override
     public void unbind() {
         glDeleteTextures(texture);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Material material && this.file.equals(material.file);
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
 }

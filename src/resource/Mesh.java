@@ -1,4 +1,4 @@
-package property;
+package resource;
 
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
@@ -31,29 +31,31 @@ public class Mesh implements Resource {
 
     public Collider collider;
 
+    private final String file;
+
     public Mesh() {
-        super();
-        direct();
+        this.file = null;
+        this.direct();
     }
 
-    public Mesh(String name) {
-        super(entity.id, entity.type);
+    public Mesh(String type, String name) {
+        this.file = File.separator + type + File.separator + name;
+        this.queue();
     }
 
     @Override
     public void load() {
+        if (file == null) {
+            return;
+        }
         Obj obj;
         try {
-            if (state != null) {
-                obj = ObjReader.read(new FileInputStream("resource" + File.separator + type + File.separator + id + "_" + state + ".obj"));
-            } else {
-                obj = ObjReader.read(new FileInputStream("resource" + File.separator + type + File.separator + id + ".obj"));
-            }
+            obj = ObjReader.read(new FileInputStream("resource" + file + ".obj"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        obj         = ObjUtils.convertToRenderable(obj);
-        indices     = ObjData.getFaceVertexIndicesArray(obj);
+        obj                 = ObjUtils.convertToRenderable(obj);
+        this.indices        = ObjData.getFaceVertexIndicesArray(obj);
         float[] vertices    = ObjData.getVerticesArray(obj);
         this.vertices       = new byte[vertices.length];
         for (int i = 0; i < vertices.length; i++) {
@@ -87,7 +89,20 @@ public class Mesh implements Resource {
         }
     }
 
+    @Override
+    public boolean loaded() {
+        return indices.length > 0 || vertices.length > 0 || texCoords.length > 0 || normals.length > 0;
+    }
+
+    @Override
+    public boolean binded() {
+        return vao != 0;
+    }
+
     private void buffer(int i, int l, Buffer buffer) {
+        if (buffer == null) {
+            return;
+        }
         int vbo = glGenBuffers();
         switch (buffer) {
             case IntBuffer ib -> {
@@ -118,7 +133,7 @@ public class Mesh implements Resource {
             buffer(0, 0, indicesBuffer);
         }
         if (vertices.length > 0) {
-            buffer(0, type == null ? 2 : 3, verticesBuffer);
+            buffer(0, file == null ? 2 : 3, verticesBuffer);
         }
         if (texCoords.length > 0) {
             buffer(1, 2, texCoordsBuffer);
@@ -127,17 +142,17 @@ public class Mesh implements Resource {
             buffer(2, 3, normalsBuffer);
         }
         glBindVertexArray(0);
-        if (type != null && id != -1 && !(this instanceof Collider)) {
-            this.collider = new Collider(this);
+        if (file != null && !(this instanceof Collider)) {
+            this.collider = new Collider();
         }
     }
 
     @Override
-    public void prepare() {
-        indicesBuffer = null;
-        verticesBuffer = null;
+    public void unload() {
+        indicesBuffer   = null;
+        verticesBuffer  = null;
         texCoordsBuffer = null;
-        normalsBuffer = null;
+        normalsBuffer   = null;
     }
 
     @Override
@@ -156,9 +171,8 @@ public class Mesh implements Resource {
 
         private static int ID = 0;
 
-        public Collider(Mesh mesh) {
-            super(mesh.id, "collider" + ID);
-            ID++;
+        public Collider() {
+            super("collider", String.valueOf(ID++));
         }
 
         @Override
@@ -179,64 +193,11 @@ public class Mesh implements Resource {
             };
         }
 
-        /*
+    }
 
-        private Float collision(Entity entity) {
-            if (collider == null) {
-                return -1f;
-            }
-            Matrix4f inverseModelMatrix = new Matrix4f();
-            entity.model.invert(inverseModelMatrix);
-            Vector4f rayOriginModelSpace = new Vector4f(Camera.position.x, Camera.position.y, Camera.position.z, 1.0f);
-            inverseModelMatrix.transform(rayOriginModelSpace);
-            Vector3f ray = new Vector3f(Camera.forward()).negate().normalize();
-            Vector4f rayDirectionModelSpace = new Vector4f(ray.x, ray.y, ray.z, 0.0f);
-            inverseModelMatrix.transform(rayDirectionModelSpace);
-            Vector3f directionNormalized = new Vector3f(rayDirectionModelSpace.x, rayDirectionModelSpace.y, rayDirectionModelSpace.z).normalize();
-            Vector3f invDir = new Vector3f(1.0f / directionNormalized.x, 1.0f / directionNormalized.y, 1.0f / directionNormalized.z);
-            float t1 = (collider.min.x - rayOriginModelSpace.x) * invDir.x;
-            float t2 = (collider.max.x - rayOriginModelSpace.x) * invDir.x;
-            float t3 = (collider.min.y - rayOriginModelSpace.y) * invDir.y;
-            float t4 = (collider.max.y - rayOriginModelSpace.y) * invDir.y;
-            float t5 = (collider.min.z - rayOriginModelSpace.z) * invDir.z;
-            float t6 = (collider.max.z - rayOriginModelSpace.z) * invDir.z;
-            float tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
-            float tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
-            if (tmax < 0) {
-                return -1f;
-            }
-            if (tmin > tmax) {
-                return -1f;
-            }
-            return Math.max(tmin, 0);
-        }
-
-
-        public boolean lookingAt(float distance, Entity entity) {
-            //return collision(entity) > 0 && distance(entity) < distance;
-            return true;
-        }
-
-        public float distance(Entity entity) {
-            System.out.println("a");
-            return new Vector3f(Camera.position).sub(entity.position).length();
-        }
-
-        public static Entity lookingAt(List<Entity> entities, float distance) {
-            float min = Float.MAX_VALUE;
-            Entity closest = null;
-            for (Entity entity : entities) {
-                Mesh mesh = entity.meshes.get(entity.mesh);
-                if (entity.interacive && mesh.collider.lookingAt(distance, entity) && mesh.collider.distance(entity) < min) {
-                    min = mesh.collider.distance(entity);
-                    closest = entity;
-                }
-            }
-            return closest;
-        }
-
-         */
-
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Mesh mesh && this.file.equals(mesh.file);
     }
 
 }

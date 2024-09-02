@@ -1,9 +1,9 @@
-package property;
+package component;
 
 import java.util.*;
 import java.util.concurrent.*;
 
-public interface Machine {
+public interface Machine extends Component {
 
     List<ScheduledExecutorService> MACHINES = new ArrayList<>();
 
@@ -20,7 +20,18 @@ public interface Machine {
     }
 
     static void clear() {
-        MACHINES.forEach(ScheduledExecutorService::shutdownNow);
+        MACHINES.forEach(scheduler -> {
+            scheduler.shutdown();
+            try {
+                if (!scheduler.awaitTermination(1, TimeUnit.SECONDS)) {
+                    scheduler.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                scheduler.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        });
+        MACHINES.clear();
     }
 
 }

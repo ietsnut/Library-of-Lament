@@ -1,11 +1,6 @@
-import game.Game;
-import network.Server;
+import game.Manager;
 
-public class LibraryOfLament {
-
-    public static void main(String[] args) {
-        Game.run();
-        //Server.listen();
-    }
-
+public void main() {
+    Manager.run();
+    //Server.listen();
 }

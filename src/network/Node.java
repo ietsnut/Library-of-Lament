@@ -1,6 +1,6 @@
 package network;
 
-import property.Machine;
+import component.Machine;
 
 import java.io.*;
 import java.net.Socket;
@@ -46,7 +46,7 @@ public class Node {
         }
 
         @Override
-        public void process() {
+        public void turn() {
             if (!socket.isClosed()) {
                 try {
                     if ((bytesRead = in.read(buffer)) != -1) {
@@ -71,7 +71,7 @@ public class Node {
         }
 
         @Override
-        public void process() {
+        public void turn() {
             if (!socket.isClosed()) {
                 System.out.println("NODE OUT:\tHello from the big server!");
                 try {

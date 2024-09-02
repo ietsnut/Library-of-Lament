@@ -84,7 +84,7 @@ def compress_obj_and_png(filename):
                 new_data[i, j] = 3  # Gray
 
     # Save the indexed image to a binary file in PNG format
-    indexed_image = Image.fromarray(new_data, mode='P')
+    indexed_image = Image.fromarray(new_data, state='P')
     indexed_image.putpalette([
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Transparent
         0, 0, 0,  # Black
