@@ -43,29 +43,6 @@ public class FBOShader extends Shader {
         glBindVertexArray(0);
     }
 
-    /*
-    @Override
-    protected void render(Entity entity) {
-        glBindVertexArray(entity.meshes[entity.mesh].vao);
-        for (int i = 0; i < attributes.length; i++) {
-            glEnableVertexAttribArray(i);
-        }
-        for (int i = 0; i < entity.materials.length; i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, entity.materials[i].texture);
-            uniform("texture" + (i + 1), i);
-        }
-        glDrawElements(GL_TRIANGLES, entity.meshes[entity.mesh].indices.length, GL_UNSIGNED_INT, 0);
-        for (int i = 0; i < entity.materials.length; i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
-        for (int i = 0; i < attributes.length; i++) {
-            glDisableVertexAttribArray(i);
-        }
-        glBindVertexArray(0);
-    }*/
-
     public void bind() {
         glBindFramebuffer(GL_FRAMEBUFFER, FBO.ID);
         glViewport(0, 0, Manager.WIDTH, Manager.HEIGHT);

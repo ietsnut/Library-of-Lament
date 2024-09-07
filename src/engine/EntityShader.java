@@ -25,7 +25,7 @@ public class EntityShader extends Shader {
     public void shader(Scene scene) {
         uniform("projection",       Camera.projection);
         uniform("view",             Camera.view);
-        LIGHT = 0;
+        LIGHT = 1;
         for (Entity entity : scene.entities) {
             List<Light> lights = entity.components(Light.class);
             if (lights == null) continue;

@@ -5,10 +5,8 @@ import java.nio.IntBuffer;
 
 import game.Manager;
 import org.lwjgl.BufferUtils;
-import property.Entity;
 import resource.Material;
 import resource.Mesh;
-import resource.Music;
 
 import static org.lwjgl.opengl.GL40.*;
 
