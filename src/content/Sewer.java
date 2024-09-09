@@ -41,7 +41,7 @@ public class Sewer extends Scene implements Machine {
 
     @Override
     public void turn() {
-        System.out.println("Sewer");
+        //System.out.println("Sewer");
     }
 
 }

@@ -47,6 +47,7 @@ public interface Resource extends Runnable, Component {
             loaded.bind();
             loaded.unload();
             BINDED.add(loaded);
+            System.out.println(loaded);
             java.lang.System.gc();
         }
         return loaded;

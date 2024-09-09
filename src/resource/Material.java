@@ -43,6 +43,11 @@ public class Material implements Resource {
         this.queue();
     }
 
+    @Override
+    public String toString() {
+        return "[ " + file + " ]: " + texture;
+    }
+
     public static BufferedImage load(String file) {
         BufferedImage image;
         try {

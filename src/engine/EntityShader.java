@@ -25,6 +25,9 @@ public class EntityShader extends Shader {
     public void shader(Scene scene) {
         uniform("projection",       Camera.projection);
         uniform("view",             Camera.view);
+        uniform("lightPosition[0]",     Camera.position);
+        uniform("lightAttenuation[0]",  Camera.LIGHT.attenuation);
+        uniform("lightIntensity[0]",    Camera.LIGHT.intensity);
         LIGHT = 1;
         for (Entity entity : scene.entities) {
             List<Light> lights = entity.components(Light.class);
@@ -37,13 +40,12 @@ public class EntityShader extends Shader {
             }
         }
         uniform("lights", LIGHT);
-        uniform("texture1", 0);
         for (Entity entity : scene.entities) {
-            if (entity.meshes[entity.mesh].binded()) {
+            if (entity.meshes[entity.mesh].binded() && entity.materials[entity.material].binded()) {
                 render(entity);
             }
         }
-        if (scene.terrain.meshes[scene.terrain.mesh].binded()) {
+        if (scene.terrain.meshes[scene.terrain.mesh].binded() && scene.terrain.materials[scene.terrain.material].binded()) {
             render(scene.terrain);
         }
     }
@@ -56,6 +58,7 @@ public class EntityShader extends Shader {
         }
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, entity.materials[entity.material].texture);
+        uniform("texture1", 0);
         glDrawElements(GL_TRIANGLES, entity.meshes[entity.mesh].indices.length, GL_UNSIGNED_INT, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
         for (int i = 0; i < attributes.length; i++) {

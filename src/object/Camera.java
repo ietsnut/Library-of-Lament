@@ -1,5 +1,6 @@
 package object;
 
+import component.Light;
 import property.Terrain;
 import game.Control;
 import game.Manager;
@@ -22,6 +23,8 @@ public class Camera implements Machine {
     public static final Quaternionf orientation = new Quaternionf();
     public static final Vector3f rotation = new Vector3f(0, 0, 0);
     public static final Vector3f position = new Vector3f(0, 1f, 1.5f);
+
+    public static final Light LIGHT = new Light(new Vector3f(1.0f, 0.7f, 0.07f), 2f);
 
     public static final float SPEED = 2f / Manager.RATE;
     public static final float SENS = 10f / Manager.RATE;

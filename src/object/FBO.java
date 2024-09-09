@@ -12,18 +12,19 @@ import static org.lwjgl.opengl.GL40.*;
 
 public class FBO {
 
+    public static Mesh MESH;
     public static int ID;
     public static final IntBuffer   DRAWBUFFERS = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();;
     public static final Material[]  MATERIALS   = new Material[3];
-    public static final Mesh        MESH        = new Mesh() {
-        @Override
-        public void load() {
-            indices = new int[]{0, 1, 2, 2, 1, 3};
-            vertices = new byte[]{-1, 1, -1, -1, 1, 1, 1, -1};
-        }
-    };
 
-    static {
+    public FBO() {
+        FBO.MESH = new Mesh() {
+            @Override
+            public void load() {
+                indices = new int[]{0, 1, 2, 2, 1, 3};
+                vertices = new byte[]{-1, 1, -1, -1, 1, 1, 1, -1};
+            }
+        };
         ID = glGenFramebuffers();
         Material color = new Material();
         glBindFramebuffer(GL_FRAMEBUFFER, FBO.ID);
