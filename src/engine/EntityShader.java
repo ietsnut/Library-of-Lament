@@ -33,9 +33,9 @@ public class EntityShader extends Shader {
             List<Light> lights = entity.components(Light.class);
             if (lights == null) continue;
             for (Light light : lights) {
-                uniform("lightPosition[" + LIGHT + "]",     entity.position);
-                uniform("lightAttenuation[" + LIGHT + "]",  light.attenuation);
-                uniform("lightIntensity[" + LIGHT + "]",    light.intensity);
+                uniform("lightPosition[" +      LIGHT + "]",     entity.position);
+                uniform("lightAttenuation[" +   LIGHT + "]",  light.attenuation);
+                uniform("lightIntensity[" +     LIGHT + "]",    light.intensity);
                 LIGHT++;
             }
         }

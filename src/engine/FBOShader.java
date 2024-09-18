@@ -10,11 +10,9 @@ import static org.lwjgl.opengl.GL40.*;
 
 public class FBOShader extends Shader {
 
-    public final FBO FBO;
-
     public FBOShader() {
         super("fbo", "position");
-        FBO = new FBO();
+        FBO.bind();
     }
 
     public void shader(Scene scene) {

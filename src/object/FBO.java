@@ -17,7 +17,7 @@ public class FBO {
     public static final IntBuffer   DRAWBUFFERS = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();;
     public static final Material[]  MATERIALS   = new Material[3];
 
-    public FBO() {
+    public static void bind() {
         FBO.MESH = new Mesh() {
             @Override
             public void load() {
