@@ -1,16 +1,12 @@
 package property;
 
-import component.Component;
-import component.Light;
 import resource.Material;
 import resource.Mesh;
 import resource.Music;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import resource.Resource;
 
 import java.io.File;
-import java.util.*;
 
 public class Entity extends State {
 
@@ -19,8 +15,7 @@ public class Entity extends State {
     public final Vector3f position  = new Vector3f(0);
     public final Vector3f rotation  = new Vector3f(0);
     public final Vector3f scale     = new Vector3f(1);
-
-    public final Matrix4f model = new Matrix4f();
+    public final Matrix4f model     = new Matrix4f();
 
     public final Material[] materials;
     public final Mesh[]     meshes;
@@ -29,8 +24,6 @@ public class Entity extends State {
     public int material = 0;
     public int mesh     = 0;
     public int music    = 0;
-
-    public final Map<Class<? extends Component>, List<Component>> components = new HashMap<>();
 
     public Entity(int states) {
         super(states);
@@ -97,19 +90,6 @@ public class Entity extends State {
 
     public void remodel() {
         this.model.set(model());
-    }
-
-    public void add(Component component) {
-        components.computeIfAbsent(component.getClass(), k -> new ArrayList<>()).add(component);
-    }
-
-    public void remove(Component component) {
-        components.computeIfAbsent(component.getClass(), k -> new ArrayList<>()).remove(component);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends Component> List<T> components(Class<T> type) {
-        return (List<T>) components.getOrDefault(type, new ArrayList<>());
     }
 
 }

@@ -1,11 +1,10 @@
 package engine;
 
-import component.Light;
+import property.Light;
 import game.Scene;
 import object.*;
+import org.joml.Vector3f;
 import property.Entity;
-
-import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -16,8 +15,6 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 public class EntityShader extends Shader {
 
-    private static int LIGHT = 0;
-
     public EntityShader() {
         super("entity", "position", "uv", "normal");
     }
@@ -25,18 +22,18 @@ public class EntityShader extends Shader {
     public void shader(Scene scene) {
         uniform("projection",       Camera.projection);
         uniform("view",             Camera.view);
-        LIGHT = 1;
-        for (Entity entity : scene.entities) {
-            List<Light> lights = entity.components(Light.class);
-            if (lights == null) continue;
-            for (Light light : lights) {
-                uniform("lightPosition[" + LIGHT + "]",     entity.position);
-                uniform("lightAttenuation[" + LIGHT + "]",  light.attenuation);
-                uniform("lightIntensity[" + LIGHT + "]",    light.intensity);
-                LIGHT++;
-            }
+        uniform("lightPosition[0]",     Camera.position);
+        uniform("lightAttenuation[0]",  new Vector3f(1.0f, 0.7f, 0.07f));
+        uniform("lightIntensity[0]",    2f);
+        int LIGHT = 1;
+        for (Light light : scene.lights) {
+            uniform("lightPosition[" + LIGHT + "]",     light.position);
+            uniform("lightAttenuation[" + LIGHT + "]",  light.attenuation);
+            uniform("lightIntensity[" + LIGHT + "]",    light.intensity);
+            LIGHT++;
         }
         uniform("lights", LIGHT);
+        uniform("illumination", 0f);
         uniform("texture1", 0);
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.mesh].binded()) {

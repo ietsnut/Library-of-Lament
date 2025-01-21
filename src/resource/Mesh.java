@@ -33,11 +33,6 @@ public class Mesh implements Resource {
 
     private final String file;
 
-    public Mesh() {
-        this.file = null;
-        this.direct();
-    }
-
     public Mesh(String type, String name) {
         this.file = File.separator + type + File.separator + name;
         this.queue();
@@ -99,10 +94,7 @@ public class Mesh implements Resource {
         return vao != 0;
     }
 
-    private void buffer(int i, int l, Buffer buffer) {
-        if (buffer == null) {
-            return;
-        }
+    public static int buffer(int i, int l, Buffer buffer) {
         int vbo = glGenBuffers();
         switch (buffer) {
             case IntBuffer ib -> {
@@ -122,7 +114,7 @@ public class Mesh implements Resource {
             default -> throw new IllegalArgumentException("Unsupported buffer : " + buffer.getClass());
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        this.vbo[i] = vbo;
+        return vbo;
     }
 
     @Override
@@ -130,16 +122,16 @@ public class Mesh implements Resource {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
         if (indices.length  > 0) {
-            buffer(0, 0, indicesBuffer);
+            this.vbo[0] = buffer(0, 0, indicesBuffer);
         }
         if (vertices.length > 0) {
-            buffer(0, file == null ? 2 : 3, verticesBuffer);
+            this.vbo[0] = buffer(0, 3, verticesBuffer);
         }
         if (texCoords.length > 0) {
-            buffer(1, 2, texCoordsBuffer);
+            this.vbo[1] = buffer(1, 2, texCoordsBuffer);
         }
         if (normals.length > 0) {
-            buffer(2, 3, normalsBuffer);
+            this.vbo[2] = buffer(2, 3, normalsBuffer);
         }
         glBindVertexArray(0);
         if (file != null && !(this instanceof Collider)) {

@@ -1,11 +1,14 @@
 package resource;
 
-import component.Component;
+import object.FBO;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public interface Resource extends Runnable, Component {
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+
+public interface Resource extends Runnable {
 
     ConcurrentLinkedQueue<Resource>   LOADED      = new ConcurrentLinkedQueue<>();
     List<Resource>                    BINDED      = new ArrayList<>();
@@ -21,14 +24,6 @@ public interface Resource extends Runnable, Component {
 
     boolean loaded();
     boolean binded();
-
-    default void direct() {
-        this.load();
-        this.buffer();
-        this.bind();
-        this.unload();
-        BINDED.add(this);
-    }
 
     default void run() {
         this.load();
@@ -57,6 +52,7 @@ public interface Resource extends Runnable, Component {
         THREADS.clear();
         LOADED.clear();
         BINDED.forEach(Resource::unbind);
+        FBO.unload();
         BINDED.clear();
     }
 

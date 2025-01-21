@@ -23,7 +23,7 @@ public class Material implements Resource {
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
-    private ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());
+    private ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());;
 
     public int texture;
     public byte[] image = new byte[0];
@@ -33,11 +33,6 @@ public class Material implements Resource {
 
     private final String file;
 
-    public Material() {
-        this.file = null;
-        this.direct();
-    }
-
     public Material(String type, String name) {
         this.file = File.separator + type + File.separator + name;
         this.queue();
@@ -46,6 +41,7 @@ public class Material implements Resource {
     public static BufferedImage load(String file) {
         BufferedImage image;
         try {
+            //String resourcesDir = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile().getParent()+"/resources/";
             image = ImageIO.read(new FileInputStream(file));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -81,9 +77,6 @@ public class Material implements Resource {
 
     @Override
     public void load() {
-        if (file == null) {
-            return;
-        }
         BufferedImage image;
         image       = load("resource" + file + ".png");
         image       = dither(image);
@@ -94,10 +87,7 @@ public class Material implements Resource {
 
     @Override
     public void buffer() {
-        if (this.image.length == 0) {
-            return;
-        }
-        buffer.clear();
+        this.buffer.clear();
         byte packedData;
         for (int i = 0; i < image.length; i += 4) {
             packedData = 0;
@@ -126,15 +116,10 @@ public class Material implements Resource {
     public void bind() {
         this.texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.texture);
-        if (!this.buffer.hasRemaining()) {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
-        }
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);

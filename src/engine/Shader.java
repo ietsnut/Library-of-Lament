@@ -106,7 +106,7 @@ public abstract class Shader {
             while((line = reader.readLine())!=null){
                 if (line.startsWith("#version")) {
                     shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
-                    shaderSource.append("#define LIGHTS " + Byte.MAX_VALUE).append("//\n");
+                    shaderSource.append("#define MAX_LIGHTS " + Byte.toString(Byte.MAX_VALUE)).append("//\n");
                     shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
                     shaderSource.append("#define WIDTH " + Manager.WIDTH).append("//\n");
                     shaderSource.append("#define HEIGHT " + Manager.HEIGHT).append("//\n");

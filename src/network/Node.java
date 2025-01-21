@@ -1,6 +1,6 @@
 package network;
 
-import component.Machine;
+import property.Machine;
 
 import java.io.*;
 import java.net.Socket;

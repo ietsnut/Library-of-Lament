@@ -7,9 +7,7 @@ import org.joml.Math;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import component.Machine;
-
-import java.util.List;
+import property.Machine;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -78,6 +76,8 @@ public class Camera implements Machine {
         } else {
             FOV = Math.clamp(75, 90, FOV - (20f / Manager.RATE));
         }
+        view();
+        projection();
     }
 
     private static void view() {

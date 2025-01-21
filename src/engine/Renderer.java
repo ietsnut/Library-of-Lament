@@ -5,12 +5,12 @@ import game.Scene;
 public class Renderer {
 
     private static EntityShader entityShader;
-    private static FBOShader fboShader;
-    private static AABBShader aabbShader;
+    private static FBOShader    fboShader;
+    private static AABBShader   aabbShader;
 
     public static void init() {
-        entityShader = new EntityShader();
         fboShader    = new FBOShader();
+        entityShader = new EntityShader();
         aabbShader   = new AABBShader();
     }
 

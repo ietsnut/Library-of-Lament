@@ -1,9 +1,9 @@
-package component;
+package property;
 
 import java.util.*;
 import java.util.concurrent.*;
 
-public interface Machine extends Component {
+public interface Machine {
 
     List<ScheduledExecutorService> MACHINES = new ArrayList<>();
 

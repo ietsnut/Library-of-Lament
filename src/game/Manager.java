@@ -1,6 +1,6 @@
 package game;
 
-import content.Sewer;
+import scene.Sewer;
 import engine.*;
 import object.*;
 
@@ -10,7 +10,7 @@ import org.lwjgl.system.MemoryStack;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import component.Machine;
+import property.Machine;
 import resource.Resource;
 
 import java.nio.*;
@@ -23,14 +23,14 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class Manager {
 
-    public static int WIDTH;
-    public static int HEIGHT;
-    public static long TIME;
-    public static long RATE;
+    public static int   WIDTH;
+    public static int   HEIGHT;
+    public static long  TIME;
+    public static long  RATE;
     public static float PLAYTIME;
 
-    public static Scene         scene;
-    public static long          window;
+    public static Scene scene;
+    public static long  window;
 
     public static Callback debugProc;
 
@@ -101,6 +101,7 @@ public class Manager {
                 lastFrameTime += 1000;
             }
             fps++;
+            //Camera.update();
             Resource.process();
             Renderer.render(scene);
             glfwPollEvents();
