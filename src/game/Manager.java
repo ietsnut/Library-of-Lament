@@ -48,6 +48,7 @@ public class Manager {
         GLFWErrorCallback.createPrint(System.err).set();
         System.out.println(1);
         if (!glfwInit()) {
+            System.out.println(1.5);
             throw new IllegalStateException("Unable to initialize GLFW");
         }
         System.out.println(2);
@@ -60,7 +61,6 @@ public class Manager {
         WIDTH = vidmode.height() * 4 / 5;
         HEIGHT = vidmode.height() * 4 / 5;
         glfwDefaultWindowHints();
-        // DEBUG
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
