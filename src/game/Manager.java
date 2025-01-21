@@ -1,5 +1,6 @@
 package game;
 
+import org.lwjgl.system.Configuration;
 import scene.Sewer;
 import engine.*;
 import object.*;
@@ -36,15 +37,23 @@ public class Manager {
 
     public static void run() {
         try {
+            System.out.println("Starting initialization...");
             open();
             loop();
+        } catch (Exception e) {
+            System.err.println("Error during execution:");
+            e.printStackTrace();
         } finally {
+            System.out.println("Starting cleanup...");
             close();
         }
     }
 
     public static void open() {
+        System.out.println("Architecture: " + System.getProperty("os.arch"));
         System.out.println("LWJGL " + Version.getVersion());
+        Configuration.DEBUG.set(true);
+        Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
         GLFWErrorCallback.createPrint(System.err).set();
         System.out.println(1);
         if (!glfwInit()) {
@@ -80,7 +89,7 @@ public class Manager {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
             glfwGetWindowSize(window, pWidth, pHeight);
-            glfwSetWindowPos(window, (1000 - pWidth.get(0)) / 2, (1000 - pHeight.get(0)) / 2);
+            glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1);
             glfwShowWindow(window);
@@ -117,8 +126,10 @@ public class Manager {
     }
 
     public static void close() {
+        Control.clear();
         Machine.clear();
         Resource.clear();
+        FBO.unload();
         Shader.clear();
         if (debugProc != null) {
             debugProc.free();

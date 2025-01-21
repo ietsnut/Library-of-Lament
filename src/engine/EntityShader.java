@@ -6,22 +6,20 @@ import object.*;
 import org.joml.Vector3f;
 import property.Entity;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
-import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL40.*;
 
 public class EntityShader extends Shader {
 
     public EntityShader() {
         super("entity", "position", "uv", "normal");
+        start();
+        uniform("texture1", 0);
+        stop();
     }
 
     public void shader(Scene scene) {
-        uniform("projection",       Camera.projection);
-        uniform("view",             Camera.view);
+        uniform("projection",           Camera.projection);
+        uniform("view",                 Camera.view);
         uniform("lightPosition[0]",     Camera.position);
         uniform("lightAttenuation[0]",  new Vector3f(1.0f, 0.7f, 0.07f));
         uniform("lightIntensity[0]",    2f);
