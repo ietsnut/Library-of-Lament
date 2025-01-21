@@ -1,6 +1,9 @@
 import game.Manager;
 
-public void main() {
-    Manager.run();
-    //Server.listen();
+class LibraryOfLament {
+    public static void main(String[] args) {
+        Manager.run();
+        //Server.listen();
+    }
 }
+

@@ -55,12 +55,9 @@ public class Manager {
         Configuration.DEBUG.set(true);
         Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
         GLFWErrorCallback.createPrint(System.err).set();
-        System.out.println(1);
         if (!glfwInit()) {
-            System.out.println(1.5);
             throw new IllegalStateException("Unable to initialize GLFW");
         }
-        System.out.println(2);
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidmode == null) {
             throw new RuntimeException("Failed to get video mode");
@@ -94,7 +91,7 @@ public class Manager {
             glfwSwapInterval(1);
             glfwShowWindow(window);
             GL.createCapabilities();
-            debugProc = GLUtil.setupDebugMessageCallback();
+            //debugProc = GLUtil.setupDebugMessageCallback();
         }
 
         scene = new Sewer();
@@ -126,7 +123,6 @@ public class Manager {
     }
 
     public static void close() {
-        Control.clear();
         Machine.clear();
         Resource.clear();
         FBO.unload();

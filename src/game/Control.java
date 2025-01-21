@@ -8,15 +8,9 @@ public class Control {
     private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY, dWheel;
     private static boolean mouseLocked, firstMouse, clicked, holding;
 
-    // Store callbacks as class fields so they can be freed later
-    private static GLFWKeyCallback keyCallback;
-    private static GLFWMouseButtonCallback mouseButtonCallback;
-    private static GLFWScrollCallback scrollCallback;
-    private static GLFWCursorPosCallback cursorPosCallback;
-
     public static void listen(long window) {
-        clear();
-        keyCallback = new GLFWKeyCallback() {
+
+        glfwSetKeyCallback(window, new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (key < 0) {
@@ -27,9 +21,9 @@ public class Control {
                     glfwSetWindowShouldClose(window, true);
                 }
             }
-        };
+        });
 
-        mouseButtonCallback = new GLFWMouseButtonCallback() {
+        glfwSetMouseButtonCallback(window, new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window, int button, int action, int mods) {
                 if (button == 0 && action == 1 && !mouseLocked) {
@@ -54,16 +48,16 @@ public class Control {
                     holding = false;
                 }
             }
-        };
+        });
 
-        scrollCallback = new GLFWScrollCallback() {
+        glfwSetScrollCallback(window, new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double xoffset, double yoffset) {
                 dWheel = (float) yoffset;
             }
-        };
+        });
 
-        cursorPosCallback = new GLFWCursorPosCallback() {
+        glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
                 if (!mouseLocked) return;
@@ -80,31 +74,8 @@ public class Control {
                     deltaMouseY += mouseY - prevMouseY;
                 }
             }
-        };
+        });
 
-        mouseButtonCallback.set(window);
-        scrollCallback.set(window);
-        cursorPosCallback.set(window);
-        keyCallback.set(window);
-    }
-
-    public static void clear() {
-        if (keyCallback != null) {
-            keyCallback.free();
-            keyCallback = null;
-        }
-        if (mouseButtonCallback != null) {
-            mouseButtonCallback.free();
-            mouseButtonCallback = null;
-        }
-        if (scrollCallback != null) {
-            scrollCallback.free();
-            scrollCallback = null;
-        }
-        if (cursorPosCallback != null) {
-            cursorPosCallback.free();
-            cursorPosCallback = null;
-        }
     }
 
     public static boolean isClicked() {
