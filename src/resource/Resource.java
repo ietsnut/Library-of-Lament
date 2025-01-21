@@ -51,8 +51,8 @@ public interface Resource extends Runnable {
         THREADS.forEach(Thread::interrupt);
         THREADS.clear();
         LOADED.clear();
-        BINDED.forEach(Resource::unbind);
         FBO.unload();
+        BINDED.forEach(Resource::unbind);
         BINDED.clear();
     }
 

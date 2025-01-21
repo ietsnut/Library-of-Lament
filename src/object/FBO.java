@@ -100,6 +100,8 @@ public class FBO {
         glDeleteVertexArrays(1);
         glDeleteBuffers(new int[] {1, 2});
         glDeleteTextures(new int[] {1, 2, 3});
+        glDeleteFramebuffers(ID);
+        glDeleteBuffers(DRAWBUFFERS);
     }
 
 }

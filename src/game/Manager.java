@@ -46,10 +46,16 @@ public class Manager {
     public static void open() {
         System.out.println("LWJGL " + Version.getVersion());
         GLFWErrorCallback.createPrint(System.err).set();
+        System.out.println(1);
         if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
+        System.out.println(2);
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        if (vidmode == null) {
+            throw new RuntimeException("Failed to get video mode");
+        }
+        System.out.println(3);
         RATE = vidmode.refreshRate();
         WIDTH = vidmode.height() * 4 / 5;
         HEIGHT = vidmode.height() * 4 / 5;
@@ -74,13 +80,14 @@ public class Manager {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
             glfwGetWindowSize(window, pWidth, pHeight);
-            glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
+            glfwSetWindowPos(window, (1000 - pWidth.get(0)) / 2, (1000 - pHeight.get(0)) / 2);
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1);
             glfwShowWindow(window);
             GL.createCapabilities();
-            //debugProc = GLUtil.setupDebugMessageCallback();
+            debugProc = GLUtil.setupDebugMessageCallback();
         }
+
         scene = new Sewer();
         Renderer.init();
         Camera.listen();
@@ -112,9 +119,10 @@ public class Manager {
     public static void close() {
         Machine.clear();
         Resource.clear();
-        glDeleteFramebuffers(FBO.ID);
-        glDeleteBuffers(FBO.DRAWBUFFERS);
         Shader.clear();
+        if (debugProc != null) {
+            debugProc.free();
+        }
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
         glfwTerminate();
