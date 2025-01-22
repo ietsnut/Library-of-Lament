@@ -107,7 +107,7 @@ public class Camera implements Machine {
 
     public static void listen() {
         Camera camera = new Camera();
-        camera.start(Manager.RATE * 2);
+        camera.start(120);
     }
 
     private static void rot(float x, float y, float z, double angle) {
