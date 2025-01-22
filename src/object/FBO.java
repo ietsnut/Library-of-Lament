@@ -82,7 +82,6 @@ public class FBO {
             System.out.println("Framebuffer error: " + status);
             throw new RuntimeException("Framebuffer not complete");
         }
-        System.out.println(status);
 
     }
 

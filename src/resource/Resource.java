@@ -36,15 +36,14 @@ public interface Resource extends Runnable {
         THREADS.add(thread);
     }
 
-    static Resource process() {
-        Resource loaded = LOADED.poll();
-        if (loaded != null) {
+    static void process() {
+        Resource loaded;
+        while ((loaded = LOADED.poll()) != null) {
             loaded.bind();
             loaded.unload();
             BINDED.add(loaded);
-            java.lang.System.gc();
         }
-        return loaded;
+        java.lang.System.gc();
     }
 
     static void clear() {

@@ -27,55 +27,13 @@ public class Entity extends State {
 
     public Entity(int states) {
         super(states);
-        File[] files = new File("resource" + File.separator + type).listFiles();
-        assert files != null;
-
-        int materialsCount  = 0;
-        int meshesCount     = 0;
-        int musicsCount     = 0;
-
-        for (File file : files) {
-            if (file.isFile()) {
-                String fileName = file.getName();
-                String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
-                switch (ext) {
-                    case "png":
-                        materialsCount++;
-                        break;
-                    case "obj":
-                        meshesCount++;
-                        break;
-                    case "mp3":
-                        musicsCount++;
-                        break;
-                }
-            }
-        }
-
-        this.materials  = new Material[materialsCount];
-        this.meshes     = new Mesh[meshesCount];
-        this.musics     = new Music[musicsCount];
-
-        materialsCount = 0;
-        meshesCount = 0;
-        musicsCount = 0;
-
-        for (File file : files) {
-            if (file.isFile()) {
-                String fileName = file.getName();
-                String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
-                switch (ext) {
-                    case "png":
-                        this.materials[materialsCount++] = new Material(type, fileName.substring(0, fileName.lastIndexOf('.')));
-                        break;
-                    case "obj":
-                        this.meshes[meshesCount++] = new Mesh(type, fileName.substring(0, fileName.lastIndexOf('.')));
-                        break;
-                    case "mp3":
-                        //this.musics[musicsCount++] = new Music(type, fileName.substring(0, fileName.lastIndexOf('.')));
-                        break;
-                }
-            }
+        this.materials  = new Material[states];
+        this.meshes     = new Mesh[states];
+        this.musics     = new Music[states];
+        for (int state = 0; state < states; state++) {
+            this.materials[state]   = new Material(type, state);
+            this.meshes[state]      = new Mesh(type, state);
+            //this.musics[musicsCount++] = new Music(type, fileName.substring(0, fileName.lastIndexOf('.')));
         }
     }
 

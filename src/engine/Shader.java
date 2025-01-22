@@ -11,6 +11,8 @@ import property.Entity;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
 
+import javax.imageio.ImageIO;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 
@@ -24,8 +26,8 @@ public abstract class Shader {
     protected final int program, vertex, fragment;
 
     public Shader(String type, String... attributes) {
-        vertex      = loadShader("resource/shader/" + type + "Vertex.glsl",     GL_VERTEX_SHADER);
-        fragment    = loadShader("resource/shader/" + type + "Fragment.glsl",   GL_FRAGMENT_SHADER);
+        vertex      = loadShader("/resources/shader/" + type + "Vertex.glsl",     GL_VERTEX_SHADER);
+        fragment    = loadShader("/resources/shader/" + type + "Fragment.glsl",   GL_FRAGMENT_SHADER);
         program     = glCreateProgram();
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
@@ -98,28 +100,30 @@ public abstract class Shader {
         }
     }
 
-    private static int loadShader(String file, int type) {
+    private int loadShader(String file, int type) {
         StringBuilder shaderSource = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            while((line = reader.readLine())!=null){
-                if (line.startsWith("#version")) {
-                    shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
-                    shaderSource.append("#define MAX_LIGHTS " + Byte.toString(Byte.MAX_VALUE)).append("//\n");
-                    shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
-                    shaderSource.append("#define WIDTH " + Manager.WIDTH).append("//\n");
-                    shaderSource.append("#define HEIGHT " + Manager.HEIGHT).append("//\n");
-                    shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
-                    shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
-                } else {
-                    shaderSource.append(line).append("//\n");
+        try (InputStream in = getClass().getResourceAsStream(file)) {
+            assert in != null;
+            try (InputStreamReader bis = new InputStreamReader(in)) {
+                BufferedReader reader = new BufferedReader(bis);
+                String line;
+                while((line = reader.readLine())!=null){
+                    if (line.startsWith("#version")) {
+                        shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
+                        shaderSource.append("#define MAX_LIGHTS " + Byte.toString(Byte.MAX_VALUE)).append("//\n");
+                        shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
+                        shaderSource.append("#define WIDTH " + Manager.WIDTH).append("//\n");
+                        shaderSource.append("#define HEIGHT " + Manager.HEIGHT).append("//\n");
+                        shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
+                        shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
+                    } else {
+                        shaderSource.append(line).append("//\n");
+                    }
                 }
+                reader.close();
             }
-            reader.close();
-        } catch (IOException e){
-            System.exit(-1);
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load shader: " + file, e);
         }
         int shaderID = glCreateShader(type);
         glShaderSource(shaderID, shaderSource);

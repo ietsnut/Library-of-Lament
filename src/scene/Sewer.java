@@ -10,6 +10,7 @@ import property.Terrain;
 public class Sewer extends Scene implements Machine {
 
     public Sewer() {
+
         terrain = new Terrain("sewer");
         for (int i = 0; i < 30; i+= 5) {
             Vase vase = new Vase("0");

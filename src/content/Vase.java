@@ -6,7 +6,7 @@ import property.Machine;
 public class Vase extends Entity implements Machine {
 
     public Vase(String name) {
-        super(0);
+        super(2);
         start();
     }
 

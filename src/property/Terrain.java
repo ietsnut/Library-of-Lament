@@ -10,7 +10,7 @@ public class Terrain extends Entity {
     Mesh terrain;
 
     public Terrain(String name) {
-        super(0);
+        super(1);
         terrain = meshes[mesh];
     }
 

@@ -6,9 +6,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -33,18 +31,20 @@ public class Material implements Resource {
 
     private final String file;
 
-    public Material(String type, String name) {
-        this.file = File.separator + type + File.separator + name;
+    public Material(String type, int state) {
+        this.file = "/resources/" + type + "/" + state;
         this.queue();
     }
 
-    public static BufferedImage load(String file) {
+    public BufferedImage load(String file) {
         BufferedImage image;
-        try {
-            //String resourcesDir = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile().getParent()+"/resources/";
-            image = ImageIO.read(new FileInputStream(file));
+        try (InputStream in = getClass().getResourceAsStream(file)) {
+            assert in != null;
+            try (BufferedInputStream bis = new BufferedInputStream(in)) {
+                image = ImageIO.read(bis);
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to load material: " + file, e);
         }
         return image;
     }
@@ -78,7 +78,7 @@ public class Material implements Resource {
     @Override
     public void load() {
         BufferedImage image;
-        image       = load("resource" + file + ".png");
+        image       = load(file + ".png");
         image       = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();

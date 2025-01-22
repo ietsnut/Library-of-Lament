@@ -8,9 +8,13 @@ public class Control {
     private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY, dWheel;
     private static boolean mouseLocked, firstMouse, clicked, holding;
 
-    public static void listen(long window) {
+    private static GLFWKeyCallback keyCallback;
+    private static GLFWMouseButtonCallback mouseButtonCallback;
+    private static GLFWScrollCallback scrollCallback;
+    private static GLFWCursorPosCallback cursorPosCallback;
 
-        glfwSetKeyCallback(window, new GLFWKeyCallback() {
+    public static void listen(long window) {
+        keyCallback = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (key < 0) {
@@ -21,9 +25,10 @@ public class Control {
                     glfwSetWindowShouldClose(window, true);
                 }
             }
-        });
+        };
+        glfwSetKeyCallback(window, keyCallback);
 
-        glfwSetMouseButtonCallback(window, new GLFWMouseButtonCallback() {
+        mouseButtonCallback = new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window, int button, int action, int mods) {
                 if (button == 0 && action == 1 && !mouseLocked) {
@@ -48,16 +53,18 @@ public class Control {
                     holding = false;
                 }
             }
-        });
+        };
+        glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
-        glfwSetScrollCallback(window, new GLFWScrollCallback() {
+        scrollCallback = new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double xoffset, double yoffset) {
                 dWheel = (float) yoffset;
             }
-        });
+        };
+        glfwSetScrollCallback(window, scrollCallback);
 
-        glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
+        cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
                 if (!mouseLocked) return;
@@ -74,8 +81,15 @@ public class Control {
                     deltaMouseY += mouseY - prevMouseY;
                 }
             }
-        });
+        };
+        glfwSetCursorPosCallback(window, cursorPosCallback);
+    }
 
+    public static void clear() {
+        if (keyCallback != null) keyCallback.free();
+        if (mouseButtonCallback != null) mouseButtonCallback.free();
+        if (scrollCallback != null) scrollCallback.free();
+        if (cursorPosCallback != null) cursorPosCallback.free();
     }
 
     public static boolean isClicked() {

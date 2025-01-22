@@ -76,8 +76,6 @@ public class Camera implements Machine {
         } else {
             FOV = Math.clamp(75, 90, FOV - (20f / Manager.RATE));
         }
-        view();
-        projection();
     }
 
     private static void view() {
@@ -100,7 +98,7 @@ public class Camera implements Machine {
         viewBuffer.m32(0);
         viewBuffer.m33(1.0f);
         viewBuffer.translate(-position.x, -position.y, -position.z);
-        Camera.view.set(viewBuffer);
+        view.set(viewBuffer);
     }
 
     public static void projection() {

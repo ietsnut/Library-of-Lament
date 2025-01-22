@@ -1,8 +1,10 @@
 import game.Manager;
+import game.Test;
 
 class LibraryOfLament {
     public static void main(String[] args) {
-        Manager.run();
+        //new Test().run();
+       Manager.run();
         //Server.listen();
     }
 }

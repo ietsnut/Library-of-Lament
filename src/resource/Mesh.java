@@ -7,9 +7,9 @@ import de.javagl.obj.ObjUtils;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.*;
 
 import static org.lwjgl.opengl.GL40.*;
@@ -33,8 +33,8 @@ public class Mesh implements Resource {
 
     private final String file;
 
-    public Mesh(String type, String name) {
-        this.file = File.separator + type + File.separator + name;
+    public Mesh(String type, int state) {
+        this.file = "/resources/" + type + "/" + state + ".obj";
         this.queue();
     }
 
@@ -44,10 +44,13 @@ public class Mesh implements Resource {
             return;
         }
         Obj obj;
-        try {
-            obj = ObjReader.read(new FileInputStream("resource" + file + ".obj"));
+        try (InputStream in = getClass().getResourceAsStream(file)) {
+            assert in != null;
+            try (BufferedInputStream bis = new BufferedInputStream(in)) {
+                obj = ObjReader.read(bis);
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to load mesh: " + file, e);
         }
         obj                 = ObjUtils.convertToRenderable(obj);
         this.indices        = ObjData.getFaceVertexIndicesArray(obj);
@@ -164,7 +167,7 @@ public class Mesh implements Resource {
         private static int ID = 0;
 
         public Collider() {
-            super("collider", String.valueOf(ID++));
+            super("collider", ID++);
         }
 
         @Override

@@ -54,7 +54,7 @@ public class Manager {
         System.out.println("LWJGL " + Version.getVersion());
         Configuration.DEBUG.set(true);
         Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
-        GLFWErrorCallback.createPrint(System.err).set();
+        //GLFWErrorCallback.createPrint(System.err).set();
         if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
@@ -62,7 +62,6 @@ public class Manager {
         if (vidmode == null) {
             throw new RuntimeException("Failed to get video mode");
         }
-        System.out.println(3);
         RATE = vidmode.refreshRate();
         WIDTH = vidmode.height() * 4 / 5;
         HEIGHT = vidmode.height() * 4 / 5;
@@ -93,9 +92,9 @@ public class Manager {
             GL.createCapabilities();
             //debugProc = GLUtil.setupDebugMessageCallback();
         }
-
-        scene = new Sewer();
         Renderer.init();
+        scene = new Sewer();
+        Resource.process();
         Camera.listen();
     }
 
@@ -114,7 +113,6 @@ public class Manager {
                 lastFrameTime += 1000;
             }
             fps++;
-            //Camera.update();
             Resource.process();
             Renderer.render(scene);
             glfwPollEvents();
@@ -123,6 +121,7 @@ public class Manager {
     }
 
     public static void close() {
+        Control.clear();
         Machine.clear();
         Resource.clear();
         FBO.unload();
@@ -133,7 +132,7 @@ public class Manager {
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
         glfwTerminate();
-        glfwSetErrorCallback(null).free();
+        //glfwSetErrorCallback(null).free();
     }
 
 
