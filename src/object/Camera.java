@@ -1,5 +1,6 @@
 package object;
 
+import property.Entity;
 import property.Terrain;
 import game.Control;
 import game.Manager;
@@ -9,23 +10,34 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import property.Machine;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera implements Machine {
 
-    public static final Matrix4f projection = new Matrix4f();
-    public static final Matrix4f view = new Matrix4f();
-    private static final Matrix4f viewBuffer = new Matrix4f();
+    /*
+    private static final Matrix4f viewBuffer1 = new Matrix4f();
+    private static final Matrix4f viewBuffer2 = new Matrix4f();
+    private static final AtomicReference<Matrix4f> currentView = new AtomicReference<>(viewBuffer1);
+
+    private static final Matrix4f projBuffer1 = new Matrix4f();
+    private static final Matrix4f projBuffer2 = new Matrix4f();
+    private static final AtomicReference<Matrix4f> currentProjection = new AtomicReference<>(projBuffer1);
+     */
+
+    public static final Matrix view         = new Matrix();
+    public static final Matrix projection   = new Matrix();
 
     public static final Quaternionf orientation = new Quaternionf();
     public static final Vector3f rotation = new Vector3f(0, 0, 0);
     public static final Vector3f position = new Vector3f(0, 1f, 1.5f);
 
     public static final float SPEED = 2f / Manager.RATE;
-    public static final float SENS = 10f / Manager.RATE;
+    public static final float SENS  = 10f / Manager.RATE;
     public static final float SLOPE = 0.7071f;
-    public static final float NEAR = 0.1f;
-    public static final float FAR = Byte.MAX_VALUE;
+    public static final float NEAR  = 0.1f;
+    public static final float FAR   = Byte.MAX_VALUE;
 
     public static float FOV = 75;
 
@@ -34,8 +46,8 @@ public class Camera implements Machine {
     @Override
     public void turn() {
         update();
-        view();
-        projection();
+        updateView();
+        updateProjection();
     }
 
     public static void update() {
@@ -78,7 +90,10 @@ public class Camera implements Machine {
         }
     }
 
-    private static void view() {
+    private static void updateView() {
+        // Determine the writable buffer
+        Matrix4f viewBuffer = view.buffer();
+
         orient();
         viewBuffer.identity();
         viewBuffer.m00(1.0f - 2.0f * (orientation.y * orientation.y + orientation.z * orientation.z));
@@ -98,16 +113,21 @@ public class Camera implements Machine {
         viewBuffer.m32(0);
         viewBuffer.m33(1.0f);
         viewBuffer.translate(-position.x, -position.y, -position.z);
-        view.set(viewBuffer);
+
+        // Swap buffers
+        view.swap();
     }
 
-    public static void projection() {
-        projection.identity().perspective(Math.toRadians(Camera.FOV), (float) Manager.WIDTH / (float) Manager.HEIGHT, NEAR, FAR);
+
+    public static void updateProjection() {
+        Matrix4f projectionBuffer = projection.buffer();
+        projectionBuffer.identity().perspective(Math.toRadians(Camera.FOV), (float) Manager.WIDTH / (float) Manager.HEIGHT, NEAR, FAR);
+        projection.swap();
     }
 
     public static void listen() {
         Camera camera = new Camera();
-        camera.start(120);
+        camera.start(200);
     }
 
     private static void rot(float x, float y, float z, double angle) {

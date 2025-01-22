@@ -1,12 +1,11 @@
 package resource;
 
-import object.FBO;
+import property.Terrain;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public interface Resource extends Runnable {
 
@@ -27,7 +26,6 @@ public interface Resource extends Runnable {
 
     default void run() {
         this.load();
-        this.buffer();
         LOADED.add(this);
     }
 
@@ -39,11 +37,12 @@ public interface Resource extends Runnable {
     static void process() {
         Resource loaded;
         while ((loaded = LOADED.poll()) != null) {
+            loaded.buffer();
             loaded.bind();
-            loaded.unload();
             BINDED.add(loaded);
+            loaded.unload();
+            java.lang.System.gc();
         }
-        java.lang.System.gc();
     }
 
     static void clear() {

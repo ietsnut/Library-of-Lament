@@ -7,8 +7,6 @@ import de.javagl.obj.ObjUtils;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.*;
 
@@ -24,10 +22,12 @@ public class Mesh implements Resource {
     public float[]  normals     = new float[0];
     public float[]  texCoords   = new float[0];
 
-    private IntBuffer    indicesBuffer;
-    private ByteBuffer   verticesBuffer;
-    private FloatBuffer  normalsBuffer;
-    private FloatBuffer  texCoordsBuffer;
+    public int index;
+
+    private static final IntBuffer   indicesBuffer      = BufferUtils.createIntBuffer(Short.MAX_VALUE);
+    private static final ByteBuffer  verticesBuffer     = BufferUtils.createByteBuffer(Short.MAX_VALUE);
+    private static final FloatBuffer normalsBuffer      = BufferUtils.createFloatBuffer(Short.MAX_VALUE);
+    private static final FloatBuffer texCoordsBuffer    = BufferUtils.createFloatBuffer(Short.MAX_VALUE);
 
     public Collider collider;
 
@@ -54,6 +54,7 @@ public class Mesh implements Resource {
         }
         obj                 = ObjUtils.convertToRenderable(obj);
         this.indices        = ObjData.getFaceVertexIndicesArray(obj);
+        this.index          = indices.length;
         float[] vertices    = ObjData.getVerticesArray(obj);
         this.vertices       = new byte[vertices.length];
         for (int i = 0; i < vertices.length; i++) {
@@ -66,22 +67,22 @@ public class Mesh implements Resource {
     @Override
     public void buffer() {
         if (this.indices.length > 0) {
-            indicesBuffer = BufferUtils.createIntBuffer(indices.length);
+            indicesBuffer.clear();
             indicesBuffer.put(indices);
             indicesBuffer.flip();
         }
         if (this.vertices.length > 0) {
-            verticesBuffer = BufferUtils.createByteBuffer(vertices.length);
+            verticesBuffer.clear();
             verticesBuffer.put(vertices);
             verticesBuffer.flip();
         }
         if (this.texCoords.length > 0) {
-            texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
+            texCoordsBuffer.clear();
             texCoordsBuffer.put(texCoords);
             texCoordsBuffer.flip();
         }
         if (this.normals.length > 0) {
-            normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
+            normalsBuffer.clear();
             normalsBuffer.put(normals);
             normalsBuffer.flip();
         }
@@ -139,16 +140,12 @@ public class Mesh implements Resource {
         glBindVertexArray(0);
         if (file != null && !(this instanceof Collider)) {
             this.collider = new Collider();
-            System.out.println("new collider");
         }
     }
 
     @Override
     public void unload() {
-        indicesBuffer   = null;
-        verticesBuffer  = null;
-        texCoordsBuffer = null;
-        normalsBuffer   = null;
+        return;
     }
 
     @Override
@@ -187,6 +184,20 @@ public class Mesh implements Resource {
             this.indices = new int[] {
                     0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
             };
+            this.index = indices.length;
+        }
+
+        @Override
+        public void unload() {
+            if (file.contains("terrain")) return;
+            Mesh.this.indices     = null;
+            Mesh.this.vertices    = null;
+            Mesh.this.texCoords   = null;
+            Mesh.this.normals     = null;
+            indices     = null;
+            vertices    = null;
+            texCoords   = null;
+            normals     = null;
         }
 
     }

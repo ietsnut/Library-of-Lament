@@ -1,12 +1,11 @@
 package property;
 
+import object.Matrix;
 import resource.Material;
 import resource.Mesh;
 import resource.Music;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-
-import java.io.File;
 
 public class Entity extends State {
 
@@ -15,7 +14,8 @@ public class Entity extends State {
     public final Vector3f position  = new Vector3f(0);
     public final Vector3f rotation  = new Vector3f(0);
     public final Vector3f scale     = new Vector3f(1);
-    public final Matrix4f model     = new Matrix4f();
+
+    public final Matrix   model     = new Matrix();
 
     public final Material[] materials;
     public final Mesh[]     meshes;
@@ -42,12 +42,13 @@ public class Entity extends State {
         return "< " + type + " > [ state: " + state() + " ] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
     }
 
-    private Matrix4f model() {
-        return model.identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y * 5), new Vector3f(0, 1, 0)).rotate((float) Math.toRadians(rotation.x * 5), new Vector3f(1, 0, 0)).rotate((float) Math.toRadians(rotation.z * 5), new Vector3f(0, 0, 1));
-    }
+    private static final Vector3f X = new Vector3f(1, 0, 0);
+    private static final Vector3f Y = new Vector3f(0, 1, 0);
+    private static final Vector3f Z = new Vector3f(0, 0, 1);
 
-    public void remodel() {
-        this.model.set(model());
+    public void updateModel() {
+        this.model.buffer().identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y * 5), Y).rotate((float) Math.toRadians(rotation.x * 5), X).rotate((float) Math.toRadians(rotation.z * 5), Z);
+        this.model.swap();
     }
 
 }

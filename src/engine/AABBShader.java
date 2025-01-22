@@ -22,16 +22,16 @@ public class AABBShader extends Shader {
     }
 
     protected void render(Entity entity) {
-        uniform("model",        entity.model);
-        uniform("projection",   Camera.projection);
-        uniform("view",         Camera.view);
+        uniform("model",        entity.model.get());
+        uniform("projection",   Camera.projection.get());
+        uniform("view",         Camera.view.get());
         uniform("time",         Manager.time() / 1000.0f);
         uniform("scale",        entity.meshes[entity.mesh].collider.size);
         glBindVertexArray(entity.meshes[entity.mesh].collider.vao);
         for (byte i = 0; i < attributes.length; i++) {
             glEnableVertexAttribArray(i);
         }
-        glDrawElements(GL_LINES, entity.meshes[entity.mesh].collider.indices.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, entity.meshes[entity.mesh].index, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
             glDisableVertexAttribArray(i);
         }

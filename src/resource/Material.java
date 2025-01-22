@@ -21,7 +21,7 @@ public class Material implements Resource {
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
-    private ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());;
+    private static final ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());;
 
     public int texture;
     public byte[] image = new byte[0];
@@ -87,7 +87,7 @@ public class Material implements Resource {
 
     @Override
     public void buffer() {
-        this.buffer.clear();
+        buffer.clear();
         byte packedData;
         for (int i = 0; i < image.length; i += 4) {
             packedData = 0;
@@ -127,7 +127,7 @@ public class Material implements Resource {
 
     @Override
     public void unload() {
-        this.buffer = null;
+        this.image = null;
     }
 
     @Override

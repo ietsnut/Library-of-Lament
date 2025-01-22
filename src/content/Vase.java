@@ -13,7 +13,6 @@ public class Vase extends Entity implements Machine {
     @Override
     public void turn() {
         this.rotation.y += 1;
-        remodel();
     }
 
 }
