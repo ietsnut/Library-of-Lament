@@ -52,8 +52,8 @@ public class Manager {
     public static void open() {
         System.out.println("Architecture: " + System.getProperty("os.arch"));
         System.out.println("LWJGL " + Version.getVersion());
-        Configuration.DEBUG.set(true);
-        Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
+        //Configuration.DEBUG.set(true);
+        //Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
         //GLFWErrorCallback.createPrint(System.err).set();
         if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");

@@ -7,7 +7,7 @@ public class Vase extends Entity implements Machine {
 
     public Vase(String name) {
         super(2);
-        //start();
+        start();
     }
 
     @Override

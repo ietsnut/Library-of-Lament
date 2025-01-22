@@ -139,6 +139,7 @@ public class Mesh implements Resource {
         glBindVertexArray(0);
         if (file != null && !(this instanceof Collider)) {
             this.collider = new Collider();
+            System.out.println("new collider");
         }
     }
 

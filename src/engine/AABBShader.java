@@ -15,33 +15,27 @@ public class AABBShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        /*
-        if (scene.active == null) {
-            return;
+        for (Entity entity : scene.entities) {
+            if (entity.meshes[entity.mesh].collider == null || !entity.meshes[entity.mesh].collider.binded()) continue;
+            render(entity);
         }
-        uniform("model",        scene.active.model);
-        uniform("projection",   Camera.projection);
-        uniform("view",         Camera.view);
-        uniform("time",         Manager.time() / 1000.0f);
-        uniform("scale",        scene.active.meshes.getFirst().collider.size);
-        render(scene.active);
-*/
     }
 
     protected void render(Entity entity) {
-        /*
-        System.out.println("AABBShader.render");
-        glBindVertexArray(entity.meshes.getFirst().collider.vao);
+        uniform("model",        entity.model);
+        uniform("projection",   Camera.projection);
+        uniform("view",         Camera.view);
+        uniform("time",         Manager.time() / 1000.0f);
+        uniform("scale",        entity.meshes[entity.mesh].collider.size);
+        glBindVertexArray(entity.meshes[entity.mesh].collider.vao);
         for (byte i = 0; i < attributes.length; i++) {
             glEnableVertexAttribArray(i);
         }
-        glDrawElements(GL_LINES, entity.meshes.getFirst().collider.indices.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, entity.meshes[entity.mesh].collider.indices.length, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
             glDisableVertexAttribArray(i);
         }
         glBindVertexArray(0);
-
-         */
     }
 
 }
