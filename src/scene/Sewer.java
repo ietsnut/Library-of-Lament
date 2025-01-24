@@ -38,9 +38,4 @@ public class Sewer extends Scene {
 
     }
 
-    @Override
-    public void turn() {
-        super.turn();
-
-    }
 }
