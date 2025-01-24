@@ -4,8 +4,9 @@ import game.Serial;
 import property.Entity;
 import property.Interactive;
 import property.Machine;
+import property.Solid;
 
-public class Vase extends Entity implements Machine, Interactive {
+public class Vase extends Entity implements Machine, Interactive, Solid {
 
     public Vase(String name) {
         super(2);
@@ -15,7 +16,7 @@ public class Vase extends Entity implements Machine, Interactive {
     @Override
     public void turn() {
         this.state = Serial.states[0];
-        this.rotation.y += 1;
+        //this.rotation.y += 1;
     }
 
     @Override

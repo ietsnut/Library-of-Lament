@@ -34,8 +34,6 @@ public class Sewer extends Scene {
         Light light2 = new Light(new Vector3f(0, 2, 0), new Vector3f(1.0f, 0.7f, 0.07f), 2f);
         lights.add(light2);
 
-        start(20);
-
     }
 
 }

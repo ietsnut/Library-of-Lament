@@ -1,12 +1,11 @@
 package object;
 
+import game.Scene;
 import org.joml.*;
 import org.joml.Math;
-import property.Entity;
-import property.Terrain;
+import property.*;
 import game.Control;
 import game.Manager;
-import property.Machine;
 import resource.Mesh;
 
 import java.util.Comparator;
@@ -33,6 +32,9 @@ public class Camera implements Machine {
     public static float FOV = 75;
 
     private static float bob = 0;
+
+    public static Entity intersecting   = null;
+    public static Entity inside         = null;
 
     public void turn() {
         update();
@@ -63,10 +65,51 @@ public class Camera implements Machine {
         if (Control.isKeyDown(GLFW_KEY_A) || Control.isKeyDown(GLFW_KEY_LEFT)) {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
+        if (Manager.scene == null) return;
         Terrain terrain = Manager.scene.terrain;
         if (terrain == null) return;
         Vector3f position = terrain.height(origin, new Vector3f(movement));
-        Camera.position.set(position);
+        float distance = Float.MAX_VALUE;
+        Entity intersecting = null;
+        boolean inside = false;
+        boolean stopped = false;
+        for (Entity entity : Manager.scene.entities) {
+            entity.updateModel();
+            if (entity instanceof Interactive interactive) {
+                if (Camera.inside(position, entity)) {
+                    if (Camera.inside == null) {
+                        if (entity instanceof Solid) {
+                            stopped = true;
+                            break;
+                        } else {
+                            Camera.inside = entity;
+                            interactive.enter();
+                        }
+                    }
+                    inside = true;
+                }
+                float dist = position.distance(entity.position);
+                if (Camera.collision(position, entity) > 0 && dist < 7.5f && dist < distance) {
+                    distance = dist;
+                    intersecting = entity;
+                }
+            }
+        }
+        if (!stopped) {
+            Camera.position.set(position);
+        }
+        Camera.intersecting = intersecting;
+        if (intersecting instanceof Interactive interactive) {
+            if (Control.isClicked()) {
+                interactive.click();
+            }
+        }
+        if (!inside) {
+            if (Camera.inside instanceof Interactive interactive) {
+                interactive.leave();
+            }
+            Camera.inside = null;
+        }
         if (movement.length() > 0 && !position.equals(origin)) {
             if (bob <= 0.0f) {
                 bob = 360.0f;
@@ -132,7 +175,7 @@ public class Camera implements Machine {
         return orientation.transform(new Vector3f(0, 0, 1));
     }
 
-    public static Float collision(Entity entity) {
+    public static double collision(Vector3f camera, Entity entity) {
         Mesh mesh = entity.meshes[entity.state];
         if (mesh.collider == null || mesh.collider.min == null || mesh.collider.max == null) {
             return -1f;
@@ -173,22 +216,8 @@ public class Camera implements Machine {
     }
 
     //camera is inside AABB
-    public static boolean inside(Entity entity) {
-        return collision(entity) == 0;
-    }
-
-    /*
-    //camera is outside AABB, but ray intersects AABB
-    public static boolean collide(Entity entity, float distance) {
-        return collision(entity) > 0 && distance(entity) < distance;
-    }*/
-
-    public static float distance(Entity entity) {
-        return new Vector3f(entity.position).distance(Camera.position);
-    }
-
-    public static Entity closest(List<Entity> entities) {
-        return entities.stream().filter(entity -> collision(entity) > 0).filter(entity -> distance(entity) <= 5f).min(Comparator.comparingDouble(Camera::collision)).orElse(null);
+    public static boolean inside(Vector3f camera,Entity entity) {
+        return collision(camera, entity) == 0;
     }
 
 }

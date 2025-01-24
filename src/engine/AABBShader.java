@@ -15,11 +15,11 @@ public class AABBShader extends Shader {
     }
 
     public void shader(Scene scene) {
-        if (scene.intersecting == null ||
-                scene.intersecting.meshes[scene.intersecting.state] == null ||
-                scene.intersecting.meshes[scene.intersecting.state].collider == null ||
-                !scene.intersecting.meshes[scene.intersecting.state].collider.binded()) return;
-        render(scene.intersecting);
+        if (Camera.intersecting == null ||
+                Camera.intersecting.meshes[Camera.intersecting.state] == null ||
+                Camera.intersecting.meshes[Camera.intersecting.state].collider == null ||
+                !Camera.intersecting.meshes[Camera.intersecting.state].collider.binded()) return;
+        render(Camera.intersecting);
         /*
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.state].collider == null || !entity.meshes[entity.state].collider.binded()) continue;
