@@ -4,15 +4,49 @@ import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
+import object.Camera;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
+import property.Entity;
 
 import java.io.*;
 import java.nio.*;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL40.*;
 
 public class Mesh implements Resource {
+
+    public static final Mesh PLANE = new Mesh() {
+        @Override
+        public void load() {
+            this.vertices = new byte[] {
+                    -1, 0, -1,  // bottom-left
+                    1, 0, -1,  // bottom-right
+                    1, 0,  1,  // top-right
+                    -1, 0,  1   // top-left
+            };
+            this.indices = new int[] {
+                    0, 1, 2,  // first triangle
+                    2, 3, 0   // second triangle
+            };
+            this.texCoords = new float[] {
+                    0, 0,  // bottom-left
+                    1, 0,  // bottom-right
+                    1, 1,  // top-right
+                    0, 1   // top-left
+            };
+            this.normals = new float[] {
+                    0, 1, 0,  // bottom-left
+                    0, 1, 0,  // bottom-right
+                    0, 1, 0,  // top-right
+                    0, 1, 0   // top-left
+            };
+            this.index = indices.length;
+        }
+    };
 
     public int      vao = 0;
     public int[]    vbo = new int[4];
@@ -33,9 +67,18 @@ public class Mesh implements Resource {
 
     private final String file;
 
-    public Mesh(String type, int state) {
-        this.file = "/resources/" + type + "/" + state + ".obj";
+    public Mesh() {
+        this.file = null;
         this.queue();
+    }
+
+    public Mesh(String type, String name) {
+        this.file = "/resources/" + type + "/" + name + ".obj";
+        this.queue();
+    }
+
+    public Mesh(String type, int state) {
+        this(type, Integer.toString(state));
     }
 
     @Override
@@ -125,16 +168,16 @@ public class Mesh implements Resource {
     public void bind() {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
-        if (indices.length  > 0) {
+        if (indicesBuffer.hasRemaining()) {
             this.vbo[0] = buffer(0, 0, indicesBuffer);
         }
-        if (vertices.length > 0) {
+        if (verticesBuffer.hasRemaining()) {
             this.vbo[0] = buffer(0, 3, verticesBuffer);
         }
-        if (texCoords.length > 0) {
+        if (texCoordsBuffer.hasRemaining()) {
             this.vbo[1] = buffer(1, 2, texCoordsBuffer);
         }
-        if (normals.length > 0) {
+        if (normalsBuffer.hasRemaining()) {
             this.vbo[2] = buffer(2, 3, normalsBuffer);
         }
         glBindVertexArray(0);
@@ -199,7 +242,6 @@ public class Mesh implements Resource {
             texCoords   = null;
             normals     = null;
         }
-
     }
 
     @Override

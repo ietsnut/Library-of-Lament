@@ -1,11 +1,15 @@
 package content;
 
 import property.Entity;
+import resource.Material;
+import resource.Mesh;
 
 public class Creature extends Entity {
 
-    public Creature(int states) {
-        super(states);
+    public Creature() {
+        super(new Material("terrain", "forest"), Mesh.PLANE);
     }
+
+
 
 }

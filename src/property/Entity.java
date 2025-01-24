@@ -3,11 +3,9 @@ package property;
 import object.Matrix;
 import resource.Material;
 import resource.Mesh;
-import resource.Music;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class Entity extends State {
+public class Entity {
 
     public final String type = this.getClass().getSimpleName().toLowerCase();
 
@@ -19,27 +17,41 @@ public class Entity extends State {
 
     public final Material[] materials;
     public final Mesh[]     meshes;
-    public final Music[]    musics;
 
-    public int material = 0;
-    public int mesh     = 0;
-    public int music    = 0;
+    int states;
+    public int state = 0;
 
-    public Entity(int states) {
-        super(states);
+    //TODO: Add invalid state detection and constrain
+
+    public Entity(Material material, Mesh mesh) {
+        this.states     = 1;
         this.materials  = new Material[states];
         this.meshes     = new Mesh[states];
-        this.musics     = new Music[states];
+        this.materials[state]   = material;
+        this.meshes[state]      = mesh;
+    }
+
+    public Entity(String name) {
+        this.states     = 1;
+        this.materials  = new Material[states];
+        this.meshes     = new Mesh[states];
+        this.materials[state]   = new Material(type, name);
+        this.meshes[state]      = new Mesh(type, name);
+    }
+
+    public Entity(int states) {
+        this.states     = states;
+        this.materials  = new Material[states];
+        this.meshes     = new Mesh[states];
         for (int state = 0; state < states; state++) {
             this.materials[state]   = new Material(type, state);
             this.meshes[state]      = new Mesh(type, state);
-            //this.musics[musicsCount++] = new Music(type, fileName.substring(0, fileName.lastIndexOf('.')));
         }
     }
 
     @Override
     public String toString() {
-        return "< " + type + " > [ state: " + state() + " ] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
+        return "< " + type + " > [ state: " + state + " ] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
     }
 
     private static final Vector3f X = new Vector3f(1, 0, 0);
@@ -50,5 +62,7 @@ public class Entity extends State {
         this.model.buffer().identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y * 5), Y).rotate((float) Math.toRadians(rotation.x * 5), X).rotate((float) Math.toRadians(rotation.z * 5), Z);
         this.model.swap();
     }
+
+
 
 }

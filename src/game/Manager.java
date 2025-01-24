@@ -81,6 +81,7 @@ public class Manager {
             throw new RuntimeException("Failed to create the GLFW window");
         }
         Control.listen(window);
+        Serial.listen();
         try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
@@ -111,6 +112,7 @@ public class Manager {
                 glfwSetWindowTitle(window, Integer.toString(fps));
                 fps = 0;
                 lastFrameTime += 1000;
+                System.gc();
             }
             fps++;
             Resource.process();

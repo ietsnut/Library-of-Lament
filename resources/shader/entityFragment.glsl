@@ -17,6 +17,8 @@ uniform float   lightIntensity[MAX_LIGHTS];
 
 uniform float   illumination;
 
+uniform int     outline;
+
 int t(sampler2D s, vec2 v) {
     return int(texture(s,v).x*255.)>>(3-int(mod(v.x/(1./textureSize(s,0).x)*4.,4.)))*2&3;
 }
@@ -62,6 +64,10 @@ void main(void) {
     color = float(float(level) / 6);
 
     normal = fragNormal;
+
+    if (outline == 0) {
+        normal = vec3(1.0);
+    }
 
 }
 

@@ -31,9 +31,13 @@ public class Material implements Resource {
 
     private final String file;
 
-    public Material(String type, int state) {
-        this.file = "/resources/" + type + "/" + state;
+    public Material(String type, String name) {
+        this.file = "/resources/" + type + "/" + name + ".png";
         this.queue();
+    }
+
+    public Material(String type, int state) {
+        this(type, Integer.toString(state));
     }
 
     public BufferedImage load(String file) {
@@ -78,7 +82,7 @@ public class Material implements Resource {
     @Override
     public void load() {
         BufferedImage image;
-        image       = load(file + ".png");
+        image       = load(file);
         image       = dither(image);
         this.width  = image.getWidth();
         this.height = image.getHeight();
@@ -118,10 +122,10 @@ public class Material implements Resource {
         glBindTexture(GL_TEXTURE_2D, this.texture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 

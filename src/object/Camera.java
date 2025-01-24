@@ -1,49 +1,39 @@
 package object;
 
+import org.joml.*;
+import org.joml.Math;
 import property.Entity;
 import property.Terrain;
 import game.Control;
 import game.Manager;
-import org.joml.Math;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import property.Machine;
+import resource.Mesh;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera implements Machine {
 
-    /*
-    private static final Matrix4f viewBuffer1 = new Matrix4f();
-    private static final Matrix4f viewBuffer2 = new Matrix4f();
-    private static final AtomicReference<Matrix4f> currentView = new AtomicReference<>(viewBuffer1);
-
-    private static final Matrix4f projBuffer1 = new Matrix4f();
-    private static final Matrix4f projBuffer2 = new Matrix4f();
-    private static final AtomicReference<Matrix4f> currentProjection = new AtomicReference<>(projBuffer1);
-     */
-
     public static final Matrix view         = new Matrix();
     public static final Matrix projection   = new Matrix();
 
     public static final Quaternionf orientation = new Quaternionf();
     public static final Vector3f rotation = new Vector3f(0, 0, 0);
-    public static final Vector3f position = new Vector3f(0, 1f, 1.5f);
+    public static final Vector3f position = new Vector3f(0, 1f, 0);
 
-    public static final float SPEED = 2f / Manager.RATE;
-    public static final float SENS  = 10f / Manager.RATE;
+    public static final float SPEED = 0.025f;
+    public static final float SENS  = 0.15f;
     public static final float SLOPE = 0.7071f;
     public static final float NEAR  = 0.1f;
-    public static final float FAR   = Byte.MAX_VALUE;
+    public static final float FAR   = Byte.MAX_VALUE * 2;
 
     public static float FOV = 75;
 
     private static float bob = 0;
 
-    @Override
     public void turn() {
         update();
         updateView();
@@ -91,9 +81,7 @@ public class Camera implements Machine {
     }
 
     private static void updateView() {
-        // Determine the writable buffer
         Matrix4f viewBuffer = view.buffer();
-
         orient();
         viewBuffer.identity();
         viewBuffer.m00(1.0f - 2.0f * (orientation.y * orientation.y + orientation.z * orientation.z));
@@ -113,8 +101,6 @@ public class Camera implements Machine {
         viewBuffer.m32(0);
         viewBuffer.m33(1.0f);
         viewBuffer.translate(-position.x, -position.y, -position.z);
-
-        // Swap buffers
         view.swap();
     }
 
@@ -127,7 +113,7 @@ public class Camera implements Machine {
 
     public static void listen() {
         Camera camera = new Camera();
-        camera.start(200);
+        camera.start(120);
     }
 
     private static void rot(float x, float y, float z, double angle) {
@@ -144,6 +130,65 @@ public class Camera implements Machine {
 
     public static Vector3f forward() {
         return orientation.transform(new Vector3f(0, 0, 1));
+    }
+
+    public static Float collision(Entity entity) {
+        Mesh mesh = entity.meshes[entity.state];
+        if (mesh.collider == null || mesh.collider.min == null || mesh.collider.max == null) {
+            return -1f;
+        }
+
+        Mesh.Collider collider = mesh.collider;
+
+        // to model space
+        Matrix4f inverseModelMatrix = new Matrix4f(entity.model.get()).invert();
+        Vector3f rayOriginModelSpace = inverseModelMatrix.transformPosition(new Vector3f(Camera.position));
+        Vector3f rayDirectionModelSpace = inverseModelMatrix.transformDirection(Camera.forward().negate()).normalize();
+
+        // inverse direction vector
+        Vector3f invDir = new Vector3f(
+                1.0f / rayDirectionModelSpace.x,
+                1.0f / rayDirectionModelSpace.y,
+                1.0f / rayDirectionModelSpace.z
+        );
+
+        // tmin and tmax for each axis
+        float t1 = (collider.min.x - rayOriginModelSpace.x) * invDir.x;
+        float t2 = (collider.max.x - rayOriginModelSpace.x) * invDir.x;
+        float t3 = (collider.min.y - rayOriginModelSpace.y) * invDir.y;
+        float t4 = (collider.max.y - rayOriginModelSpace.y) * invDir.y;
+        float t5 = (collider.min.z - rayOriginModelSpace.z) * invDir.z;
+        float t6 = (collider.max.z - rayOriginModelSpace.z) * invDir.z;
+
+        // the nearest and farthest intersection distances
+        float tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
+        float tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
+
+        // intersection validity
+        if (tmax < 0 || tmin > tmax) {
+            return -1f; // No intersection
+        }
+
+        return Math.max(tmin, 0); // Return the intersection distance (or 0 if the ray starts inside)
+    }
+
+    //camera is inside AABB
+    public static boolean inside(Entity entity) {
+        return collision(entity) == 0;
+    }
+
+    /*
+    //camera is outside AABB, but ray intersects AABB
+    public static boolean collide(Entity entity, float distance) {
+        return collision(entity) > 0 && distance(entity) < distance;
+    }*/
+
+    public static float distance(Entity entity) {
+        return new Vector3f(entity.position).distance(Camera.position);
+    }
+
+    public static Entity closest(List<Entity> entities) {
+        return entities.stream().filter(entity -> collision(entity) > 0).filter(entity -> distance(entity) <= 5f).min(Comparator.comparingDouble(Camera::collision)).orElse(null);
     }
 
 }

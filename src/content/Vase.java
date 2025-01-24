@@ -1,9 +1,11 @@
 package content;
 
+import game.Serial;
 import property.Entity;
+import property.Interactive;
 import property.Machine;
 
-public class Vase extends Entity implements Machine {
+public class Vase extends Entity implements Machine, Interactive {
 
     public Vase(String name) {
         super(2);
@@ -12,7 +14,23 @@ public class Vase extends Entity implements Machine {
 
     @Override
     public void turn() {
+        this.state = Serial.states[0];
         this.rotation.y += 1;
+    }
+
+    @Override
+    public void click() {
+        System.out.println("Clicked");
+    }
+
+    @Override
+    public void enter() {
+        System.out.println("Entered");
+    }
+
+    @Override
+    public void leave() {
+        System.out.println("Left");
     }
 
 }

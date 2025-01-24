@@ -15,10 +15,16 @@ public class AABBShader extends Shader {
     }
 
     public void shader(Scene scene) {
+        if (scene.intersecting == null ||
+                scene.intersecting.meshes[scene.intersecting.state] == null ||
+                scene.intersecting.meshes[scene.intersecting.state].collider == null ||
+                !scene.intersecting.meshes[scene.intersecting.state].collider.binded()) return;
+        render(scene.intersecting);
+        /*
         for (Entity entity : scene.entities) {
-            if (entity.meshes[entity.mesh].collider == null || !entity.meshes[entity.mesh].collider.binded()) continue;
-            render(entity);
-        }
+            if (entity.meshes[entity.state].collider == null || !entity.meshes[entity.state].collider.binded()) continue;
+            render(intersecting);
+        }*/
     }
 
     protected void render(Entity entity) {
@@ -26,12 +32,12 @@ public class AABBShader extends Shader {
         uniform("projection",   Camera.projection.get());
         uniform("view",         Camera.view.get());
         uniform("time",         Manager.time() / 1000.0f);
-        uniform("scale",        entity.meshes[entity.mesh].collider.size);
-        glBindVertexArray(entity.meshes[entity.mesh].collider.vao);
+        uniform("scale",        entity.meshes[entity.state].collider.size);
+        glBindVertexArray(entity.meshes[entity.state].collider.vao);
         for (byte i = 0; i < attributes.length; i++) {
             glEnableVertexAttribArray(i);
         }
-        glDrawElements(GL_LINES, entity.meshes[entity.mesh].index, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, entity.meshes[entity.state].index, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < attributes.length; i++) {
             glDisableVertexAttribArray(i);
         }

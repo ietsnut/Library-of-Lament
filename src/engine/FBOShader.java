@@ -2,6 +2,7 @@ package engine;
 
 import game.Manager;
 import game.Scene;
+import game.Serial;
 import property.Entity;
 import object.FBO;
 
@@ -20,6 +21,7 @@ public class FBOShader extends Shader {
     }
 
     public void shader(Scene scene) {
+        uniform("sky", Serial.states[2] / 16f);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);

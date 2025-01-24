@@ -10,6 +10,8 @@ uniform sampler2D texture3;
 const float dx = 1.0 / WIDTH;
 const float dy = 1.0 / HEIGHT;
 
+uniform float sky;
+
 const vec3[] palette = vec3[] (
     vec3(0.0, 0.0, 0.0),
     vec3(0.227,0.212,0.208),
@@ -62,6 +64,9 @@ void main(void) {
         } if (depth < 0.97) {
             color = vec4(1.0);
         }
+    } else if (depth > 0.99999) {
+        vec3 albedo = palette[int(sky * 7)];
+        color = vec4(albedo, 1.0);
     } else {
         vec3 albedo = palette[int(texture(texture1, fragUV).r * 8)];
         color = vec4(albedo, 1.0);
