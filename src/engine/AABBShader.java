@@ -20,11 +20,6 @@ public class AABBShader extends Shader {
                 Camera.intersecting.meshes[Camera.intersecting.state].collider == null ||
                 !Camera.intersecting.meshes[Camera.intersecting.state].collider.binded()) return;
         render(Camera.intersecting);
-        /*
-        for (Entity entity : scene.entities) {
-            if (entity.meshes[entity.state].collider == null || !entity.meshes[entity.state].collider.binded()) continue;
-            render(intersecting);
-        }*/
     }
 
     protected void render(Entity entity) {

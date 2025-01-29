@@ -6,7 +6,7 @@ import property.Interactive;
 import property.Machine;
 import property.Solid;
 
-public class Vase extends Entity implements Machine, Interactive, Solid {
+public class Vase extends Entity implements Machine, Interactive {
 
     public Vase(String name) {
         super(2);
