@@ -21,7 +21,7 @@ public class Material implements Resource {
             new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
             new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
 
-    private static final ByteBuffer buffer = BufferUtils.createByteBuffer((4096 * 4096) / 4).order(ByteOrder.nativeOrder());;
+    private ByteBuffer buffer;
 
     public int texture;
     public byte[] image = new byte[0];
@@ -38,6 +38,11 @@ public class Material implements Resource {
 
     public Material(String type, int state) {
         this(type, Integer.toString(state));
+    }
+
+    @Override
+    public String toString() {
+        return file;
     }
 
     public BufferedImage load(String file) {
@@ -91,7 +96,9 @@ public class Material implements Resource {
 
     @Override
     public void buffer() {
-        buffer.clear();
+        int totalPixels = width * height;
+        int totalBytes  = (totalPixels + 3) / 4;
+        this.buffer = BufferUtils.createByteBuffer(totalBytes).order(ByteOrder.nativeOrder());
         byte packedData;
         for (int i = 0; i < image.length; i += 4) {
             packedData = 0;
@@ -127,6 +134,8 @@ public class Material implements Resource {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
+        this.buffer.clear();
+        this.buffer = null;
     }
 
     @Override

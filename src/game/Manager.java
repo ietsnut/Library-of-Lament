@@ -112,6 +112,7 @@ public class Manager {
                 glfwSetWindowTitle(window, Integer.toString(fps));
                 fps = 0;
                 lastFrameTime += 1000;
+                System.gc();
             }
             fps++;
             Resource.process();

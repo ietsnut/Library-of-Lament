@@ -34,13 +34,11 @@ public class EntityShader extends Shader {
         uniform("lights", LIGHT);
         uniform("illumination", 0f);
         uniform("texture1", 0);
-        uniform("outline", 1);
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.state].binded()) {
                 render(entity);
             }
         }
-        uniform("outline", 0);
         if (scene.terrain.meshes[scene.terrain.state].binded()) {
             render(scene.terrain);
         }

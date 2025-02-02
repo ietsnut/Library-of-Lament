@@ -22,7 +22,7 @@ public class Mesh implements Resource {
     public static final Mesh PLANE = new Mesh() {
         @Override
         public void load() {
-            this.vertices = new byte[] {
+            this.vertices = new float[] {
                     -1, 0, -1,  // bottom-left
                     1, 0, -1,  // bottom-right
                     1, 0,  1,  // top-right
@@ -48,20 +48,20 @@ public class Mesh implements Resource {
         }
     };
 
-    public int      vao = 0;
-    public int[]    vbo = new int[4];
+    public int      vao, ebo;
+    public int[]    vbo = new int[3];
 
     public int[]    indices     = new int[0];
-    public byte[]   vertices    = new byte[0];
+    public float[]  vertices    = new float[0];
     public float[]  normals     = new float[0];
     public float[]  texCoords   = new float[0];
 
     public int index;
 
-    private static final IntBuffer   indicesBuffer      = BufferUtils.createIntBuffer(Short.MAX_VALUE);
-    private static final ByteBuffer  verticesBuffer     = BufferUtils.createByteBuffer(Short.MAX_VALUE);
-    private static final FloatBuffer normalsBuffer      = BufferUtils.createFloatBuffer(Short.MAX_VALUE);
-    private static final FloatBuffer texCoordsBuffer    = BufferUtils.createFloatBuffer(Short.MAX_VALUE);
+    private IntBuffer   indicesBuffer;
+    private FloatBuffer verticesBuffer;
+    private FloatBuffer normalsBuffer;
+    private FloatBuffer texCoordsBuffer;
 
     public Collider collider;
 
@@ -82,6 +82,11 @@ public class Mesh implements Resource {
     }
 
     @Override
+    public String toString() {
+        return file;
+    }
+
+    @Override
     public void load() {
         if (file == null) {
             return;
@@ -95,39 +100,31 @@ public class Mesh implements Resource {
         } catch (IOException e) {
             throw new RuntimeException("Failed to load mesh: " + file, e);
         }
-        obj                 = ObjUtils.convertToRenderable(obj);
-        this.indices        = ObjData.getFaceVertexIndicesArray(obj);
-        this.index          = indices.length;
-        float[] vertices    = ObjData.getVerticesArray(obj);
-        this.vertices       = new byte[vertices.length];
-        for (int i = 0; i < vertices.length; i++) {
-            this.vertices[i] = (byte) Math.round(vertices[i]);
-        }
-        texCoords   = ObjData.getTexCoordsArray(obj, 2, true);
-        normals     = ObjData.getNormalsArray(obj);
+        obj             = ObjUtils.convertToRenderable(obj);
+        this.indices    = ObjData.getFaceVertexIndicesArray(obj);
+        this.vertices   = ObjData.getVerticesArray(obj);
+        this.texCoords  = ObjData.getTexCoordsArray(obj, 2, true);
+        this.normals    = ObjData.getNormalsArray(obj);
+        this.index      = (indices != null) ? indices.length : 0;
     }
 
     @Override
     public void buffer() {
-        if (this.indices.length > 0) {
-            indicesBuffer.clear();
-            indicesBuffer.put(indices);
-            indicesBuffer.flip();
+        if (indices.length > 0) {
+            indicesBuffer = BufferUtils.createIntBuffer(indices.length);
+            indicesBuffer.put(indices).flip();
         }
-        if (this.vertices.length > 0) {
-            verticesBuffer.clear();
-            verticesBuffer.put(vertices);
-            verticesBuffer.flip();
+        if (vertices.length > 0) {
+            verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
+            verticesBuffer.put(vertices).flip();
         }
-        if (this.texCoords.length > 0) {
-            texCoordsBuffer.clear();
-            texCoordsBuffer.put(texCoords);
-            texCoordsBuffer.flip();
+        if (texCoords.length > 0) {
+            texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
+            texCoordsBuffer.put(texCoords).flip();
         }
-        if (this.normals.length > 0) {
-            normalsBuffer.clear();
-            normalsBuffer.put(normals);
-            normalsBuffer.flip();
+        if (normals.length > 0) {
+            normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
+            normalsBuffer.put(normals).flip();
         }
     }
 
@@ -141,46 +138,55 @@ public class Mesh implements Resource {
         return vao != 0;
     }
 
-    public static int buffer(int i, int l, Buffer buffer) {
-        int vbo = glGenBuffers();
-        switch (buffer) {
-            case IntBuffer ib -> {
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, ib, GL_STATIC_DRAW);
-            }
-            case FloatBuffer fb -> {
-                glBindBuffer(GL_ARRAY_BUFFER, vbo);
-                glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-                glVertexAttribPointer(i, l, GL_FLOAT, false, 0, 0);
-            }
-            case ByteBuffer bb -> {
-                glBindBuffer(GL_ARRAY_BUFFER, vbo);
-                glBufferData(GL_ARRAY_BUFFER, bb, GL_STATIC_DRAW);
-                glVertexAttribPointer(i, l, GL_BYTE, false, 0, 0);
-            }
-            default -> throw new IllegalArgumentException("Unsupported buffer : " + buffer.getClass());
-        }
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        return vbo;
-    }
-
     @Override
     public void bind() {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
-        if (indicesBuffer.hasRemaining()) {
-            this.vbo[0] = buffer(0, 0, indicesBuffer);
+        if (indicesBuffer != null && indicesBuffer.hasRemaining()) {
+            ebo = glGenBuffers();
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
         }
-        if (verticesBuffer.hasRemaining()) {
-            this.vbo[0] = buffer(0, 3, verticesBuffer);
+        if (verticesBuffer != null && verticesBuffer.hasRemaining()) {
+            vbo[0] = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+            glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         }
-        if (texCoordsBuffer.hasRemaining()) {
-            this.vbo[1] = buffer(1, 2, texCoordsBuffer);
+        if (texCoordsBuffer != null && texCoordsBuffer.hasRemaining()) {
+            vbo[1] = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+            glBufferData(GL_ARRAY_BUFFER, texCoordsBuffer, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
         }
-        if (normalsBuffer.hasRemaining()) {
-            this.vbo[2] = buffer(2, 3, normalsBuffer);
+        if (normalsBuffer != null && normalsBuffer.hasRemaining()) {
+            vbo[2] = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+            glBufferData(GL_ARRAY_BUFFER, normalsBuffer, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
         }
         glBindVertexArray(0);
+
+        if (indicesBuffer != null) {
+            indicesBuffer.clear();
+            indicesBuffer = null;
+        }
+        if (verticesBuffer != null) {
+            verticesBuffer.clear();
+            verticesBuffer = null;
+        }
+        if (texCoordsBuffer != null) {
+            texCoordsBuffer.clear();
+            texCoordsBuffer = null;
+        }
+        if (normalsBuffer != null) {
+            normalsBuffer.clear();
+            normalsBuffer = null;
+        }
+
         if (file != null && !(this instanceof Collider)) {
             this.collider = new Collider();
         }
@@ -194,8 +200,9 @@ public class Mesh implements Resource {
     @Override
     public void unbind() {
         glDeleteVertexArrays(vao);
-        for (int vbo : vbo) {
-            glDeleteBuffers(vbo);
+        glDeleteBuffers(ebo);
+        for (int id : vbo) {
+            glDeleteBuffers(id);
         }
     }
 
@@ -213,16 +220,16 @@ public class Mesh implements Resource {
 
         @Override
         public void load() {
-            byte[] vertices = Mesh.this.vertices;
-            min = new Vector3f(Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE);
-            max = new Vector3f(Byte.MIN_VALUE, Byte.MIN_VALUE, Byte.MIN_VALUE);
+            float[] vertices = Mesh.this.vertices;
+            min = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+            max = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
             for (int i = 0; i < vertices.length; i += 3) {
                 min.set(Math.min(min.x, vertices[i]), Math.min(min.y, vertices[i + 1]), Math.min(min.z, vertices[i + 2]));
                 max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));
             }
             size = new Vector3f(max).sub(min).length();
-            this.vertices = new byte[] {
-                    (byte) min.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) max.y, (byte) max.z, (byte) min.x, (byte) max.y, (byte) max.z
+            this.vertices = new float[] {
+                     min.x, min.y, min.z, max.x, min.y, min.z, max.x, max.y, min.z, min.x, max.y, min.z, min.x, min.y, max.z, max.x, min.y, max.z, max.x, max.y, max.z, min.x, max.y,max.z
             };
             this.indices = new int[] {
                     0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
