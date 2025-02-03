@@ -66,6 +66,7 @@ public class Manager {
         HEIGHT = vidmode.height() * 4 / 5;
         WIDTH = vidmode.width() * 4 / 5;
         glfwDefaultWindowHints();
+        //glfwWindowHint(GLFW_SAMPLES, 8);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
