@@ -48,6 +48,24 @@ public class Mesh implements Resource {
         }
     };
 
+    /* TODO: add more static meshes/constants:
+     *  - Plane 1x1
+     *  - X-shape (for foliage)
+     *  - Box/Rectangle 1x1x1 (same 6 sides)
+     *  - Box/Rectangle (unfolded, 6 different sides)
+     *  Meshes with constructor:
+     *  - Box/Rectangle (width, height and depth for dimensions)
+     *  - Cylinder (radius and amount of sides)
+     *  - Plane (width and height)
+     * */
+
+    /*
+    * TODO: add entity types:
+    *  - Billboard (plane always facing player)
+    *  - Sky (rotating around player)
+    *  - 
+    * */
+
     public int      vao, ebo;
     public int[]    vbo = new int[3];
 
