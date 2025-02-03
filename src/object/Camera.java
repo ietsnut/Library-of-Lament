@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.lang.Float.NaN;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera implements Machine {
@@ -95,7 +96,7 @@ public class Camera implements Machine {
                 }
             }
         }
-        if (!stopped) {
+        if (!stopped && !Float.isNaN(position.x) && !Float.isNaN(position.z) && !Float.isNaN(position.y)) {
             Camera.position.set(position);
         }
         Camera.intersecting = intersecting;

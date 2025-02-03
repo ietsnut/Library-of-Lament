@@ -1,5 +1,6 @@
 package game;
 
+import object.Camera;
 import org.lwjgl.glfw.*;
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -23,6 +24,9 @@ public class Control {
                 keys[key] = action != GLFW_RELEASE;
                 if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                     glfwSetWindowShouldClose(window, true);
+                }
+                if (key == GLFW_KEY_ENTER && action == GLFW_RELEASE) {
+                    System.out.println(Camera.position.x + ", " + Camera.position.y + ", " + Camera.position.z);
                 }
             }
         };
