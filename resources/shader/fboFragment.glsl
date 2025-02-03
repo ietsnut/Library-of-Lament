@@ -49,14 +49,16 @@ float depth(sampler2D sampler) {
 void main(void) {
     //color = vec4(vec3(texture(texture1, fragUV).r).rgb, 1.0);
     vec2 center = vec2(0.5, 0.5);
-    float distance = length(fragUV - center);
+    vec2  uvDist   = fragUV - center;
+    float distance = length(uvDist);
     if (distance > 0.5) {
         discard;
     }
     float depthDelta    = depth(texture3);
     float depth         = texture(texture3, fragUV).r;
     float normalDelta   = max(sobel(texture2, 0), max(sobel(texture2, 1), sobel(texture2, 2)));
-    float dither        = (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2;
+    //float dither        = (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2;
+    float dither = 1.0;
     if (normalDelta > 0.1 && dither > 0.1) {
         color = vec4(vec3(0.5), 1.0);
         if (depth < 0.99) {
@@ -71,11 +73,12 @@ void main(void) {
         vec3 albedo = palette[int(texture(texture1, fragUV).r * 8)];
         color = vec4(albedo, 1.0);
     }
-
     if (distance > 0.499) {
         color = vec4(1.0);
     }
-    if(distance < 0.01 && distance > 0.01 - 0.002 || distance < 0.002) {
+    uvDist.x      *= WIDTH / HEIGHT;
+    float distance2 = length(uvDist);
+    if(distance2 < 0.01 && distance2 > 0.01 - 0.002 || distance2 < 0.002) {
         color = dot(color.rgb, GRAYSCALE) > 0.5 ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(1.0);
     }
 }
