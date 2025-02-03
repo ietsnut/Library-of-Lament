@@ -15,11 +15,11 @@ public class Board extends Scene {
         House house = new House("0");
         house.position.set(-16.776, 01.914, 19.506);
         entities.add(house);
-        entities.add(new Sky("0", new Cylinder(8, 60), 3));
+        entities.add(new Sky("0", new Cylinder(8, 60), 9));
         entities.getLast().rotation.x = (float) (Math.random() * 90);
-        entities.add(new Sky("0", new Cylinder(12, 80), 2));
+        entities.add(new Sky("0", new Cylinder(8, 80), 5));
         entities.getLast().rotation.y = (float) (Math.random() * 90);
-        entities.add(new Sky("0", new Cylinder(16, 120), 1));
+        entities.add(new Sky("0", new Cylinder(8, 120), 2));
         entities.getLast().rotation.z = (float) (Math.random() * 90);
         /*
         for (int i = 0; i < 30; i+= 5) {

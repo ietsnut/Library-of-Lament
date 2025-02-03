@@ -41,10 +41,11 @@ public class Manager {
             loop();
         } catch (Exception e) {
             System.err.println("Error during execution:");
-            e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             System.out.println("Starting cleanup...");
             close();
+            System.exit(0);
         }
     }
 
@@ -130,7 +131,6 @@ public class Manager {
         if (debugProc != null) {
             debugProc.free();
         }
-        glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
         glfwTerminate();
         //glfwSetErrorCallback(null).free();
