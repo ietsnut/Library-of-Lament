@@ -36,7 +36,11 @@ public class EntityShader extends Shader {
         uniform("texture1", 0);
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.state].binded()) {
+                if (entity instanceof Sky) {
+                    uniform("illumination", 0.5f);
+                }
                 render(entity);
+                uniform("illumination", 0f);
             }
         }
         if (scene.terrain.meshes[scene.terrain.state].binded()) {

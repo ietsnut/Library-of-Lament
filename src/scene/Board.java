@@ -1,15 +1,26 @@
 package scene;
 
-import content.Vase;
+import content.House;
+import content.Sky;
 import game.Scene;
+import property.Cylinder;
 import property.Light;
 import org.joml.Vector3f;
 import property.Terrain;
 
-public class Sewer extends Scene {
+public class Board extends Scene {
 
-    public Sewer() {
-        this.terrain = new Terrain("untitled");
+    public Board() {
+        this.terrain = new Terrain("board");
+        House house = new House("0");
+        house.position.set(-16.776, 01.914, 19.506);
+        entities.add(house);
+        entities.add(new Sky("0", new Cylinder(8, 60), 3));
+        entities.getLast().rotation.x = (float) (Math.random() * 90);
+        entities.add(new Sky("0", new Cylinder(12, 80), 2));
+        entities.getLast().rotation.y = (float) (Math.random() * 90);
+        entities.add(new Sky("0", new Cylinder(16, 120), 1));
+        entities.getLast().rotation.z = (float) (Math.random() * 90);
         /*
         for (int i = 0; i < 30; i+= 5) {
             Vase vase = new Vase("0");

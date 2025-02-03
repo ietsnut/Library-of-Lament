@@ -31,6 +31,14 @@ public class Entity {
         this.meshes[state]      = mesh;
     }
 
+    public Entity(Mesh mesh, String name) {
+        this.states     = 1;
+        this.materials  = new Material[states];
+        this.meshes     = new Mesh[states];
+        this.materials[state]   = new Material(type, name);
+        this.meshes[state]      = mesh;
+    }
+
     public Entity(String name) {
         this.states     = 1;
         this.materials  = new Material[states];
@@ -54,12 +62,12 @@ public class Entity {
         return "< " + type + " > [ state: " + state + " ] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
     }
 
-    private static final Vector3f X = new Vector3f(1, 0, 0);
-    private static final Vector3f Y = new Vector3f(0, 1, 0);
-    private static final Vector3f Z = new Vector3f(0, 0, 1);
+    public static final Vector3f X = new Vector3f(1, 0, 0);
+    public static final Vector3f Y = new Vector3f(0, 1, 0);
+    public static final Vector3f Z = new Vector3f(0, 0, 1);
 
-    public void updateModel() {
-        this.model.buffer().identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y * 5), Y).rotate((float) Math.toRadians(rotation.x * 5), X).rotate((float) Math.toRadians(rotation.z * 5), Z);
+    public void update() {
+        this.model.buffer().identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y), Y).rotate((float) Math.toRadians(rotation.x), X).rotate((float) Math.toRadians(rotation.z), Z);
         this.model.swap();
     }
 

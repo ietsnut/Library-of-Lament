@@ -74,7 +74,7 @@ public class Camera implements Machine {
         boolean inside = false;
         boolean stopped = false;
         for (Entity entity : Manager.scene.entities) {
-            entity.updateModel();
+            entity.update();
             if (entity instanceof Interactive interactive) {
                 if (Camera.inside(position, entity)) {
                     if (Camera.inside == null) {

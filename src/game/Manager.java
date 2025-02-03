@@ -1,7 +1,6 @@
 package game;
 
-import org.lwjgl.system.Configuration;
-import scene.Sewer;
+import scene.Board;
 import engine.*;
 import object.*;
 
@@ -63,8 +62,8 @@ public class Manager {
             throw new RuntimeException("Failed to get video mode");
         }
         RATE = vidmode.refreshRate();
-        WIDTH = vidmode.height() * 4 / 5;
         HEIGHT = vidmode.height() * 4 / 5;
+        WIDTH = vidmode.width() * 4 / 5;
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -94,7 +93,7 @@ public class Manager {
             //debugProc = GLUtil.setupDebugMessageCallback();
         }
         Renderer.init();
-        scene = new Sewer();
+        scene = new Board();
         Resource.process();
         Camera.listen();
     }

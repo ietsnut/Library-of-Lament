@@ -59,15 +59,11 @@ void main(void) {
     float dither        = (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2;
     if (normalDelta > 0.1 && dither > 0.1) {
         color = vec4(vec3(0.5), 1.0);
-        if (depth < 0.9999) {
+        if (depth < 0.99) {
+            color = vec4(vec3(0.75), 1.0);
+        } if (depth < 0.98 ) {
             color = vec4(1.0);
         }
-        /*
-        if (depth < 0.98) {
-            color = vec4(vec3(0.75), 1.0);
-        } if (depth < 0.97) {
-            color = vec4(1.0);
-        }*/
     } else if (depth > 0.99999) {
         vec3 albedo = palette[int(sky * 7)];
         color = vec4(albedo, 1.0);
