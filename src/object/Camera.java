@@ -8,6 +8,7 @@ import game.Control;
 import game.Manager;
 import resource.Mesh;
 
+import javax.crypto.Mac;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,6 +37,13 @@ public class Camera implements Machine {
 
     public static Entity intersecting   = null;
     public static Entity inside         = null;
+
+    public static void reset() {
+        position.set(0, 1f, 0);
+        orientation.set(0, 0, 0, 0);
+        rotation.set(0, 0, 0);
+        orient();
+    }
 
     public void turn() {
         update();
@@ -66,10 +74,14 @@ public class Camera implements Machine {
         if (Control.isKeyDown(GLFW_KEY_A) || Control.isKeyDown(GLFW_KEY_LEFT)) {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
-        if (Manager.scene == null) return;
+
+
+        if (Manager.scene.terrain == null) return;
         Terrain terrain = Manager.scene.terrain;
-        if (terrain == null) return;
+        if (!terrain.meshes[0].loaded()) return;
         Vector3f position = terrain.height(origin, new Vector3f(movement));
+
+
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
         boolean inside = false;
@@ -156,20 +168,30 @@ public class Camera implements Machine {
     }
 
     public static void listen() {
+
         Camera camera = new Camera();
-        camera.start(120);
+        camera.start(Manager.RATE * 2);
+        //Thread thread = new Thread(new Camera());
+        //thread.start();
     }
 
-    private static void rot(float x, float y, float z, double angle) {
-        Quaternionf deltaRotation = new Quaternionf().rotationAxis((float) angle, x, y, z);
+    /*
+    @Override
+    public void run() {
+        while (true)
+            turn();
+    }*/
+
+    private static void rot(Vector3f axis, float angle) {
+        Quaternionf deltaRotation = new Quaternionf().rotationAxis(angle, axis);
         orientation.mul(deltaRotation);
     }
 
     private static void orient() {
         orientation.identity();
-        rot(0, 1, 0, Math.toRadians(rotation.y));
-        rot(1, 0, 0, Math.toRadians(rotation.x));
-        rot(0, 0, 1, Math.toRadians(rotation.z));
+        rot(Entity.Y, Math.toRadians(rotation.y));
+        rot(Entity.X, Math.toRadians(rotation.x));
+        rot(Entity.Z, Math.toRadians(rotation.z));
     }
 
     public static Vector3f forward() {

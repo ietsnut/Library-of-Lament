@@ -1,5 +1,6 @@
 package resource;
 
+import game.Scene;
 import property.Terrain;
 
 import java.util.*;

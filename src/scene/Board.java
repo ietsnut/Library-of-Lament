@@ -11,7 +11,7 @@ import property.Terrain;
 public class Board extends Scene {
 
     public Board() {
-        this.terrain = new Terrain("board");
+        terrain = new Terrain("board");
         House house = new House("0");
         house.position.set(-16.776, 01.914, 19.506);
         entities.add(house);

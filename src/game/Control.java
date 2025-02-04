@@ -2,6 +2,9 @@ package game;
 
 import object.Camera;
 import org.lwjgl.glfw.*;
+import scene.Board;
+import scene.Forest;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Control {
@@ -26,7 +29,7 @@ public class Control {
                     glfwSetWindowShouldClose(window, true);
                 }
                 if (key == GLFW_KEY_ENTER && action == GLFW_RELEASE) {
-                    System.out.println(Camera.position.x + ", " + Camera.position.y + ", " + Camera.position.z);
+                    Manager.swap();
                 }
             }
         };

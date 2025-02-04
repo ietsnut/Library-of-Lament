@@ -9,8 +9,6 @@ public class Matrix extends AtomicReference<Matrix4f> {
     private final Matrix4f buffer1 = new Matrix4f();
     private final Matrix4f buffer2 = new Matrix4f();
 
-    public boolean changed = true;
-
     public Matrix() {
         super();
         set(buffer1);

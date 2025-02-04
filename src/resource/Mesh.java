@@ -148,7 +148,7 @@ public class Mesh implements Resource {
 
     @Override
     public boolean loaded() {
-        return indices.length > 0 || vertices.length > 0 || texCoords.length > 0 || normals.length > 0;
+        return indices.length > 0 && vertices.length > 0 && texCoords.length > 0 && normals.length > 0;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package game;
 
+import property.Entity;
 import scene.Board;
 import engine.*;
 import object.*;
@@ -12,6 +13,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import property.Machine;
 import resource.Resource;
+import scene.Forest;
 
 import java.nio.*;
 
@@ -29,8 +31,10 @@ public class Manager {
     public static long  RATE;
     public static float PLAYTIME;
 
-    public static Scene scene;
     public static long  window;
+
+    private static boolean swap = false;
+    public static Scene scene;
 
     public static Callback debugProc;
 
@@ -41,7 +45,7 @@ public class Manager {
             loop();
         } catch (Exception e) {
             System.err.println("Error during execution:");
-            throw new RuntimeException(e);
+            e.printStackTrace();
         } finally {
             System.out.println("Starting cleanup...");
             close();
@@ -116,6 +120,9 @@ public class Manager {
                 System.gc();
             }
             fps++;
+            if (swap) {
+                scene();
+            }
             Resource.process();
             Renderer.render(scene);
             glfwPollEvents();
@@ -137,10 +144,46 @@ public class Manager {
         //glfwSetErrorCallback(null).free();
     }
 
+    private static void scene() {
+        swap = false;
+        Resource.clear();
+        scene.clear();
+        if (scene instanceof Board) {
+            scene = new Forest();
+        } else {
+            scene = new Board();
+        }
+        Camera.reset();
+/*
+        new Thread(() -> {
+            boolean loaded = false;
+            while (!loaded) {
+                loaded = true;
+                for (Entity entity : scene.entities) {
+                    if (!entity.meshes[entity.state].binded()) {
+                        loaded = false;
+                    }
+                }
+                if (!scene.terrain.meshes[scene.terrain.state].binded()) {
+                    loaded = false;
+                }
+            }
+            Scene old = active.get();
+            active.set(scene);
+            dumped.set(old);
+            clean = true;
+            Camera.reset();
+        }).start();
+        */
+
+    }
+
+    public static void swap() {
+        swap = true;
+    }
 
     public static long time() {
         return (long) (GLFW.glfwGetTime() * 1000);
     }
-
 
 }

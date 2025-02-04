@@ -11,8 +11,7 @@ import resource.Mesh;
 public class Forest extends Scene {
 
     public Forest() {
-        super();
-        this.terrain = new Terrain("forest");
+        terrain = new Terrain("forest");
         for (int i = 0; i < 30; i+= 5) {
             Vase vase = new Vase("0");
             vase.scale.set(1/16f);

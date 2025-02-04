@@ -1,10 +1,11 @@
 package game;
 
 import object.Camera;
+import org.joml.Matrix4f;
 import property.*;
 
-import javax.crypto.Mac;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class Scene {
 
@@ -16,6 +17,7 @@ public abstract class Scene {
         entities.clear();
         lights.clear();
         terrain = null;
+        System.gc();
     }
 
 }
