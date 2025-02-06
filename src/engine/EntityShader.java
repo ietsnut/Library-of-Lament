@@ -21,17 +21,6 @@ public class EntityShader extends Shader {
     public void shader(Scene scene) {
         uniform("projection",           Camera.projection.get());
         uniform("view",                 Camera.view.get());
-        uniform("lightPosition[0]",     Camera.position);
-        uniform("lightAttenuation[0]",  new Vector3f(2.0f, 0.7f, 0.07f));
-        uniform("lightIntensity[0]",    2f);
-        int LIGHT = 1;
-        for (Light light : scene.lights) {
-            uniform("lightPosition[" + LIGHT + "]",     light.position);
-            uniform("lightAttenuation[" + LIGHT + "]",  light.attenuation);
-            uniform("lightIntensity[" + LIGHT + "]",    light.intensity);
-            LIGHT++;
-        }
-        uniform("lights", LIGHT);
         uniform("illumination", 0f);
         uniform("texture1", 0);
         for (Entity entity : scene.entities) {

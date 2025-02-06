@@ -19,8 +19,8 @@ public class FBO {
     public static final int[]       INDICES     = new int[] {0, 1, 2, 2, 1, 3};
     public static final byte[]      VERTICES    = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
 
-    public static final IntBuffer   IBUFFER     = BufferUtils.createIntBuffer(INDICES.length);
-    public static final ByteBuffer  VBUFFER     = BufferUtils.createByteBuffer(VERTICES.length);
+    public static final IntBuffer   IBUFFER     = BufferUtils.createIntBuffer(6);
+    public static final ByteBuffer  VBUFFER     = BufferUtils.createByteBuffer(8);
 
     public static void load() {
 
@@ -52,7 +52,7 @@ public class FBO {
         frame(1);
         glBindFramebuffer(GL_FRAMEBUFFER, ID);
         glBindTexture(GL_TEXTURE_2D, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, Manager.WIDTH, Manager.HEIGHT, 0, GL_RED, GL_FLOAT, (ByteBuffer) null);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, Manager.WIDTH, Manager.HEIGHT, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, (ByteBuffer) null);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 1, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

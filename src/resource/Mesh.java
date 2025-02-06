@@ -23,10 +23,10 @@ public class Mesh implements Resource {
         @Override
         public void load() {
             this.vertices = new float[] {
-                    -1, 0, -1,  // bottom-left
-                    1, 0, -1,  // bottom-right
-                    1, 0,  1,  // top-right
-                    -1, 0,  1   // top-left
+                    -10, 0, -10,  // bottom-left
+                    10, 0, -10,  // bottom-right
+                    10, 0,  10,  // top-right
+                    -10, 0,  10   // top-left
             };
             this.indices = new int[] {
                     0, 1, 2,  // first triangle

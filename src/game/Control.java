@@ -31,6 +31,9 @@ public class Control {
                 if (key == GLFW_KEY_ENTER && action == GLFW_RELEASE) {
                     Manager.swap();
                 }
+                if (key == GLFW_KEY_0 && action == GLFW_RELEASE) {
+                    System.out.println(Math.round(Camera.position.x) + ", " + Math.round(Camera.position.y) + ", "  + Math.round(Camera.position.z));
+                }
             }
         };
         glfwSetKeyCallback(window, keyCallback);
