@@ -8,13 +8,12 @@ import scene.Forest;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Control {
-    private static final boolean[] keys = new boolean[65536];
-    private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY, dWheel;
-    private static boolean mouseLocked, firstMouse, clicked, holding;
+
+    private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY;
+    private static boolean mouseLocked, firstMouse, clicked, holding, walking;
 
     private static GLFWKeyCallback keyCallback;
     private static GLFWMouseButtonCallback mouseButtonCallback;
-    private static GLFWScrollCallback scrollCallback;
     private static GLFWCursorPosCallback cursorPosCallback;
 
     public static void listen(long window) {
@@ -24,7 +23,6 @@ public class Control {
                 if (key < 0) {
                     return;
                 }
-                keys[key] = action != GLFW_RELEASE;
                 if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                     glfwSetWindowShouldClose(window, true);
                 }
@@ -33,6 +31,12 @@ public class Control {
                 }
                 if (key == GLFW_KEY_0 && action == GLFW_RELEASE) {
                     System.out.println(Math.round(Camera.position.x) + ", " + Math.round(Camera.position.y) + ", "  + Math.round(Camera.position.z));
+                }
+                if (key == GLFW_KEY_1 && action == GLFW_RELEASE && mouseLocked) {
+                    glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
+                    mouseLocked = false;
+                    firstMouse = true;
                 }
             }
         };
@@ -47,32 +51,18 @@ public class Control {
                     mouseLocked = true;
                     firstMouse = true;
                 }
-                if (button == 1 && action == 1 && mouseLocked) {
-                    glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                    glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
-                    mouseLocked = false;
-                    firstMouse = true;
+                if (button == 1 && mouseLocked) {
+                    walking = (action == 1);
                 }
                 if (mouseLocked && !firstMouse && button == 0 && action == 1) {
                     clicked = true;
                 }
-                if (mouseLocked && !firstMouse && button == 0 && action == GLFW_PRESS) {
-                    holding = true;
-                }
-                if (mouseLocked && !firstMouse && button == 0 && action == GLFW_RELEASE) {
-                    holding = false;
+                if (mouseLocked && !firstMouse && button == 0) {
+                    holding = (action == GLFW_PRESS);
                 }
             }
         };
         glfwSetMouseButtonCallback(window, mouseButtonCallback);
-
-        scrollCallback = new GLFWScrollCallback() {
-            @Override
-            public void invoke(long window, double xoffset, double yoffset) {
-                dWheel = (float) yoffset;
-            }
-        };
-        glfwSetScrollCallback(window, scrollCallback);
 
         cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
@@ -98,7 +88,6 @@ public class Control {
     public static void clear() {
         if (keyCallback != null) keyCallback.free();
         if (mouseButtonCallback != null) mouseButtonCallback.free();
-        if (scrollCallback != null) scrollCallback.free();
         if (cursorPosCallback != null) cursorPosCallback.free();
     }
 
@@ -114,8 +103,8 @@ public class Control {
         return holding;
     }
 
-    public static boolean isKeyDown(int keycode) {
-        return keys[keycode];
+    public static boolean isWalking() {
+        return walking;
     }
 
     public static float dx() {
@@ -130,9 +119,4 @@ public class Control {
         return dy;
     }
 
-    public static float getDWheel() {
-        float dw = dWheel;
-        dWheel = 0;
-        return dw;
-    }
 }

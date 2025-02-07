@@ -62,25 +62,15 @@ public class Camera implements Machine {
         Vector3f forward = new Vector3f(forward().x, 0, forward().z).normalize();
         Vector3f origin = new Vector3f(position);
         Vector3f movement = new Vector3f();
-        if (Control.isKeyDown(GLFW_KEY_W) || Control.isKeyDown(GLFW_KEY_UP)) {
+
+        if (Control.isWalking()) {
             movement.add(forward.x * -SPEED, 0, forward.z * -SPEED);
         }
-        if (Control.isKeyDown(GLFW_KEY_S) || Control.isKeyDown(GLFW_KEY_DOWN)) {
-            movement.add(forward.x * SPEED, 0, forward.z * SPEED);
-        }
-        if (Control.isKeyDown(GLFW_KEY_D) || Control.isKeyDown(GLFW_KEY_RIGHT)) {
-            movement.add(forward.z * SPEED, 0, forward.x * -SPEED);
-        }
-        if (Control.isKeyDown(GLFW_KEY_A) || Control.isKeyDown(GLFW_KEY_LEFT)) {
-            movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
-        }
-
 
         if (Manager.scene.terrain == null) return;
         Terrain terrain = Manager.scene.terrain;
         if (!terrain.meshes[0].loaded()) return;
         Vector3f position = terrain.height(origin, new Vector3f(movement));
-
 
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
@@ -123,6 +113,7 @@ public class Camera implements Machine {
             }
             Camera.inside = null;
         }
+
         if (movement.length() > 0 && !position.equals(origin)) {
             if (bob <= 0.0f) {
                 bob = 360.0f;
