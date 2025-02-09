@@ -11,8 +11,6 @@ const float dx = 1.0 / WIDTH;
 const float dy = 1.0 / HEIGHT;
 const vec2 center = vec2(0.5, 0.5);
 
-uniform float sky;
-
 const vec3[] palette = vec3[] (
     vec3(0.0),
     vec3(0.47, 0.5, 0.35),

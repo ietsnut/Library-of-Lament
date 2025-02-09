@@ -3,17 +3,19 @@ package content;
 import game.Serial;
 import property.Entity;
 import property.Machine;
+import resource.Material;
+import resource.Mesh;
 
 public class Plant extends Entity implements Machine {
 
-    public Plant(String name) {
-        super(3);
-        start();
+    public Plant(int states) {
+        super(states, Mesh.X_SHAPE);
+        start(8);
     }
 
     @Override
     public void turn() {
-        this.state = Serial.states[0];
+        this.state = Math.clamp(Serial.states[1] / 4, 0, 3);
     }
 
 }

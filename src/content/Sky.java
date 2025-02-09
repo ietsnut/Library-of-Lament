@@ -15,7 +15,7 @@ public class Sky extends Entity implements Machine {
         this.rotation.x = (float) (Math.random() * 360);
         this.rotation.y = (float) (Math.random() * 360);
         this.rotation.z = (float) (Math.random() * 360);
-        start(4);
+        start(8);
     }
 
     @Override
@@ -29,8 +29,8 @@ public class Sky extends Entity implements Machine {
 
     @Override
     public void turn() {
-        rotation.x += modifier;
-        rotation.y += modifier;
-        rotation.z += modifier;
+        rotation.x += (Serial.states[0] / 15f);
+        rotation.y += (Serial.states[0] / 15f);
+        rotation.z += (Serial.states[0] / 15f);
     }
 }

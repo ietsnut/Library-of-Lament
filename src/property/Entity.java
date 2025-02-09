@@ -47,6 +47,16 @@ public class Entity {
         this.meshes[state]      = new Mesh(type, name);
     }
 
+    public Entity(int states, Mesh mesh) {
+        this.states     = states;
+        this.materials  = new Material[states];
+        this.meshes     = new Mesh[states];
+        for (int state = 0; state < states; state++) {
+            this.materials[state]   = new Material(type, state);
+            this.meshes[state]      = mesh;
+        }
+    }
+
     public Entity(int states) {
         this.states     = states;
         this.materials  = new Material[states];

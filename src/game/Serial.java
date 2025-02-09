@@ -9,7 +9,7 @@ import static resource.Resource.THREADS;
 
 public class Serial implements Runnable {
 
-    public static int[] states = new int[3];
+    public static int[] states = new int[2];
 
     public static void listen() {
         Thread thread = new Thread(new Serial());
@@ -45,10 +45,9 @@ public class Serial implements Runnable {
                         buffer.delete(0, newlineIndex + 1);
                         try {
                             String[] parts = line.split(" ");
-                            if (parts.length == 3) {
+                            if (parts.length == 2) {
                                 states[0] = Integer.parseInt(parts[0]);
                                 states[1] = Integer.parseInt(parts[1]);
-                                states[2] = Integer.parseInt(parts[2]);
                                 System.out.println(Arrays.toString(states));
                             }
                         } catch (NumberFormatException e) {

@@ -48,6 +48,31 @@ public class Mesh implements Resource {
         }
     };
 
+    public static final Mesh X_SHAPE = new Mesh() {
+        @Override
+        public void load() {
+
+            this.vertices = new float[] {
+                    -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f, -0.5f, 0.0f, 1.0f, -0.5f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.5f, 0.0f, 1.0f,  0.5f, 0.0f, 1.0f,  0.0f
+            };
+
+            this.indices = new int[] {
+                    0, 3, 2,  2, 1, 0, 4, 7, 6,  6, 5, 4, 8, 11,10, 10, 9, 8, 12,15,14,14,13,12
+            };
+
+            this.texCoords = new float[] {
+                    0.0f, 1.0f, 0.5f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f
+            };
+
+            this.normals = new float[] {
+                    0,0,1,  0,0,1,  0,0,1,  0,0,1, 0,0,1,  0,0,1,  0,0,1,  0,0,1, 1,0,0,  1,0,0,  1,0,0,  1,0,0, 1,0,0,  1,0,0,  1,0,0,  1,0,0
+            };
+
+            this.index = indices.length;
+
+        }
+    };
+
     /* TODO: add more static meshes/constants:
      *  - Plane 1x1
      *  - X-shape (for foliage)
