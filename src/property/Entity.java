@@ -5,6 +5,10 @@ import resource.Material;
 import resource.Mesh;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Entity {
 
     public final String type = this.getClass().getSimpleName().toLowerCase();
@@ -21,49 +25,95 @@ public class Entity {
     int states;
     public int state = 0;
 
-    //TODO: Add invalid state detection and constrain
+    private static final Map<String, Material> materialCache = new HashMap<>();
+    private static final Map<String, Mesh> meshCache = new HashMap<>();
 
     public Entity(Material material, Mesh mesh) {
         this.states     = 1;
         this.materials  = new Material[states];
         this.meshes     = new Mesh[states];
-        this.materials[state]   = material;
-        this.meshes[state]      = mesh;
+        this.materials[state] = material;
+        this.meshes[state]    = mesh;
     }
 
+    // 2. When a Mesh is provided along with a name, create (or reuse) the Material.
     public Entity(Mesh mesh, String name) {
         this.states     = 1;
         this.materials  = new Material[states];
         this.meshes     = new Mesh[states];
-        this.materials[state]   = new Material(type, name);
-        this.meshes[state]      = mesh;
+
+        String materialKey = type + ":" + name;
+        Material cachedMaterial = materialCache.get(materialKey);
+        if (cachedMaterial == null) {
+            cachedMaterial = new Material(type, name);
+            materialCache.put(materialKey, cachedMaterial);
+        }
+        this.materials[state] = cachedMaterial;
+        this.meshes[state]    = mesh;
     }
 
+    // 3. When only a name is provided, create (or reuse) both Material and Mesh.
     public Entity(String name) {
         this.states     = 1;
         this.materials  = new Material[states];
         this.meshes     = new Mesh[states];
-        this.materials[state]   = new Material(type, name);
-        this.meshes[state]      = new Mesh(type, name);
+
+        String materialKey = type + ":" + name;
+        Material cachedMaterial = materialCache.get(materialKey);
+        if (cachedMaterial == null) {
+            cachedMaterial = new Material(type, name);
+            materialCache.put(materialKey, cachedMaterial);
+        }
+        this.materials[state] = cachedMaterial;
+
+        String meshKey = type + ":" + name;
+        Mesh cachedMesh = meshCache.get(meshKey);
+        if (cachedMesh == null) {
+            cachedMesh = new Mesh(type, name);
+            meshCache.put(meshKey, cachedMesh);
+        }
+        this.meshes[state] = cachedMesh;
     }
 
+    // 4. When multiple states are used with a provided Mesh,
+    //    create (or reuse) a Material for each state.
     public Entity(int states, Mesh mesh) {
         this.states     = states;
         this.materials  = new Material[states];
         this.meshes     = new Mesh[states];
-        for (int state = 0; state < states; state++) {
-            this.materials[state]   = new Material(type, state);
-            this.meshes[state]      = mesh;
+        for (int i = 0; i < states; i++) {
+            String key = type + ":" + i;
+            Material cachedMaterial = materialCache.get(key);
+            if (cachedMaterial == null) {
+                cachedMaterial = new Material(type, i);
+                materialCache.put(key, cachedMaterial);
+            }
+            this.materials[i] = cachedMaterial;
+            this.meshes[i]    = mesh; // Mesh provided externally; assumed already managed.
         }
     }
 
+    // 5. When multiple states are used and both Material and Mesh need to be created,
+    //    create (or reuse) each one.
     public Entity(int states) {
         this.states     = states;
         this.materials  = new Material[states];
         this.meshes     = new Mesh[states];
-        for (int state = 0; state < states; state++) {
-            this.materials[state]   = new Material(type, state);
-            this.meshes[state]      = new Mesh(type, state);
+        for (int i = 0; i < states; i++) {
+            String key = type + ":" + i;
+            Material cachedMaterial = materialCache.get(key);
+            if (cachedMaterial == null) {
+                cachedMaterial = new Material(type, i);
+                materialCache.put(key, cachedMaterial);
+            }
+            this.materials[i] = cachedMaterial;
+
+            Mesh cachedMesh = meshCache.get(key);
+            if (cachedMesh == null) {
+                cachedMesh = new Mesh(type, i);
+                meshCache.put(key, cachedMesh);
+            }
+            this.meshes[i] = cachedMesh;
         }
     }
 

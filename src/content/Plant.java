@@ -3,7 +3,6 @@ package content;
 import game.Serial;
 import property.Entity;
 import property.Machine;
-import resource.Material;
 import resource.Mesh;
 
 public class Plant extends Entity implements Machine {
@@ -15,7 +14,7 @@ public class Plant extends Entity implements Machine {
 
     @Override
     public void turn() {
-        this.state = Math.clamp(Serial.states[1] / 4, 0, 3);
+        this.state = Math.clamp((Serial.states[1] / 4), 0, 3);
     }
 
 }
