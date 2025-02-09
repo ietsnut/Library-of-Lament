@@ -20,7 +20,7 @@ void main(void) {
     if (albedo == 0) {
         discard;
     }
-    color = (albedo - 1) & 0x3;
+    color = (uint(albedo) - 1u) & 0x3u;
     normal = fragNormal;
 }
 

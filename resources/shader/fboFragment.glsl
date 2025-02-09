@@ -36,7 +36,7 @@ void main(void) {
     } else if (texture(texture3, fragUV).r > 0.99999) {
         color = vec4(palette[1], 1.0);
     } else {
-        color = vec4(palette[texture(texture1, fragUV).r & 0x3], 1.0);
+        color = vec4(palette[uint(texture(texture1, fragUV).r) & 0x3u], 1.0);
     }
     if (distance > 0.499) {
         color = vec4(1.0);
