@@ -1,10 +1,7 @@
 package engine;
 
-import content.Sky;
-import property.Light;
 import game.Scene;
 import object.*;
-import org.joml.Vector3f;
 import property.Entity;
 
 import static org.lwjgl.opengl.GL40.*;
