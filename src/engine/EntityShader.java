@@ -21,15 +21,9 @@ public class EntityShader extends Shader {
     public void shader(Scene scene) {
         uniform("projection",           Camera.projection.get());
         uniform("view",                 Camera.view.get());
-        uniform("illumination", 0f);
-        uniform("texture1", 0);
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.state].binded()) {
-                if (entity instanceof Sky) {
-                    uniform("illumination", 0.5f);
-                }
                 render(entity);
-                uniform("illumination", 0f);
             }
         }
         if (scene.terrain.meshes[scene.terrain.state].binded()) {
@@ -45,6 +39,7 @@ public class EntityShader extends Shader {
         }
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, entity.materials[entity.state].texture);
+        uniform("texture1", 0);
         glDrawElements(GL_TRIANGLES, entity.meshes[entity.state].index, GL_UNSIGNED_INT, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
         for (int i = 0; i < attributes.length; i++) {
