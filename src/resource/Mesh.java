@@ -4,109 +4,31 @@ import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
-import object.Camera;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import game.Console;
 import org.lwjgl.BufferUtils;
-import property.Entity;
 
 import java.io.*;
 import java.nio.*;
-import java.util.List;
+import java.util.Arrays;
 
 import static org.lwjgl.opengl.GL40.*;
 
 public class Mesh implements Resource {
 
-    public static final Mesh PLANE = new Mesh() {
-        @Override
-        public void load() {
-            this.vertices = new float[] {
-                    -10, 0, -10,  // bottom-left
-                    10, 0, -10,  // bottom-right
-                    10, 0,  10,  // top-right
-                    -10, 0,  10   // top-left
-            };
-            this.indices = new int[] {
-                    0, 1, 2,  // first triangle
-                    2, 3, 0   // second triangle
-            };
-            this.texCoords = new float[] {
-                    0, 0,  // bottom-left
-                    1, 0,  // bottom-right
-                    1, 1,  // top-right
-                    0, 1   // top-left
-            };
-            this.normals = new float[] {
-                    0, 1, 0,  // bottom-left
-                    0, 1, 0,  // bottom-right
-                    0, 1, 0,  // top-right
-                    0, 1, 0   // top-left
-            };
-            this.index = indices.length;
-        }
-    };
-
-    public static final Mesh X_SHAPE = new Mesh() {
-        @Override
-        public void load() {
-
-            this.vertices = new float[] {
-                    -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f, -0.5f, 0.0f, 1.0f, -0.5f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,  0.5f, 0.0f, 1.0f,  0.5f, 0.0f, 1.0f,  0.0f
-            };
-
-            this.indices = new int[] {
-                    0, 3, 2,  2, 1, 0, 4, 7, 6,  6, 5, 4, 8, 11,10, 10, 9, 8, 12,15,14,14,13,12
-            };
-
-            this.texCoords = new float[] {
-                    0.0f, 1.0f, 0.5f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f
-            };
-
-            this.normals = new float[] {
-                    0,0,1,  0,0,1,  0,0,1,  0,0,1, 0,0,1,  0,0,1,  0,0,1,  0,0,1, 1,0,0,  1,0,0,  1,0,0,  1,0,0, 1,0,0,  1,0,0,  1,0,0,  1,0,0
-            };
-
-            this.index = indices.length;
-
-        }
-    };
-
-    /* TODO: add more static meshes/constants:
-     *  - Plane 1x1
-     *  - X-shape (for foliage)
-     *  - Box/Rectangle 1x1x1 (same 6 sides)
-     *  - Box/Rectangle (unfolded, 6 different sides)
-     *  Meshes with constructor:
-     *  - Box/Rectangle (width, height and depth for dimensions)
-     *  - Cylinder (radius and amount of sides)
-     *  - Plane (width and height)
-     * */
-
-    /*
-    * TODO: add entity types:
-    *  - Billboard (plane always facing player)
-    *  - Sky (rotating around player)
-    *  - 
-    * */
-
     public int      vao, ebo;
     public int[]    vbo = new int[3];
 
-    public int[]    indices     = new int[0];
-    public float[]  vertices    = new float[0];
-    public float[]  normals     = new float[0];
-    public float[]  texCoords   = new float[0];
+    public int[]    indices;
+    public byte[]   vertices;
+    public float[]  normals;
+    public float[]  uvs;
 
     public int index;
 
     private IntBuffer   indicesBuffer;
-    private FloatBuffer verticesBuffer;
+    private ByteBuffer  verticesBuffer;
     private FloatBuffer normalsBuffer;
-    private FloatBuffer texCoordsBuffer;
-
-    public Collider collider;
+    private FloatBuffer uvsBuffer;
 
     private final String file;
 
@@ -141,12 +63,17 @@ public class Mesh implements Resource {
                 obj = ObjReader.read(bis);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load mesh: " + file, e);
+            Console.error("Failed to load", file);
+            return;
         }
         obj             = ObjUtils.convertToRenderable(obj);
         this.indices    = ObjData.getFaceVertexIndicesArray(obj);
-        this.vertices   = ObjData.getVerticesArray(obj);
-        this.texCoords  = ObjData.getTexCoordsArray(obj, 2, true);
+        float[] vertices = ObjData.getVerticesArray(obj);
+        this.vertices = new byte[vertices.length];
+        for (int i = 0; i < vertices.length; i++) {
+            this.vertices[i] = (byte) vertices[i];
+        }
+        this.uvs        = ObjData.getTexCoordsArray(obj, 2, true);
         this.normals    = ObjData.getNormalsArray(obj);
         this.index      = (indices != null) ? indices.length : 0;
     }
@@ -158,12 +85,12 @@ public class Mesh implements Resource {
             indicesBuffer.put(indices).flip();
         }
         if (vertices.length > 0) {
-            verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
+            verticesBuffer = BufferUtils.createByteBuffer(vertices.length);
             verticesBuffer.put(vertices).flip();
         }
-        if (texCoords.length > 0) {
-            texCoordsBuffer = BufferUtils.createFloatBuffer(texCoords.length);
-            texCoordsBuffer.put(texCoords).flip();
+        if (uvs.length > 0) {
+            uvsBuffer = BufferUtils.createFloatBuffer(uvs.length);
+            uvsBuffer.put(uvs).flip();
         }
         if (normals.length > 0) {
             normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
@@ -173,7 +100,7 @@ public class Mesh implements Resource {
 
     @Override
     public boolean loaded() {
-        return indices.length > 0 && vertices.length > 0 && texCoords.length > 0 && normals.length > 0;
+        return indices.length > 0 && vertices.length > 0 && uvs.length > 0 && normals.length > 0;
     }
 
     @Override
@@ -195,12 +122,12 @@ public class Mesh implements Resource {
             glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
             glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+            glVertexAttribPointer(0, 3, GL_BYTE, false, 0, 0);
         }
-        if (texCoordsBuffer != null && texCoordsBuffer.hasRemaining()) {
+        if (uvsBuffer != null && uvsBuffer.hasRemaining()) {
             vbo[1] = glGenBuffers();
             glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-            glBufferData(GL_ARRAY_BUFFER, texCoordsBuffer, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, uvsBuffer, GL_STATIC_DRAW);
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
         }
@@ -221,23 +148,22 @@ public class Mesh implements Resource {
             verticesBuffer.clear();
             verticesBuffer = null;
         }
-        if (texCoordsBuffer != null) {
-            texCoordsBuffer.clear();
-            texCoordsBuffer = null;
+        if (uvsBuffer != null) {
+            uvsBuffer.clear();
+            uvsBuffer = null;
         }
         if (normalsBuffer != null) {
             normalsBuffer.clear();
             normalsBuffer = null;
         }
-
-        if (file != null && !(this instanceof Collider)) {
-            this.collider = new Collider();
-        }
     }
 
     @Override
     public void unload() {
-        return;
+        this.indices    = null;
+        this.vertices   = null;
+        this.uvs        = null;
+        this.normals    = null;
     }
 
     @Override
@@ -246,51 +172,6 @@ public class Mesh implements Resource {
         glDeleteBuffers(ebo);
         for (int id : vbo) {
             glDeleteBuffers(id);
-        }
-    }
-
-    public class Collider extends Mesh {
-
-        public Vector3f min;
-        public Vector3f max;
-        public float size;
-
-        private static int ID = 0;
-
-        public Collider() {
-            super("collider", ID++);
-        }
-
-        @Override
-        public void load() {
-            float[] vertices = Mesh.this.vertices;
-            min = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-            max = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
-            for (int i = 0; i < vertices.length; i += 3) {
-                min.set(Math.min(min.x, vertices[i]), Math.min(min.y, vertices[i + 1]), Math.min(min.z, vertices[i + 2]));
-                max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));
-            }
-            size = new Vector3f(max).sub(min).length();
-            this.vertices = new float[] {
-                     min.x, min.y, min.z, max.x, min.y, min.z, max.x, max.y, min.z, min.x, max.y, min.z, min.x, min.y, max.z, max.x, min.y, max.z, max.x, max.y, max.z, min.x, max.y,max.z
-            };
-            this.indices = new int[] {
-                    0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
-            };
-            this.index = indices.length;
-        }
-
-        @Override
-        public void unload() {
-            if (file.contains("terrain")) return;
-            Mesh.this.indices     = null;
-            Mesh.this.vertices    = null;
-            Mesh.this.texCoords   = null;
-            Mesh.this.normals     = null;
-            indices     = null;
-            vertices    = null;
-            texCoords   = null;
-            normals     = null;
         }
     }
 

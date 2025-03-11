@@ -2,15 +2,13 @@ package game;
 
 import object.Camera;
 import org.lwjgl.glfw.*;
-import scene.Board;
-import scene.Forest;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Control {
 
     private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY;
-    private static boolean mouseLocked, firstMouse, clicked, holding, walking;
+    private static boolean mouseLocked, firstMouse;
 
     private static GLFWKeyCallback keyCallback;
     private static GLFWMouseButtonCallback mouseButtonCallback;
@@ -23,16 +21,10 @@ public class Control {
                 if (key < 0) {
                     return;
                 }
-                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
                     glfwSetWindowShouldClose(window, true);
                 }
-                if (key == GLFW_KEY_ENTER && action == GLFW_RELEASE) {
-                    Manager.swap();
-                }
-                if (key == GLFW_KEY_0 && action == GLFW_RELEASE) {
-                    System.out.println(Math.round(Camera.position.x) + ", " + Math.round(Camera.position.y) + ", "  + Math.round(Camera.position.z));
-                }
-                if (key == GLFW_KEY_1 && action == GLFW_RELEASE && mouseLocked) {
+                if (key == GLFW_KEY_TAB && action == GLFW_PRESS && mouseLocked) {
                     glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                     glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
                     mouseLocked = false;
@@ -51,14 +43,8 @@ public class Control {
                     mouseLocked = true;
                     firstMouse = true;
                 }
-                if (button == 1 && mouseLocked) {
-                    walking = (action == 1);
-                }
                 if (mouseLocked && !firstMouse && button == 0 && action == 1) {
-                    clicked = true;
-                }
-                if (mouseLocked && !firstMouse && button == 0) {
-                    holding = (action == GLFW_PRESS);
+                    Serial.write();
                 }
             }
         };
@@ -89,22 +75,6 @@ public class Control {
         if (keyCallback != null) keyCallback.free();
         if (mouseButtonCallback != null) mouseButtonCallback.free();
         if (cursorPosCallback != null) cursorPosCallback.free();
-    }
-
-    public static boolean isClicked() {
-        if (clicked) {
-            clicked = false;
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isHolding() {
-        return holding;
-    }
-
-    public static boolean isWalking() {
-        return walking;
     }
 
     public static float dx() {

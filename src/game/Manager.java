@@ -1,23 +1,19 @@
 package game;
 
-import property.Entity;
-import scene.Board;
 import engine.*;
-import object.*;
 
+import object.FBO;
 import org.lwjgl.Version;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
-import property.Machine;
 import resource.Resource;
-import scene.Forest;
+import window.Window;
 
 import java.nio.*;
 
-import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.system.MemoryStack.*;
@@ -27,35 +23,27 @@ public class Manager {
 
     public static int   WIDTH = 800;
     public static int   HEIGHT = 800;
-    public static long  TIME;
     public static long  RATE;
-    public static float PLAYTIME;
 
     public static long  window;
-
-    private static boolean swap = false;
-    public static Scene scene;
 
     public static Callback debugProc;
 
     public static void run() {
         try {
-            System.out.println("Starting initialization...");
             open();
             loop();
         } catch (Exception e) {
-            System.err.println("Error during execution:");
             e.printStackTrace();
         } finally {
-            System.out.println("Starting cleanup...");
             close();
             System.exit(0);
         }
     }
 
     public static void open() {
-        System.out.println("Architecture: " + System.getProperty("os.arch"));
-        System.out.println("LWJGL " + Version.getVersion());
+        Console.log("Architecture", System.getProperty("os.arch"));
+        Console.log("Version", Version.getVersion());
         //Configuration.DEBUG.set(true);
         //Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
         //GLFWErrorCallback.createPrint(System.err).set();
@@ -67,10 +55,9 @@ public class Manager {
             throw new RuntimeException("Failed to get video mode");
         }
         RATE = vidmode.refreshRate();
-        HEIGHT = vidmode.height() * 4 / 5;
-        WIDTH = vidmode.width() * 4 / 5;
+        HEIGHT = vidmode.height();
+        WIDTH = HEIGHT / 3 * 4;
         glfwDefaultWindowHints();
-        //glfwWindowHint(GLFW_SAMPLES, 8);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -83,10 +70,11 @@ public class Manager {
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
         window = glfwCreateWindow(WIDTH, HEIGHT, "", NULL, NULL);
         if (window == NULL) {
-            throw new RuntimeException("Failed to create the GLFW window");
+            Console.error("Failed to create GLFW window.");
+            System.exit(0);
         }
+        Console.log("OpenGL", glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR) + "." + glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR));
         Control.listen(window);
-        Serial.listen();
         try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
@@ -98,41 +86,33 @@ public class Manager {
             GL.createCapabilities();
             //debugProc = GLUtil.setupDebugMessageCallback();
         }
+        Console.log("Starting...");
+        Window window1 = new Window(800, 800, "adder");
         Renderer.init();
-        scene = new Board();
         Resource.process();
-        Camera.listen();
     }
 
     private static void loop() {
         int fps = 0;
         long lastFrameTime = time();
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glViewport(0, 0, Manager.WIDTH, Manager.HEIGHT);
-        glDepthRange(0.0, 1.0);
         while (!glfwWindowShouldClose(window)) {
-            TIME = time();
-            PLAYTIME = (TIME - lastFrameTime) / 1000f;
-            if (TIME - lastFrameTime > 1000) {
+            if (time() - lastFrameTime > 1000) {
                 glfwSetWindowTitle(window, Integer.toString(fps));
                 fps = 0;
                 lastFrameTime += 1000;
-                System.gc();
             }
             fps++;
-            if (swap) {
-                scene();
-            }
             Resource.process();
-            Renderer.render(scene);
+            Renderer.render();
             glfwPollEvents();
             glfwSwapBuffers(window);
         }
     }
 
     public static void close() {
+        Console.log("Closing...");
+        Serial.close();
         Control.clear();
-        Machine.clear();
         Resource.clear();
         FBO.unload();
         Shader.clear();
@@ -144,42 +124,8 @@ public class Manager {
         //glfwSetErrorCallback(null).free();
     }
 
-    private static void scene() {
-        swap = false;
-        Resource.clear();
-        scene.clear();
-        if (scene instanceof Board) {
-            scene = new Forest();
-        } else {
-            scene = new Board();
-        }
-        Camera.reset();
-/*
-        new Thread(() -> {
-            boolean loaded = false;
-            while (!loaded) {
-                loaded = true;
-                for (Entity entity : scene.entities) {
-                    if (!entity.meshes[entity.state].binded()) {
-                        loaded = false;
-                    }
-                }
-                if (!scene.terrain.meshes[scene.terrain.state].binded()) {
-                    loaded = false;
-                }
-            }
-            Scene old = active.get();
-            active.set(scene);
-            dumped.set(old);
-            clean = true;
-            Camera.reset();
-        }).start();
-        */
-
-    }
-
-    public static void swap() {
-        swap = true;
+    public static void stop() {
+        glfwSetWindowShouldClose(window, true);
     }
 
     public static long time() {

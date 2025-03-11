@@ -1,19 +1,20 @@
 package resource;
 
-import game.Scene;
-import property.Terrain;
+import game.Console;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public interface Resource extends Runnable {
 
-    ConcurrentLinkedQueue<Resource>   LOADED      = new ConcurrentLinkedQueue<>();
-    List<Resource>                    BINDED      = new ArrayList<>();
-    List<Thread>                      THREADS     = new ArrayList<>();
+    ConcurrentLinkedQueue<Resource> LOADED = new ConcurrentLinkedQueue<>();
+
+    List<Resource> BINDED = new ArrayList<>();
+
+    // Use a virtual thread per task executor.
+    ExecutorService THREADS = Executors.newVirtualThreadPerTaskExecutor();
 
     void load();
     void unload();
@@ -27,7 +28,7 @@ public interface Resource extends Runnable {
     boolean binded();
 
     default void run() {
-        System.out.println("Loading: " + this);
+        Console.log("Loading", this.toString());
         this.load();
         this.buffer();
         this.unload();
@@ -36,17 +37,13 @@ public interface Resource extends Runnable {
     }
 
     default void queue() {
-        Thread thread = new Thread(this);
-        try {
-            thread.start();
-        } finally {
-            THREADS.add(thread);
-        }
+        THREADS.submit(this);
     }
 
     static void process() {
         Resource loaded;
         while ((loaded = LOADED.poll()) != null) {
+            Console.log("Binding", loaded.toString());
             loaded.bind();
             BINDED.add(loaded);
             System.gc();
@@ -54,11 +51,13 @@ public interface Resource extends Runnable {
     }
 
     static void clear() {
-        THREADS.forEach(Thread::interrupt);
-        THREADS.clear();
+        THREADS.shutdown();
         LOADED.clear();
+        for (Resource resource : BINDED) {
+            Console.log("Unbinding", resource.toString());
+            resource.unbind();
+        }
         BINDED.forEach(Resource::unbind);
         BINDED.clear();
     }
-
 }

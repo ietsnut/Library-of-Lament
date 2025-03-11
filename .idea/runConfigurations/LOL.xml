@@ -2,7 +2,6 @@
   <configuration default="false" name="LOL" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="LibraryOfLament" />
     <module name="Library of Lament" />
-    <option name="VM_PARAMETERS" value="-XstartOnFirstThread" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

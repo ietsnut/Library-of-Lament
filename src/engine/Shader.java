@@ -5,20 +5,17 @@ import java.nio.FloatBuffer;
 import java.util.*;
 
 import game.Manager;
-import game.Scene;
 import object.Camera;
-import property.Entity;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
-
-import javax.imageio.ImageIO;
+import resource.Material;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 
 public abstract class Shader {
 
-    public static final List<Shader> ALL = new ArrayList<>();
+    private static final List<Shader> ALL = new ArrayList<>();
 
     private final HashMap<String, Integer> uniforms = new HashMap<>();
     final String[] attributes;
@@ -40,9 +37,12 @@ public abstract class Shader {
         ALL.add(this);
     }
 
-    final static FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+    protected void uniform (String location, FloatBuffer buffer) {
+        int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
+        glUniformMatrix4fv(uniform, false, buffer);
+    }
 
-    protected Shader uniform(String location, Serializable data) {
+    protected void uniform(String location, Serializable data) {
         int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
         switch (data) {
             case Float f:
@@ -63,21 +63,16 @@ public abstract class Shader {
             case Vector4f v:
                 glUniform4f(uniform, v.x, v.y, v.z, v.w);
                 break;
-            case Matrix4f m:
-                m.get(buffer);
-                glUniformMatrix4fv(uniform, false, buffer);
-                break;
             default:
                 throw new IllegalArgumentException("Unsupported data type: " + data.getClass());
         }
-        return this;
     }
 
-    protected abstract void shader(Scene scene);
+    protected abstract void shader();
 
-    protected final void render(Scene scene) {
+    public final void render() {
         start();
-        shader(scene);
+        shader();
         stop();
     }
 
@@ -111,10 +106,16 @@ public abstract class Shader {
                     if (line.startsWith("#version")) {
                         shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
                         shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
-                        shaderSource.append("#define WIDTH " + Manager.WIDTH).append("//\n");
-                        shaderSource.append("#define HEIGHT " + Manager.HEIGHT).append("//\n");
-                        shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
-                        shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
+                        shaderSource.append("#define WIDTH ").append(Manager.WIDTH).append("//\n");
+                        shaderSource.append("#define HEIGHT ").append(Manager.HEIGHT).append("//\n");
+                        shaderSource.append("#define ASPECT ").append((float) Manager.WIDTH / (float) Manager.HEIGHT).append("//\n");
+                        shaderSource.append("const vec3 PALETTE[7] = vec3[](\n");
+                        for (int i = 1; i < Material.PALETTE.length; i++) {
+                            int color = Material.PALETTE[i];
+                            shaderSource.append(String.format("    vec3(%.3f, %.3f, %.3f)%s\n", ((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f, ((color) & 0xFF) / 255.0f, (i < Material.PALETTE.length - 1) ? "," : ""));
+                        }
+                        shaderSource.append(");\n");
+                        shaderSource.append("const vec4 LINE = ").append(String.format("vec4(%.3f, %.3f, %.3f, 1.0);\n", ((Material.LINE >> 16) & 0xFF) / 255.0f, ((Material.LINE >> 8) & 0xFF) / 255.0f, ((Material.LINE) & 0xFF) / 255.0f)).append("//\n");
                     } else {
                         shaderSource.append(line).append("//\n");
                     }

@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
+import game.Console;
 import game.Manager;
 import org.lwjgl.BufferUtils;
 import resource.Mesh;
@@ -79,8 +80,8 @@ public class FBO {
         glViewport(0, 0, Manager.WIDTH, Manager.HEIGHT);
         int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
-            System.out.println("Framebuffer error: " + status);
-            throw new RuntimeException("Framebuffer not complete");
+            Console.error("Not complete", Integer.toString(status));
+            Manager.stop();
         }
 
     }

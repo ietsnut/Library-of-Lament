@@ -1,11 +1,10 @@
 import game.Manager;
-import game.Test;
+import game.Serial;
 
 class LibraryOfLament {
     public static void main(String[] args) {
-        //new Test().run();
-       Manager.run();
-        //Server.listen();
+        Serial.start("COM6");
+        Manager.run();
     }
 }
 

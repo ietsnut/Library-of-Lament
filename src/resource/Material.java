@@ -1,30 +1,35 @@
 package resource;
 
+import game.Console;
 import org.lwjgl.BufferUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 
 import static org.lwjgl.opengl.GL40.*;
 
 public class Material implements Resource {
 
-    private static final IndexColorModel ICM = new IndexColorModel(2, 4,
-            new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
-            new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
-            new byte[]{(byte) 0, (byte) 0, (byte) 128, (byte) 255},
-            new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
+    public static final int[] PALETTE = {
+            0x00000000, // Transparent
+            0xFFA5B4D3, // #A5B4D3
+            0xFFCF4E38, // #CF4E38
+            0xFFC7BE7D, // #C7BE7D
+            0XFFFFA572, // #FFA572
+            0xFF325D8A, // #325D8A
+            0xFF415E54, // #415E54
+            0xFFD28D87  // #D28D87
+    };
+
+    public static final int LINE = 0xFF43392A; //#43392A
 
     private ByteBuffer buffer;
 
     public int texture;
-    public byte[] image = new byte[0];
+    public BufferedImage image;
 
     public int width;
     public int height;
@@ -53,69 +58,68 @@ public class Material implements Resource {
                 image = ImageIO.read(bis);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load material: " + file, e);
+            return null;
         }
         return image;
     }
 
-    public static BufferedImage dither(BufferedImage original) {
-        BufferedImage image = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
-        for (int y = 0; y < original.getHeight(); y++) {
-            for (int x = 0; x < original.getWidth(); x++) {
-                int argb = original.getRGB(x, y);
-                int a = (argb >> 24) & 0xff;
-                int r = (argb >> 16) & 0xff;
-                int g = (argb >> 8) & 0xff;
-                int b = argb & 0xff;
-                int index;
-                int gray = (int) (0.299 * r + 0.587 * g + 0.114 * b);
-                if (a < 128) {
-                    index = 0;
-                } else if (gray < 64.75) {
-                    index = 1; // black
-                } else if (gray < 191.25) {
-                    index = 2; // gray
-                } else {
-                    index = 3; // white
-                }
-                image.getRaster().setSample(x, y, 0, index);
+    private static int findClosestPaletteColor(int argb) {
+        if ((argb >>> 24) == 0) {
+            return 0;
+        }
+        int minDistance = Integer.MAX_VALUE;
+        int closestIndex = 0;
+        for (int i = 0; i < PALETTE.length; i++) {
+            int color = PALETTE[i];
+            int dr = ((color >> 16) & 0xFF) - ((argb >> 16) & 0xFF);
+            int dg = ((color >> 8) & 0xFF) - ((argb >> 8) & 0xFF);
+            int db = (color & 0xFF) - (argb & 0xFF);
+            int distance = dr * dr + dg * dg + db * db;
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestIndex = i;
             }
         }
-        return image;
+        return closestIndex;
     }
 
     @Override
     public void load() {
-        BufferedImage image;
-        image       = load(file);
-        image       = dither(image);
-        this.width  = image.getWidth();
-        this.height = image.getHeight();
-        this.image  = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        this.image = load(file);
+        if (this.image == null) {
+            Console.error("Failed to load", file);
+            return;
+        }
+        this.width  = this.image.getWidth();
+        this.height = this.image.getHeight();
     }
 
     @Override
     public void buffer() {
         int totalPixels = width * height;
-        int totalBytes  = (totalPixels + 3) / 4;
+        int totalBytes = (totalPixels + 1) / 2;
         this.buffer = BufferUtils.createByteBuffer(totalBytes).order(ByteOrder.nativeOrder());
-        byte packedData;
-        for (int i = 0; i < image.length; i += 4) {
-            packedData = 0;
-            for (int j = 0; j < 4; j++) {
-                if (i + j < image.length) {
-                    int pixelValue = (image[i + j] & 0xFF) & 0x03;
-                    packedData |= (byte) (pixelValue << (6 - 2 * j));
-                }
+        for (int i = 0; i < totalPixels; i += 2) {
+            int x1 = i % width;
+            int y1 = i / width;
+            int argb1 = this.image.getRGB(x1, y1);
+            int index1 = findClosestPaletteColor(argb1) & 0x07;
+            int index2 = 0;
+            if (i + 1 < totalPixels) {
+                int x2 = (i + 1) % width;
+                int y2 = (i + 1) / width;
+                int argb2 = this.image.getRGB(x2, y2);
+                index2 = findClosestPaletteColor(argb2) & 0x07;
             }
-            buffer.put(packedData);
+            byte packedData = (byte) ((index1 << 4) | index2);
+            this.buffer.put(packedData);
         }
-        buffer.flip();
+        this.buffer.flip();
     }
 
     @Override
     public boolean loaded() {
-        return this.image.length > 0;
+        return this.image != null;
     }
 
     @Override
@@ -127,12 +131,12 @@ public class Material implements Resource {
     public void bind() {
         this.texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, this.texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 2), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
         this.buffer.clear();
         this.buffer = null;

@@ -1,37 +1,46 @@
 package window;
 
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.parser.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
-public class Window extends JFrame implements Runnable, MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
+public class Window extends JFrame implements Runnable, MouseListener, MouseMotionListener, MouseWheelListener {
 
     protected int X, Y;
     protected final int W, H;
-    protected HashMap<Integer, Boolean> KEYS;
     protected final int FPS = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getDisplayMode().getRefreshRate();
     protected final Canvas2D canvas2D;
-    protected final BufferedImage image;
+    //protected final BufferedImage image;
 
-    public Window(BufferedImage image, int W, int H) {
+    protected final SVGDocument svg;
+
+    public Window(int W, int H, String svg) {
         this.W = W;
         this.H = H;
-        this.image = image;
-        this.KEYS = new HashMap<>();
-        Field[] fields = KeyEvent.class.getDeclaredFields();
-        for (Field field : fields) {
-            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
-                try {
-                    KEYS.put(field.getInt(null), false);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+        //this.image = image;
+        SVGLoader loader = new SVGLoader();
+        //URL url = getClass().getResource("/resources/vector/" + svg + ".svg");
+        CustomStrokeProcessor strokeProcessor = new CustomStrokeProcessor();
+        String svgString = "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>"
+                + "<circle cx='100' cy='100' r='80' fill='blue' stroke='black' stroke-width='1px'/>"
+                + "</svg>";
+        InputStream svgStream = new ByteArrayInputStream(svgString.getBytes(StandardCharsets.UTF_8));
+
+        this.svg = loader.load(svgStream, new DefaultParserProvider() {
+            @Override
+            public DomProcessor createPreProcessor() {
+                return strokeProcessor;
             }
-        }
+        });
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {}
         System.setProperty("sun.java2d.opengl", "true");
         System.setProperty("sun.java2d.uiScale", "1");
@@ -39,7 +48,6 @@ public class Window extends JFrame implements Runnable, MouseListener, MouseMoti
         setBackground(new Color(0, 0, 0, 0));
         addMouseListener(this);
         addMouseMotionListener(this);
-        addKeyListener(this);
         addMouseWheelListener(this);
         setFocusable(true);
         setFocusableWindowState(true);
@@ -53,12 +61,34 @@ public class Window extends JFrame implements Runnable, MouseListener, MouseMoti
         SwingUtilities.invokeLater(this);
     }
 
+    public class CustomStrokeProcessor implements DomProcessor {
+
+        @Override
+        public void process(ParsedElement root) {
+            processElement(root);
+            for (ParsedElement child : root.children()) {
+                process(child);
+            }
+        }
+
+        private void processElement(ParsedElement element) {
+            Map<String, String> attributes = element.attributeNode().attributes();
+            if (attributes.containsKey("stroke")) {
+                // Force the stroke width to a fixed value (1px)
+                attributes.put("stroke-width", "1px");
+                // Optionally, try to force non-scaling stroke behavior if supported.
+                attributes.put("vector-effect", "non-scaling-stroke");
+            }
+        }
+
+    }
+
     public void update() {
 
     }
 
-    public void draw(Graphics2D graphics) {
-
+    public void draw(Graphics2D g) {
+        svg.render((JComponent) canvas2D, g);
     }
 
     long previousTime = System.nanoTime();
@@ -91,9 +121,15 @@ public class Window extends JFrame implements Runnable, MouseListener, MouseMoti
         @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D)g;
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+            g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT);
+
+            //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            //g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
             window.draw(g2d);
-            g2d.drawImage(window.image, 0, 0, W, H, this);
+            //svg.render(this, g2d, new ViewBox(0, 0, W, H));
+             //g2d.drawImage(window.image, 0, 0, W, H, this);
         }
 
         @Override
@@ -147,21 +183,6 @@ public class Window extends JFrame implements Runnable, MouseListener, MouseMoti
     @Override
     public void mouseMoved(MouseEvent e) {
 
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        KEYS.put(e.getKeyCode(), true);
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        KEYS.put(e.getKeyCode(), false);
     }
 
     @Override

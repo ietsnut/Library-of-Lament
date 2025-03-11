@@ -1,11 +1,12 @@
 package property;
 
-import object.Matrix;
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import resource.Material;
 import resource.Mesh;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,8 @@ public class Entity {
     public final Vector3f rotation  = new Vector3f(0);
     public final Vector3f scale     = new Vector3f(1);
 
-    public final Matrix   model     = new Matrix();
+    public final Matrix4f model     = new Matrix4f();
+    public final FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 
     public final Material[] materials;
     public final Mesh[]     meshes;
@@ -117,18 +119,13 @@ public class Entity {
         }
     }
 
-    @Override
-    public String toString() {
-        return "< " + type + " > [ state: " + state + " ] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
-    }
-
     public static final Vector3f X = new Vector3f(1, 0, 0);
     public static final Vector3f Y = new Vector3f(0, 1, 0);
     public static final Vector3f Z = new Vector3f(0, 0, 1);
 
     public void update() {
-        this.model.buffer().identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y), Y).rotate((float) Math.toRadians(rotation.x), X).rotate((float) Math.toRadians(rotation.z), Z);
-        this.model.swap();
+        this.model.identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y), Y).rotate((float) Math.toRadians(rotation.x), X).rotate((float) Math.toRadians(rotation.z), Z);
+        this.model.get(buffer);
     }
 
 
