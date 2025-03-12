@@ -43,8 +43,12 @@ public class Control {
                     mouseLocked = true;
                     firstMouse = true;
                 }
-                if (mouseLocked && !firstMouse && button == 0 && action == 1) {
-                    Serial.write();
+                if (mouseLocked && !firstMouse && action == 1) {
+                    if (button == 1) {
+                        Serial.write();
+                    } else if (button == 0) {
+                        Serial.read();
+                    }
                 }
             }
         };

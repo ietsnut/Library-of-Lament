@@ -18,16 +18,17 @@ public class Renderer {
         fboShader    = new FBOShader();
         entityShader = new EntityShader();
 
-        Tower tower = new Tower("temple");
+        Tower tower = new Tower("device");
         tower.rotation.y = 45;
-        tower.position.y = -40;
+        //tower.position.y = -40;
+        tower.scale.set(3);
         tower.update();
         ENTITIES.add(tower);
 
     }
 
     public static void render() {
-        ENTITIES.getFirst().rotation.y += Serial.get(0, 0) ? 0.1f : -0.1f;
+        ENTITIES.getFirst().rotation.y += Serial.get(0, 0) ? 0.5f : -0.5f;
         ENTITIES.getFirst().update();
         fboShader.bind();
         entityShader.render();

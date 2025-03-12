@@ -9,7 +9,6 @@ uniform sampler2D texture3;  // depth
 
 const float dx = 1.0 / WIDTH;
 const float dy = 1.0 / HEIGHT;
-const vec2 center = vec2(0.5, 0.5);
 
 float sobel(sampler2D sampler, int channel) {
     float mCenter = texture(sampler, fragUV)[channel];
@@ -20,11 +19,19 @@ float sobel(sampler2D sampler, int channel) {
 }
 
 void main(void) {
-    uint index = uint(texture(texture1, fragUV).r) & 0x07u;
-    if (sobel(texture3, 0) > 0.01 || max(sobel(texture2, 0), max(sobel(texture2, 1), sobel(texture2, 2))) > 0.01) {
+    ivec2 texSize = textureSize(texture1, 0);
+    ivec2 coord = ivec2(fragUV * vec2(texSize));
+    coord = clamp(coord, ivec2(0), texSize - ivec2(1));
+    uint current = texelFetch(texture1, coord, 0).r & 0x07u;
+    uint top     = texelFetch(texture1, coord + ivec2(0, -1), 0).r & 0x07u;
+    uint bottom  = texelFetch(texture1, coord + ivec2(0, 1), 0).r & 0x07u;
+    uint left    = texelFetch(texture1, coord + ivec2(-1, 0), 0).r & 0x07u;
+    uint right   = texelFetch(texture1, coord + ivec2(1, 0), 0).r & 0x07u;
+    bool isEdge = (current != top) || (current != bottom) || (current != left) || (current != right);
+    if (sobel(texture3, 0) > 0.01 || max(sobel(texture2, 0), max(sobel(texture2, 1), sobel(texture2, 2))) > 0.01 || isEdge) {
         color = LINE;
-    } else if (index > 0u) {
-        color = vec4(PALETTE[index - 1], 1.0);
+    } else if (current > 0u) {
+        color = vec4(PALETTE[current - 1], 1.0);
     } else {
         discard;
     }

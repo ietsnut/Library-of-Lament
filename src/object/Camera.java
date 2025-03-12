@@ -13,7 +13,7 @@ public class Camera {
 
     static {
 
-        Vector3f cameraPos    = new Vector3f(128f, 128f, 500f); // Positioned in front, centered on your 255-sized model
+        Vector3f cameraPos    = new Vector3f(128f, 128f, 256f); // Positioned in front, centered on your 255-sized model
         Vector3f cameraTarget = new Vector3f(0, 0, 0);          // Looking towards the center of your scene
         Vector3f upDirection  = new Vector3f(0, 1f, 0);         // Y-axis is "up"
 
@@ -26,7 +26,7 @@ public class Camera {
         float right  = halfWidth + padding;
         float bottom = -halfHeight - padding;
         float top    = halfHeight + padding;
-        float near = 500f;
+        float near = 256f;
         float far  = 600f;
 
         Matrix4f PROJECTION = new Matrix4f().ortho(left, right, bottom, top, near, far);

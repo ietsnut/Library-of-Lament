@@ -87,6 +87,7 @@ public class Manager {
             //debugProc = GLUtil.setupDebugMessageCallback();
         }
         Console.log("Starting...");
+        Serial.start();
         Window window1 = new Window(800, 800, "adder");
         Renderer.init();
         Resource.process();
