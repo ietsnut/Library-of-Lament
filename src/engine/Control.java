@@ -41,7 +41,7 @@ public class Control {
                     glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                     mouseLocked = true;
                     firstMouse = true;
-                    Manager.jwindow.toFront();
+                    glfwFocusWindow(Manager.window);
                 }
                 if (mouseLocked && !firstMouse && action == 1) {
                     if (button == 1) {

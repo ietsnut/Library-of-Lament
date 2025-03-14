@@ -3,6 +3,7 @@ package window;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.parser.*;
+import engine.Manager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,22 +14,20 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import static org.lwjgl.glfw.GLFW.glfwFocusWindow;
+
 public class Window extends JWindow {
 
     protected int X, Y;
     protected final int W, H;
-    protected final int FPS = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getDisplayMode().getRefreshRate();
-    protected final Canvas2D canvas2D;
     protected final ViewBox size;
-    //protected final BufferedImage image;
-
     protected final SVGDocument svg;
+    protected final Canvas2D canvas2D;
 
     public Window(int W, int H, String svg) {
         this.W = W;
         this.H = H;
         this.size = new ViewBox(W, H);
-        //this.image = image;
         SVGLoader loader = new SVGLoader();
         URL url = getClass().getResource("/resources/vector/" + svg + ".svg");
         CustomStrokeProcessor strokeProcessor = new CustomStrokeProcessor();
@@ -38,12 +37,12 @@ public class Window extends JWindow {
                 return strokeProcessor;
             }
         });
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {}
-        System.setProperty("sun.java2d.opengl", "true");
-        System.setProperty("sun.java2d.uiScale", "1");
+        //try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {}
+        //System.setProperty("sun.java2d.opengl", "true");
+        //System.setProperty("sun.java2d.uiScale", "1");
         setBackground(new Color(0, 0, 0, 0));
-        setFocusable(true);
-        setFocusableWindowState(true);
+        setFocusable(false);
+        setFocusableWindowState(false);
         this.canvas2D = new Canvas2D(this);
         setContentPane(this.canvas2D);
         pack();

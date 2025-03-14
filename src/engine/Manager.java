@@ -12,6 +12,8 @@ import org.lwjgl.opengl.*;
 import resource.Resource;
 import window.Window;
 
+import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -29,7 +31,7 @@ public class Manager {
 
     public static Callback debugProc;
 
-    public static Window jwindow;
+    public static Process jwindow;
 
     public static void run() {
         try {
@@ -67,8 +69,12 @@ public class Manager {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
         glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+        glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            glfwWindowHint(GLFW_COCOA_GRAPHICS_SWITCHING, GLFW_TRUE);
+            glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+        }
         window = glfwCreateWindow(WIDTH, HEIGHT, "", NULL, NULL);
         if (window == NULL) {
             Console.error("Failed to create GLFW window.");
@@ -87,9 +93,25 @@ public class Manager {
             GL.createCapabilities();
             //debugProc = GLUtil.setupDebugMessageCallback();
         }
+        new Thread(() -> {
+            try {
+                ProcessBuilder pb = new ProcessBuilder(
+                        "java",
+                        "-cp", System.getProperty("java.class.path"),
+                        "window.SwingLauncher"
+                );
+                jwindow = pb.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (jwindow.isAlive()) {
+                jwindow.destroy();
+            }
+        }));
         Console.log("Starting...");
         Serial.start();
-        jwindow = new Window(1000, 1000, "1");
         Renderer.init();
         Resource.process();
     }
