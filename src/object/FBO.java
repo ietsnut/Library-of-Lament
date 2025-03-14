@@ -2,12 +2,10 @@ package object;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
 
-import game.Console;
-import game.Manager;
+import engine.Console;
+import engine.Manager;
 import org.lwjgl.BufferUtils;
-import resource.Mesh;
 
 import static org.lwjgl.opengl.GL40.*;
 

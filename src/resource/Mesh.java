@@ -4,12 +4,11 @@ import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
-import game.Console;
+import engine.Console;
 import org.lwjgl.BufferUtils;
 
 import java.io.*;
 import java.nio.*;
-import java.util.Arrays;
 
 import static org.lwjgl.opengl.GL40.*;
 
@@ -37,13 +36,9 @@ public class Mesh implements Resource {
         this.queue();
     }
 
-    public Mesh(String type, String name) {
-        this.file = "/resources/" + type + "/" + name + ".obj";
+    public Mesh(String name) {
+        this.file = "/resources/automata/" + name + ".obj";
         this.queue();
-    }
-
-    public Mesh(String type, int state) {
-        this(type, Integer.toString(state));
     }
 
     @Override

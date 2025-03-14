@@ -11,23 +11,27 @@ public class Camera {
     public static final Matrix4f VIEW_PROJECTION;
     public static final FloatBuffer BUFFER = BufferUtils.createFloatBuffer(16);;
 
+    public static final Vector3f POSITION;
+    public static final Vector3f TARGET;
+    public static final Vector3f UP;
+
     static {
 
-        Vector3f cameraPos    = new Vector3f(128f, 128f, 256f); // Positioned in front, centered on your 255-sized model
-        Vector3f cameraTarget = new Vector3f(0, 0, 0);          // Looking towards the center of your scene
-        Vector3f upDirection  = new Vector3f(0, 1f, 0);         // Y-axis is "up"
+        POSITION = new Vector3f(0, 0, 256f);
+        TARGET = new Vector3f(0, 0, 0);
+        UP = new Vector3f(0, 1f, 0);
 
-        Matrix4f VIEW = new Matrix4f().lookAt(cameraPos, cameraTarget, upDirection);
+        Matrix4f VIEW = new Matrix4f().lookAt(POSITION, TARGET, UP);
 
-        float halfWidth  = 127.5f;
-        float halfHeight = 127.5f;
-        float padding    = 0;
-        float left   = -halfWidth - padding;
-        float right  = halfWidth + padding;
-        float bottom = -halfHeight - padding;
-        float top    = halfHeight + padding;
-        float near = 256f;
-        float far  = 600f;
+        float hWidth    = 127.5f;
+        float hHeight   = 127.5f;
+        float padding   = 0;
+        float left      = -hWidth - padding;
+        float right     = hWidth + padding;
+        float bottom    = -hHeight - padding;
+        float top       = hHeight + padding;
+        float near      = 127.5f;
+        float far       = 400f;
 
         Matrix4f PROJECTION = new Matrix4f().ortho(left, right, bottom, top, near, far);
 

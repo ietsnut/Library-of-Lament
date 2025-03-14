@@ -1,6 +1,6 @@
 package resource;
 
-import game.Console;
+import engine.Console;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;

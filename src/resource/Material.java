@@ -1,6 +1,6 @@
 package resource;
 
-import game.Console;
+import engine.Console;
 import org.lwjgl.BufferUtils;
 
 import javax.imageio.ImageIO;
@@ -36,13 +36,9 @@ public class Material implements Resource {
 
     private final String file;
 
-    public Material(String type, String name) {
-        this.file = "/resources/" + type + "/" + name + ".png";
+    public Material(String name) {
+        this.file = "/resources/automata/" + name + ".png";
         this.queue();
-    }
-
-    public Material(String type, int state) {
-        this(type, Integer.toString(state));
     }
 
     @Override
