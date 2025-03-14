@@ -1,5 +1,8 @@
 package engine;
 
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLUtil;
+import org.lwjgl.system.Configuration;
 import shader.*;
 
 import object.FBO;
@@ -8,16 +11,14 @@ import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.*;
 import resource.Resource;
-import window.Window;
 
-import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.*;
+import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
+import static org.lwjgl.opengl.GL43.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -87,12 +88,21 @@ public class Manager {
             IntBuffer pHeight = stack.mallocInt(1); // int*
             glfwGetWindowSize(window, pWidth, pHeight);
             glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
-            glfwMakeContextCurrent(window);
-            glfwSwapInterval(1);
-            glfwShowWindow(window);
-            GL.createCapabilities();
-            //debugProc = GLUtil.setupDebugMessageCallback();
         }
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(1);
+        glfwShowWindow(window);
+        GL.createCapabilities();
+        debugProc = GLUtil.setupDebugMessageCallback();
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageControl(
+                GL_DONT_CARE,                       // Source
+                GL_DONT_CARE,                       // Type
+                GL_DEBUG_SEVERITY_NOTIFICATION,     // Severity to filter out
+                (IntBuffer)null,                    // IDs (none)
+                false                               // false = disable
+        );
         new Thread(() -> {
             try {
                 ProcessBuilder pb = new ProcessBuilder(
@@ -112,11 +122,12 @@ public class Manager {
         }));
         Console.log("Starting...");
         Serial.start();
-        Renderer.init();
-        Resource.process();
     }
 
     private static void loop() {
+        GL.createCapabilities();
+        Renderer.init();
+        Resource.process();
         while (!glfwWindowShouldClose(window)) {
             glfwWaitEvents();
             Resource.process();
@@ -137,7 +148,7 @@ public class Manager {
         }
         glfwDestroyWindow(window);
         glfwTerminate();
-        //glfwSetErrorCallback(null).free();
+        //Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 
     public static void stop() {

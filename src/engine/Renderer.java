@@ -30,13 +30,7 @@ public class Renderer {
         float dx = Control.dx() * 0.5f;
         float dy = Control.dy() * 0.5f;
 
-        float pitchNormalized = (worldPitch % 360f + 360f) % 360f;
-
-        if (pitchNormalized > 90f && pitchNormalized < 270f) {
-            worldYaw -= dx;
-        } else {
-            worldYaw += dx;
-        }
+        worldYaw += dx;
         worldPitch += dy;
 
         worldPitch = (worldPitch % 360f + 360f) % 360f;

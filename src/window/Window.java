@@ -37,17 +37,13 @@ public class Window extends JWindow {
                 return strokeProcessor;
             }
         });
-        //try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {}
-        //System.setProperty("sun.java2d.opengl", "true");
-        //System.setProperty("sun.java2d.uiScale", "1");
         setBackground(new Color(0, 0, 0, 0));
-        setFocusable(false);
-        setFocusableWindowState(false);
-        this.canvas2D = new Canvas2D(this);
+        this.canvas2D = new Canvas2D();
         setContentPane(this.canvas2D);
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+        toFront();
     }
 
     public class CustomStrokeProcessor implements DomProcessor {
@@ -72,21 +68,10 @@ public class Window extends JWindow {
 
     }
 
-    public void update() {
-
-    }
-
-    public void draw(Graphics2D g) {
-        svg.render((Component) canvas2D, g, size);
-    }
-
     protected class Canvas2D extends JPanel {
 
-        private final Window window;
-
-        private Canvas2D(Window window) {
-            super(true);
-            this.window = window;
+        private Canvas2D() {
+            super(false);
             setOpaque(false);
         }
 
@@ -96,12 +81,11 @@ public class Window extends JWindow {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
             g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT);
-            window.draw(g2d);
+            svg.render((Component) this, g2d, size);
         }
 
         @Override
         public Dimension getPreferredSize() {
-            //return window.image == null ? new Dimension(W, H) : new Dimension(window.image.getWidth(), window.image.getHeight());
             return new Dimension(W, H);
         }
 
