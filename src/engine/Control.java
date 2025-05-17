@@ -1,7 +1,10 @@
 package engine;
 
 import org.lwjgl.glfw.*;
+<<<<<<< HEAD:src/engine/Control.java
 
+=======
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Control.java
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Control {
@@ -23,11 +26,16 @@ public class Control {
                 if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
                     glfwSetWindowShouldClose(window, true);
                 }
+<<<<<<< HEAD:src/engine/Control.java
                 if (key == GLFW_KEY_TAB && action == GLFW_PRESS && mouseLocked) {
                     glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                     glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
                     mouseLocked = false;
                     firstMouse = true;
+=======
+                if (key == GLFW_KEY_ENTER && action == GLFW_RELEASE) {
+                    System.out.println(Camera.position.x + ", " + Camera.position.y + ", " + Camera.position.z);
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Control.java
                 }
             }
         };

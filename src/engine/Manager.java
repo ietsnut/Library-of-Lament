@@ -1,9 +1,15 @@
 package engine;
 
+<<<<<<< HEAD:src/engine/Manager.java
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.Configuration;
 import shader.*;
+=======
+import scene.Board;
+import engine.*;
+import object.*;
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
 
 import object.FBO;
 import org.lwjgl.Version;
@@ -28,6 +34,10 @@ public class Manager {
     public static int   HEIGHT = 800;
     public static long  RATE;
 
+<<<<<<< HEAD:src/engine/Manager.java
+=======
+    public static Scene scene;
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
     public static long  window;
 
     public static Callback debugProc;
@@ -39,7 +49,12 @@ public class Manager {
             open();
             loop();
         } catch (Exception e) {
+<<<<<<< HEAD:src/engine/Manager.java
             e.printStackTrace();
+=======
+            System.err.println("Error during execution:");
+            throw new RuntimeException(e);
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
         } finally {
             close();
             System.exit(0);
@@ -129,7 +144,19 @@ public class Manager {
         Renderer.init();
         Resource.process();
         while (!glfwWindowShouldClose(window)) {
+<<<<<<< HEAD:src/engine/Manager.java
             glfwWaitEvents();
+=======
+            TIME = time();
+            PLAYTIME = (TIME - lastFrameTime) / 1000f;
+            if (TIME - lastFrameTime > 1000) {
+                glfwSetWindowTitle(window, Integer.toString(fps));
+                fps = 0;
+                lastFrameTime += 1000;
+                System.gc();
+            }
+            fps++;
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
             Resource.process();
             Renderer.render();
             glfwSwapBuffers(window);
@@ -151,12 +178,16 @@ public class Manager {
         //Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 
+<<<<<<< HEAD:src/engine/Manager.java
     public static void stop() {
         glfwSetWindowShouldClose(window, true);
     }
+=======
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
 
     public static long time() {
         return (long) (GLFW.glfwGetTime() * 1000);
     }
+
 
 }
