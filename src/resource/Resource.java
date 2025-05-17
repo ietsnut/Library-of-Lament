@@ -2,8 +2,11 @@ package resource;
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import engine.Console;
 =======
+=======
+>>>>>>> parent of 9f378cf (basic scene switching)
 =======
 >>>>>>> parent of 9f378cf (basic scene switching)
 import property.Terrain;

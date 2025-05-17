@@ -3,7 +3,10 @@ package engine;
 import org.lwjgl.glfw.*;
 <<<<<<< HEAD:src/engine/Control.java
 <<<<<<< HEAD:src/engine/Control.java
+<<<<<<< HEAD:src/engine/Control.java
 
+=======
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Control.java
 =======
 >>>>>>> parent of 9f378cf (basic scene switching):src/game/Control.java
 =======
@@ -39,6 +42,9 @@ public class Control {
                 if (key == GLFW_KEY_ENTER && action == GLFW_RELEASE) {
                     System.out.println(Camera.position.x + ", " + Camera.position.y + ", " + Camera.position.z);
 <<<<<<< HEAD:src/engine/Control.java
+<<<<<<< HEAD:src/engine/Control.java
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Control.java
+=======
 >>>>>>> parent of 9f378cf (basic scene switching):src/game/Control.java
 =======
 >>>>>>> parent of 9f378cf (basic scene switching):src/game/Control.java
