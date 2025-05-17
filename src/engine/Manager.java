@@ -1,11 +1,14 @@
 package engine;
 
 <<<<<<< HEAD:src/engine/Manager.java
+<<<<<<< HEAD:src/engine/Manager.java
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.Configuration;
 import shader.*;
 =======
+=======
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
 import scene.Board;
 import engine.*;
 import object.*;
@@ -35,6 +38,10 @@ public class Manager {
     public static long  RATE;
 
 <<<<<<< HEAD:src/engine/Manager.java
+<<<<<<< HEAD:src/engine/Manager.java
+=======
+    public static Scene scene;
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
 =======
     public static Scene scene;
 >>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
@@ -50,7 +57,12 @@ public class Manager {
             loop();
         } catch (Exception e) {
 <<<<<<< HEAD:src/engine/Manager.java
+<<<<<<< HEAD:src/engine/Manager.java
             e.printStackTrace();
+=======
+            System.err.println("Error during execution:");
+            throw new RuntimeException(e);
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
 =======
             System.err.println("Error during execution:");
             throw new RuntimeException(e);
@@ -156,6 +168,9 @@ public class Manager {
                 System.gc();
             }
             fps++;
+<<<<<<< HEAD:src/engine/Manager.java
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
+=======
 >>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
             Resource.process();
             Renderer.render();
@@ -179,9 +194,12 @@ public class Manager {
     }
 
 <<<<<<< HEAD:src/engine/Manager.java
+<<<<<<< HEAD:src/engine/Manager.java
     public static void stop() {
         glfwSetWindowShouldClose(window, true);
     }
+=======
+>>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
 =======
 >>>>>>> parent of 9f378cf (basic scene switching):src/game/Manager.java
 

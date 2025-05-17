@@ -5,8 +5,11 @@ import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 import java.nio.FloatBuffer;
 =======
+=======
+>>>>>>> parent of 9f378cf (basic scene switching)
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,6 +44,7 @@ public class Camera {
 
         Matrix4f PROJECTION = new Matrix4f().ortho(left, right, bottom, top, near, far);
 
+<<<<<<< HEAD
         VIEW_PROJECTION = new Matrix4f(PROJECTION).mul(VIEW);
 
         VIEW_PROJECTION.get(BUFFER);
@@ -48,6 +52,8 @@ public class Camera {
 <<<<<<< HEAD
     }
 =======
+=======
+>>>>>>> parent of 9f378cf (basic scene switching)
     public void turn() {
         update();
         updateView();
