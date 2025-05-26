@@ -109,7 +109,6 @@ public class Manager {
                 (IntBuffer)null,                    // IDs (none)
                 false                               // false = disable
         );
-        /*
         new Thread(() -> {
             try {
                 ProcessBuilder pb = new ProcessBuilder(
@@ -126,7 +125,7 @@ public class Manager {
             if (jwindow.isAlive()) {
                 jwindow.destroy();
             }
-        }));*/
+        }));
         //Serial.listen();
 
         Console.log("Starting...");

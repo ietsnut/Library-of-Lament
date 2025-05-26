@@ -4,9 +4,8 @@ import engine.Console;
 import org.lwjgl.BufferUtils;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -52,6 +51,31 @@ public class Material implements Resource {
             0xFFC0D1CB  // #C0D1CB
     };
 
+    public static final int[] PALETTE2 = {
+            0x00000000, // index 0: transparent
+            0xFF000000, // index 1: black
+            0xFF1F1C23, // index 2
+            0xFF322429, // index 3
+            0xFF643A37, // index 4
+            0xFF4D5176, // index 5
+            0xFFA29F7C, // index 6
+            0xFFC0D1CB  // index 7
+    };
+
+    public static final IndexColorModel ICM2;
+
+    static {
+        byte[] r = new byte[8], g = new byte[8], b = new byte[8], a = new byte[8];
+        for (int i = 0; i < PALETTE2.length; i++) {
+            int color = PALETTE2[i];
+            a[i] = (byte) ((color >> 24) & 0xFF);
+            r[i] = (byte) ((color >> 16) & 0xFF);
+            g[i] = (byte) ((color >> 8) & 0xFF);
+            b[i] = (byte) (color & 0xFF);
+        }
+        ICM2 = new IndexColorModel(8, 8, r, g, b, 0);
+    }
+
     public static final int LINE = 0xFFA29F7C;
 
     public Material(String type, String name) {
@@ -68,9 +92,54 @@ public class Material implements Resource {
         return file;
     }
 
-    public BufferedImage load(String file) {
+    public static BufferedImage indexs(BufferedImage original) {
+
+        BufferedImage indexed = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM2);
+        WritableRaster raster = indexed.getRaster();
+
+        for (int y = 0; y < original.getHeight(); y++) {
+            for (int x = 0; x < original.getWidth(); x++) {
+                int argb = original.getRGB(x, y);
+                int alpha = (argb >> 24) & 0xFF;
+
+                if (alpha < 128) {
+                    raster.setSample(x, y, 0, 0); // Transparent
+                    continue;
+                }
+
+                int rVal = (argb >> 16) & 0xFF;
+                int gVal = (argb >> 8) & 0xFF;
+                int bVal = argb & 0xFF;
+                int brightness = (int)(0.299 * rVal + 0.587 * gVal + 0.114 * bVal);
+
+                // Find the closest color in PALETTE2 (ignoring index 0)
+                int closestIndex = 1;
+                int closestDistance = 256;
+
+                for (int i = 1; i < PALETTE2.length; i++) {
+                    int pr = (PALETTE2[i] >> 16) & 0xFF;
+                    int pg = (PALETTE2[i] >> 8) & 0xFF;
+                    int pb = PALETTE2[i] & 0xFF;
+                    int pBrightness = (int)(0.299 * pr + 0.587 * pg + 0.114 * pb);
+
+                    int dist = Math.abs(brightness - pBrightness);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                        closestIndex = i;
+                    }
+                }
+
+                raster.setSample(x, y, 0, closestIndex);
+            }
+        }
+
+        return indexed;
+    }
+
+
+    public static BufferedImage load(String file) {
         BufferedImage image;
-        try (InputStream in = getClass().getResourceAsStream(file)) {
+        try (InputStream in = Material.class.getResourceAsStream(file)) {
             assert in != null;
             try (BufferedInputStream bis = new BufferedInputStream(in)) {
                 image = ImageIO.read(bis);
@@ -80,8 +149,6 @@ public class Material implements Resource {
         }
         return image;
     }
-
-    //TODO: encode and decode directly without going over pixels
 
     public static BufferedImage dither(BufferedImage original) {
         BufferedImage image = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_BYTE_INDEXED, ICM);
