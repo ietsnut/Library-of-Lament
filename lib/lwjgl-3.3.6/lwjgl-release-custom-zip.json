@@ -1,0 +1,40 @@
+{
+  "build": "release",
+  "mode": "zip",
+  "selectedAddons": [
+    "joml",
+    "joml-primitives",
+    "lwjglx-debug",
+    "lwjgl3-awt"
+  ],
+  "platform": [
+    "freebsd",
+    "linux",
+    "linux-arm64",
+    "linux-arm32",
+    "macos",
+    "macos-arm64",
+    "windows",
+    "windows-x86",
+    "windows-arm64",
+    "linux-ppc64le",
+    "linux-riscv64"
+  ],
+  "descriptions": false,
+  "compact": false,
+  "hardcoded": false,
+  "javadoc": true,
+  "includeJSON": true,
+  "source": true,
+  "osgi": false,
+  "language": "groovy",
+  "contents": [
+    "lwjgl",
+    "lwjgl-glfw",
+    "lwjgl-opengl",
+    "lwjgl-egl",
+    "lwjgl-opengles"
+  ],
+  "version": "3.3.6",
+  "versionLatest": "3.3.6"
+}
