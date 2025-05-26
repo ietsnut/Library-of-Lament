@@ -39,7 +39,7 @@ public class EntityShader extends Shader {
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.state].binded()) {
                 if (entity instanceof Sky) {
-                    uniform("illumination", 1f);
+                    uniform("illumination", 2f);
                 }
                 render(entity);
                 uniform("illumination", 0f);

@@ -129,7 +129,6 @@ public class Camera implements Machine {
         boolean inside = false;
         boolean stopped = false;
         for (Entity entity : Manager.scene.entities) {
-            entity.update();
             if (entity instanceof Interactive interactive) {
                 float dist = position.distance(entity.position);
                 if (Camera.collision(position, entity) > 0 && dist < 7.5f && dist < distance) {

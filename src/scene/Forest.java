@@ -47,14 +47,14 @@ public class Forest extends Scene {
         entities.add(vase3);
         */
 
-        /*
+
         entities.add(new Sky("12", new Cylinder(8, 60), 5));
         entities.getLast().rotation.x = (float) (Math.random() * 90);
         entities.add(new Sky("12", new Cylinder(8, 80), 3));
         entities.getLast().rotation.y = (float) (Math.random() * 90);
         entities.add(new Sky("12", new Cylinder(8, 120), 1));
         entities.getLast().rotation.z = (float) (Math.random() * 90);
-*/
+
 
 
         /*
