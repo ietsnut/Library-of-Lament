@@ -1,10 +1,15 @@
+import ca.weblite.webview.WebView;
 import engine.Manager;
-import window.SwingLauncher;
+
+
+import java.awt.*;
 
 class LibraryOfLament {
     public static void main(String[] args) {
         Manager.run();
         //SwingLauncher.main(args);
+
+        //EventQueue.invokeLater(new Browser());
     }
 }
 

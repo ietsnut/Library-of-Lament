@@ -100,16 +100,21 @@ public class Manager {
         glfwSwapInterval(1);
         glfwShowWindow(window);
         GL.createCapabilities();
-        debugProc = GLUtil.setupDebugMessageCallback();
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageControl(
-                GL_DONT_CARE,                       // Source
-                GL_DONT_CARE,                       // Type
-                GL_DEBUG_SEVERITY_NOTIFICATION,     // Severity to filter out
-                (IntBuffer)null,                    // IDs (none)
-                false                               // false = disable
-        );
+        GLCapabilities caps = GL.getCapabilities();
+        if (caps.OpenGL43) {
+            debugProc = GLUtil.setupDebugMessageCallback();
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageControl(
+                    GL_DONT_CARE,
+                    GL_DONT_CARE,
+                    GL_DEBUG_SEVERITY_NOTIFICATION,
+                    (IntBuffer) null,
+                    false
+            );
+        } else {
+            Console.warning("OpenGL 4.3 not supported. Debug output disabled.");
+        }
         new Thread(() -> {
             try {
                 ProcessBuilder pb = new ProcessBuilder(

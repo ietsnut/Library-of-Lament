@@ -80,6 +80,7 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-natives-windows.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-sources.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/WebView.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

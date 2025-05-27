@@ -67,6 +67,8 @@ public class Window extends JFrame implements Runnable, MouseListener, MouseMoti
 
     @Override
     public void run() {
+        canvas2D.repaint();
+        /*
         long currentTime = System.nanoTime();
         deltaTime = currentTime - previousTime;
         previousTime = currentTime;
@@ -75,7 +77,7 @@ public class Window extends JFrame implements Runnable, MouseListener, MouseMoti
             update();
         }
         canvas2D.repaint();
-        SwingUtilities.invokeLater(this);
+        SwingUtilities.invokeLater(this);*/
     }
 
     protected class Canvas2D extends JPanel {
