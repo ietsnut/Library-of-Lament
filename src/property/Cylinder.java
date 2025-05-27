@@ -78,8 +78,6 @@ public class Cylinder extends Mesh {
             this.indices[baseIdx + 4] = baseVert + 3;
             this.indices[baseIdx + 5] = baseVert;
         }
-
-        this.index     = indices.length;
     }
 
     @Override

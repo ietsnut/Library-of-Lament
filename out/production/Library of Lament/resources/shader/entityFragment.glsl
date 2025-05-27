@@ -7,7 +7,7 @@ in vec3     fragNormal;
 layout(location = 0) out uint color;
 layout(location = 1) out vec3 normal;
 
-uniform usampler2D texture1;
+uniform sampler2D texture1;
 
 uniform int     lights;
 

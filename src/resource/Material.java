@@ -78,6 +78,11 @@ public class Material implements Resource {
 
     public static final int LINE = 0xFFA29F7C;
 
+    public Material(String name) {
+        this.file = "/resources/" + name + ".png";
+        this.queue();
+    }
+
     public Material(String type, String name) {
         this.file = "/resources/" + type + "/" + name + ".png";
         this.queue();

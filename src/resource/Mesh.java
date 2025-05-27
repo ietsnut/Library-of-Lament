@@ -35,6 +35,47 @@ public class Mesh implements Resource {
 
     private final String file;
 
+    public static final Mesh QUAD = new Mesh() {
+        @Override
+        public void load() {
+            vertices = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
+            indices  = new int[] {0, 1, 2, 2, 1, 3};
+            uvs = new float[]{ 0, 0, 1, 0, 1, 1, 0, 1 };
+        }
+        @Override
+        public int dimensions() {
+            return 2;
+        }
+    };
+
+    public static final Mesh PLANE = new Mesh() {
+        @Override
+        public void load() {
+            this.vertices = new byte[] {
+                    -10, 0, -10,  // bottom-left
+                    10, 0, -10,  // bottom-right
+                    10, 0,  10,  // top-right
+                    -10, 0,  10   // top-left
+            };
+            this.indices = new int[] {
+                    0, 1, 2,  // first triangle
+                    2, 3, 0   // second triangle
+            };
+            this.uvs = new float[] {
+                    0, 0,  // bottom-left
+                    1, 0,  // bottom-right
+                    1, 1,  // top-right
+                    0, 1   // top-left
+            };
+            this.normals = new float[] {
+                    0, 1, 0,  // bottom-left
+                    0, 1, 0,  // bottom-right
+                    0, 1, 0,  // top-right
+                    0, 1, 0   // top-left
+            };
+        }
+    };
+
     public Mesh() {
         this.file = null;
         this.queue();
@@ -73,11 +114,11 @@ public class Mesh implements Resource {
         }
         this.uvs        = ObjData.getTexCoordsArray(obj, 2, true);
         this.normals    = ObjData.getNormalsArray(obj);
-        this.index      = (indices != null) ? indices.length : 0;
     }
 
     @Override
     public void buffer() {
+        this.index = (indices != null) ? indices.length : 0;
         if (indices != null && indices.length > 0) {
             indicesBuffer = BufferUtils.createIntBuffer(indices.length).put(indices).flip();
         }
@@ -102,6 +143,10 @@ public class Mesh implements Resource {
         return vao != 0;
     }
 
+    public int dimensions() {
+        return 3;
+    }
+
     @Override
     public void bind() {
         this.vao = glGenVertexArrays();
@@ -116,7 +161,7 @@ public class Mesh implements Resource {
             glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
             glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_BYTE, false, 0, 0);
+            glVertexAttribPointer(0, dimensions(), GL_BYTE, false, 0, 0);
         }
         if (uvsBuffer != null && uvsBuffer.hasRemaining()) {
             vbo[1] = glGenBuffers();

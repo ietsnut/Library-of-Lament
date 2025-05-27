@@ -3,6 +3,7 @@ package shader;
 import engine.Manager;
 import engine.Scene;
 import object.FBO;
+import resource.Mesh;
 
 import static org.lwjgl.opengl.GL40.*;
 
@@ -33,13 +34,13 @@ public class FBOShader extends Shader {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
-        glBindVertexArray(1);
+        glBindVertexArray(Mesh.QUAD.vao);
         glEnableVertexAttribArray(0);
         for (int i = 1; i < 4; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, i);
         }
-        glDrawElements(GL_TRIANGLES, FBO.INDICES.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, Mesh.QUAD.index, GL_UNSIGNED_INT, 0);
         for (int i = 1; i < 4; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, 0);

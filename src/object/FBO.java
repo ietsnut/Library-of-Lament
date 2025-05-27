@@ -15,36 +15,10 @@ public class FBO {
 
     public static final IntBuffer   DRAWBUFFERS = BufferUtils.createIntBuffer(2).put(GL_COLOR_ATTACHMENT0).put(GL_COLOR_ATTACHMENT1).flip();;
 
-    public static final int[]       INDICES     = new int[] {0, 1, 2, 2, 1, 3};
-    public static final byte[]      VERTICES    = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
-
     public static final IntBuffer   IBUFFER     = BufferUtils.createIntBuffer(6);
     public static final ByteBuffer  VBUFFER     = BufferUtils.createByteBuffer(8);
 
     public static void load() {
-
-        glGenVertexArrays();
-        glBindVertexArray(1);
-
-        IBUFFER.put(INDICES);
-        IBUFFER.flip();
-        VBUFFER.put(VERTICES);
-        VBUFFER.flip();
-
-        glGenBuffers();
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 1);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, IBUFFER, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glGenBuffers();
-
-        glBindBuffer(GL_ARRAY_BUFFER, 2);
-        glBufferData(GL_ARRAY_BUFFER, VBUFFER, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_BYTE, false, 0, 0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glBindVertexArray(0);
 
         ID = glGenFramebuffers();
 

@@ -63,8 +63,9 @@ public class Manager {
             throw new RuntimeException("Failed to get video mode");
         }
         RATE = vidmode.refreshRate();
-        HEIGHT = vidmode.height() * 4 / 5;
-        WIDTH = vidmode.width() * 4 / 5;
+        WIDTH = HEIGHT = vidmode.height() * 4 / 5;
+
+        //WIDTH = vidmode.width() * 4 / 5;
         glfwDefaultWindowHints();
         //glfwWindowHint(GLFW_SAMPLES, 8);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);

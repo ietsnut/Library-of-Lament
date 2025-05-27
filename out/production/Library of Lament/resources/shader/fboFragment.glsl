@@ -55,8 +55,6 @@ void main(void) {
         } if (depth < 0.98) {
             color = PALETTE[6];
         }
-    } else if (depth > 0.99999) {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
     }
     if (distance > 0.499) {
         color = LINE;

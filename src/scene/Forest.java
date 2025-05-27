@@ -3,11 +3,10 @@ package scene;
 import content.Sky;
 import content.Vase;
 import engine.Scene;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
-import property.Cylinder;
-import property.Entity;
-import property.Light;
-import property.Terrain;
+import property.*;
+import resource.Material;
 
 public class Forest extends Scene {
 
@@ -54,7 +53,7 @@ public class Forest extends Scene {
         entities.add(new Sky("12", new Cylinder(8, 120), 1));
         entities.getLast().rotation.z = (float) (Math.random() * 90);
 
-
+        guis.add(new GUI(new Material("rat3"), new Vector2f(0.5f, 0.5f), new Vector2f(0.3f, 0.3f)));
 
         /*
         for (int i = 0; i < 30; i+= 5) {
