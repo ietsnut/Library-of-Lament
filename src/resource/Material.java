@@ -112,33 +112,38 @@ public class Material implements Resource {
                     continue;
                 }
 
-                int rVal = (argb >> 16) & 0xFF;
-                int gVal = (argb >> 8) & 0xFF;
-                int bVal = argb & 0xFF;
-                int brightness = (int)(0.299 * rVal + 0.587 * gVal + 0.114 * bVal);
-
-                // Find the closest color in PALETTE2 (ignoring index 0)
-                int closestIndex = 1;
-                int closestDistance = 256;
-
-                for (int i = 1; i < PALETTE2.length; i++) {
-                    int pr = (PALETTE2[i] >> 16) & 0xFF;
-                    int pg = (PALETTE2[i] >> 8) & 0xFF;
-                    int pb = PALETTE2[i] & 0xFF;
-                    int pBrightness = (int)(0.299 * pr + 0.587 * pg + 0.114 * pb);
-
-                    int dist = Math.abs(brightness - pBrightness);
-                    if (dist < closestDistance) {
-                        closestDistance = dist;
-                        closestIndex = i;
-                    }
-                }
+                int closestIndex = getClosestIndex(argb);
 
                 raster.setSample(x, y, 0, closestIndex);
             }
         }
 
         return indexed;
+    }
+
+    private static int getClosestIndex(int argb) {
+        int rVal = (argb >> 16) & 0xFF;
+        int gVal = (argb >> 8) & 0xFF;
+        int bVal = argb & 0xFF;
+        int brightness = (int)(0.299 * rVal + 0.587 * gVal + 0.114 * bVal);
+
+        // Find the closest color in PALETTE2 (ignoring index 0)
+        int closestIndex = 1;
+        int closestDistance = 256;
+
+        for (int i = 1; i < PALETTE2.length; i++) {
+            int pr = (PALETTE2[i] >> 16) & 0xFF;
+            int pg = (PALETTE2[i] >> 8) & 0xFF;
+            int pb = PALETTE2[i] & 0xFF;
+            int pBrightness = (int)(0.299 * pr + 0.587 * pg + 0.114 * pb);
+
+            int dist = Math.abs(brightness - pBrightness);
+            if (dist < closestDistance) {
+                closestDistance = dist;
+                closestIndex = i;
+            }
+        }
+        return closestIndex;
     }
 
 

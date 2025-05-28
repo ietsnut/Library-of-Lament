@@ -22,7 +22,7 @@ public class Renderer {
         entityShader.render(scene);
         fboShader.unbind();
         fboShader.render(scene);
-        guiShader.render(scene);
+        //guiShader.render(scene);
     }
 
 }

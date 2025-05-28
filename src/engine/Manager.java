@@ -100,8 +100,8 @@ public class Manager {
         glfwSwapInterval(1);
         glfwShowWindow(window);
         GL.createCapabilities();
-        GLCapabilities caps = GL.getCapabilities();
-        if (caps.OpenGL43) {
+        //GLCapabilities caps = GL.getCapabilities();
+        if (!System.getProperty("os.name").toLowerCase().contains("mac")) {
             debugProc = GLUtil.setupDebugMessageCallback();
             glEnable(GL_DEBUG_OUTPUT);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
