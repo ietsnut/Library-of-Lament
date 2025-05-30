@@ -1,5 +1,6 @@
 package scene;
 
+import content.Portal;
 import content.Sky;
 import content.Vase;
 import engine.Scene;
@@ -7,6 +8,8 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import property.*;
 import resource.Material;
+
+import javax.sound.sampled.Port;
 
 public class Forest extends Scene {
 
@@ -27,7 +30,7 @@ public class Forest extends Scene {
         vase2.rotation.set(0, 0 ,0);
         entities.add(vase2);
 
-        Vase arch = new Vase("arch");
+        Portal arch = new Portal("arch");
         arch.scale.set(1/16f);
         arch.position.set(-12, 4, 9);
         arch.rotation.set(0, 0 ,0);

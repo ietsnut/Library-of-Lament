@@ -16,7 +16,7 @@ public class Camera implements Machine {
     public static final Matrix projection   = new Matrix();
 
     public static final Quaternionf orientation = new Quaternionf();
-    public static final Vector3f rotation = new Vector3f(0, 0, 0);
+    public static final Vector3f rotation = new Vector3f(0, 180, 0);
     public static final Vector3f position = new Vector3f(0, 1.6f, 1.5f);
 
     public static final float SPEED = 0.015f;
@@ -32,11 +32,22 @@ public class Camera implements Machine {
     public static Entity intersecting   = null;
     public static Entity inside         = null;
 
+    private static final Vector3f resetTarget = new Vector3f(0, 1.6f, 0);
+    private static final Quaternionf resetOrientation = new Quaternionf().identity();
+    private static final Vector3f resetRotation = new Vector3f(0, 180, 0);
+    private static final Quaternionf startOrientation = new Quaternionf();
+    private static boolean resetting = false;
+    private static float resetProgress = 0.0f;
+    private static final float RESET_SPEED = 3.0f; // seconds to reach target
+    private static final Vector3f startPosition = new Vector3f();
+    private static final Vector3f startRotation = new Vector3f();
+
     public static void reset() {
-        position.set(0, 1f, 0);
-        orientation.set(0, 0, 0, 0);
-        rotation.set(0, 0, 0);
-        orient();
+        resetProgress = 0.0f;
+        resetting = true;
+        startOrientation.set(orientation);
+        startPosition.set(position);
+        startRotation.set(rotation);
     }
 
     public void turn() {
@@ -46,6 +57,28 @@ public class Camera implements Machine {
     }
 
     public static void update() {
+        if (resetting) {
+            resetProgress += 1.0f / Manager.RATE;
+            float linearT = Math.min(resetProgress / RESET_SPEED, 1.0f);
+            float t = (float)(1 - Math.cos(linearT * Math.PI)) * 0.5f; // smoothstep
+
+            position.set(startPosition).lerp(resetTarget, t);
+            rotation.set(startRotation).lerp(resetRotation, t);
+            orientation.set(startOrientation).slerp(resetOrientation, t);
+
+            updateView();
+            updateProjection();
+
+            if (linearT >= 1.0f) {
+                resetting = false;
+                rotation.set(resetRotation);
+                orientation.set(resetOrientation);
+                position.set(resetTarget);
+                // No return; allow input in the same frame
+            } else {
+                return;
+            }
+        }
         if (glfwGetInputMode(Manager.window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
             FOV = Math.clamp(75, 90, FOV - (20f / Manager.RATE));
             return;
