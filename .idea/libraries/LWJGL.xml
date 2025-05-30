@@ -52,13 +52,13 @@
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-natives-windows.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-jawt.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.2.3.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-primitives-1.10.0-javadoc.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.2.3-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-1.10.7-sources.jar!/" />
@@ -69,9 +69,8 @@
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-sources.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-sources.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8-sources.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0-sources.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-jawt-sources.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.2.3-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
