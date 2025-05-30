@@ -8,6 +8,8 @@ import engine.Control;
 import engine.Manager;
 import resource.Mesh;
 
+import java.awt.event.KeyEvent;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera implements Machine {
@@ -46,28 +48,33 @@ public class Camera implements Machine {
     }
 
     public static void update() {
-        if (glfwGetInputMode(Manager.window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
+        if (!CameraInputHandler.mouseCaptured) {
             FOV = Math.clamp(75, 90, FOV - (20f / Manager.RATE));
             return;
         }
-        rotation.add(0, Control.dx() * -SENS, 0);
-        rotation.add(Control.dy() * -SENS, 0, 0);
+
+        rotation.add(0, -CameraInputHandler.dx * SENS, 0);
+        rotation.add(-CameraInputHandler.dy * SENS, 0, 0);
         rotation.x = Math.min(Math.max(rotation.x, -80), 80);
+
         Vector3f forward = new Vector3f(forward().x, 0, forward().z).normalize();
         Vector3f origin = new Vector3f(position);
         Vector3f movement = new Vector3f();
-        if (Control.isKeyDown(GLFW_KEY_W) || Control.isKeyDown(GLFW_KEY_UP)) {
+
+        if (CameraInputHandler.isKeyDown(KeyEvent.VK_W)) {
             movement.add(forward.x * -SPEED, 0, forward.z * -SPEED);
         }
-        if (Control.isKeyDown(GLFW_KEY_S) || Control.isKeyDown(GLFW_KEY_DOWN)) {
+        if (CameraInputHandler.isKeyDown(KeyEvent.VK_S)) {
             movement.add(forward.x * SPEED, 0, forward.z * SPEED);
         }
-        if (Control.isKeyDown(GLFW_KEY_D) || Control.isKeyDown(GLFW_KEY_RIGHT)) {
+        if (CameraInputHandler.isKeyDown(KeyEvent.VK_D)) {
             movement.add(forward.z * SPEED, 0, forward.x * -SPEED);
         }
-        if (Control.isKeyDown(GLFW_KEY_A) || Control.isKeyDown(GLFW_KEY_LEFT)) {
+        if (CameraInputHandler.isKeyDown(KeyEvent.VK_A)) {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
+
+        CameraInputHandler.resetMouseDelta();
 
         if (Manager.scene.terrain == null) return;
         Terrain terrain = Manager.scene.terrain;
@@ -176,7 +183,8 @@ public class Camera implements Machine {
     public static void listen() {
 
         Camera camera = new Camera();
-        camera.start(Manager.RATE * 2);
+        camera.start(60);
+        //camera.start(Manager.RATE * 2);
         //Thread thread = new Thread(new Camera());
         //thread.start();
     }
