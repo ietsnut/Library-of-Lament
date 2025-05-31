@@ -69,7 +69,7 @@ public class Control {
         cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
-                if (!mouseLocked) return;
+                if (!mouseLocked || Camera.resetting) return;
                 if (firstMouse) {
                     prevMouseX = mouseX = (float) xpos;
                     prevMouseY = mouseY = (float) ypos;
@@ -85,6 +85,17 @@ public class Control {
             }
         };
         glfwSetCursorPosCallback(window, cursorPosCallback);
+    }
+
+    public static void resetMouse() {
+        deltaMouseX = 0;
+        deltaMouseY = 0;
+
+        // Reset mouse position to center
+        glfwSetCursorPos(Manager.window, Manager.WIDTH / 2.0, Manager.HEIGHT / 2.0);
+
+        // Force firstMouse true so the next movement doesn't apply a delta
+        firstMouse = true;
     }
 
     public static void clear() {

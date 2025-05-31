@@ -16,8 +16,8 @@ public class Camera implements Machine {
     public static final Matrix projection   = new Matrix();
 
     public static final Quaternionf orientation = new Quaternionf();
-    public static final Vector3f rotation = new Vector3f(0, 180, 0);
-    public static final Vector3f position = new Vector3f(0, 1.6f, 1.5f);
+    public static final Vector3f rotation = new Vector3f(0, 0, 0);
+    public static final Vector3f position = new Vector3f(0, 1.7f, 0);
 
     public static final float SPEED = 0.015f;
     public static final float SENS  = 0.15f;
@@ -25,6 +25,7 @@ public class Camera implements Machine {
     public static final float NEAR  = 0.1f;
     public static final float FAR   = Byte.MAX_VALUE * 2;
 
+    public static final float DEFAULT_FOV = 75;
     public static float FOV = 75;
 
     private static float bob = 0;
@@ -32,11 +33,11 @@ public class Camera implements Machine {
     public static Entity intersecting   = null;
     public static Entity inside         = null;
 
-    private static final Vector3f resetTarget = new Vector3f(0, 1.6f, 0);
+    private static final Vector3f resetTarget = new Vector3f(0, 1.7f, 0);
     private static final Quaternionf resetOrientation = new Quaternionf().identity();
-    private static final Vector3f resetRotation = new Vector3f(0, 180, 0);
+    private static final Vector3f resetRotation = new Vector3f(0, 0, 0);
     private static final Quaternionf startOrientation = new Quaternionf();
-    private static boolean resetting = false;
+    public static boolean resetting = false;
     private static float resetProgress = 0.0f;
     private static final float RESET_SPEED = 3.0f; // seconds to reach target
     private static final Vector3f startPosition = new Vector3f();
@@ -74,13 +75,14 @@ public class Camera implements Machine {
                 rotation.set(resetRotation);
                 orientation.set(resetOrientation);
                 position.set(resetTarget);
+                Control.resetMouse();
                 // No return; allow input in the same frame
             } else {
                 return;
             }
         }
         if (glfwGetInputMode(Manager.window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
-            FOV = Math.clamp(75, 90, FOV - (20f / Manager.RATE));
+            FOV = Math.clamp(DEFAULT_FOV, 90, FOV - (20f / Manager.RATE));
             return;
         }
         rotation.add(0, Control.dx() * -SENS, 0);
@@ -102,10 +104,21 @@ public class Camera implements Machine {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
 
+        /*
         if (Manager.scene.terrain == null) return;
         Terrain terrain = Manager.scene.terrain;
         if (!terrain.meshes[0].loaded()) return;
         Vector3f position = terrain.height(origin, new Vector3f(movement));
+         */
+
+
+        Vector3f position = origin;
+        if (Manager.scene.terrain != null) {
+            Terrain terrain = Manager.scene.terrain;
+            if (terrain.meshes[0].loaded()) {
+                position = terrain.height(origin, new Vector3f(movement));
+            }
+        }
 
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
@@ -150,27 +163,14 @@ public class Camera implements Machine {
                 bob -= 7.5f;
             }
             Camera.position.y += Math.sin(Math.toRadians(bob)) / 30.0f;
-            FOV = Math.clamp(75, 90, FOV + (20f / Manager.RATE));
+            FOV = Math.clamp(DEFAULT_FOV, 90, FOV + (20f / Manager.RATE));
         } else {
-            FOV = Math.clamp(75, 90, FOV - (20f / Manager.RATE));
+            FOV = Math.clamp(DEFAULT_FOV, 90, FOV - (20f / Manager.RATE));
         }
     }
 
     public static void click() {
-        float distance = Float.MAX_VALUE;
-        Entity intersecting = null;
-        boolean inside = false;
-        boolean stopped = false;
-        for (Entity entity : Manager.scene.entities) {
-            if (entity instanceof Interactive interactive) {
-                float dist = position.distance(entity.position);
-                if (Camera.collision(position, entity) > 0 && dist < 7.5f && dist < distance) {
-                    distance = dist;
-                    intersecting = entity;
-                }
-            }
-        }
-        if (intersecting instanceof Interactive interactive) {
+        if (intersecting != null && intersecting instanceof Interactive interactive) {
             interactive.click();
         }
     }

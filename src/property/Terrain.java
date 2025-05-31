@@ -11,6 +11,7 @@ public class Terrain extends Entity {
     public Terrain(String name) {
         super(name);
         terrain = meshes[state];
+        this.update();
     }
 
     private static final int[] idx = new int[3];
@@ -34,7 +35,7 @@ public class Terrain extends Entity {
             }
             bary(x[0], z[0], x[1], z[1], x[2], z[2], xQuery, zQuery, bary);
             if (inside(bary)) {
-                return bary[0] * y[0] + bary[1] * y[1] + bary[2] * y[2] + 1.6f;
+                return bary[0] * y[0] + bary[1] * y[1] + bary[2] * y[2] + 1.7f;
             }
         }
         return 0;
@@ -53,7 +54,7 @@ public class Terrain extends Entity {
 
             bary(x[0], z[0], x[1], z[1], x[2], z[2], tempPos.x, tempPos.z, bary);
             if (inside(bary)) {
-                float yResult = bary[0] * y[0] + bary[1] * y[1] + bary[2] * y[2] + 1.6f;
+                float yResult = bary[0] * y[0] + bary[1] * y[1] + bary[2] * y[2] + 1.7f;
                 if (Math.abs(yResult - tempPos.y) < 0.5f) {
                     return tempPos.setComponent(1, yResult);
                 }
@@ -71,7 +72,7 @@ public class Terrain extends Entity {
 
             bary(x[0], z[0], x[1], z[1], x[2], z[2], origin.x, origin.z, bary);
             if (inside(bary)) {
-                float yResult = bary[0] * y[0] + bary[1] * y[1] + bary[2] * y[2] + 1.6f;
+                float yResult = bary[0] * y[0] + bary[1] * y[1] + bary[2] * y[2] + 1.7f;
                 if (Math.abs(yResult - origin.y) < 0.1f) {
                     movementDirection.set(movement).normalize();
 

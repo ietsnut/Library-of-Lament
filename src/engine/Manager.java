@@ -1,5 +1,6 @@
 package engine;
 
+import scene.Driving;
 import shader.*;
 import object.*;
 
@@ -136,7 +137,7 @@ public class Manager {
 
         Console.log("Starting...");
         Renderer.init();
-        scene = new Forest();
+        scene = new Driving();
         Resource.process();
         Camera.listen();
     }

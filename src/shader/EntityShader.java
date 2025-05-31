@@ -45,7 +45,7 @@ public class EntityShader extends Shader {
                 uniform("illumination", 0f);
             }
         }
-        if (scene.terrain.meshes[scene.terrain.state].binded() && scene.terrain.materials[scene.terrain.state].binded()) {
+        if (scene.terrain != null && scene.terrain.meshes[scene.terrain.state].binded() && scene.terrain.materials[scene.terrain.state].binded()) {
             render(scene.terrain);
         }
     }
