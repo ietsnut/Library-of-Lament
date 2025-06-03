@@ -34,14 +34,14 @@ public class Control {
             @Override
             public void invoke(long window, int button, int action, int mods) {
                 if (button == 0 && action == 1 && !mouseLocked) {
-                    glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
-                    glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    glfwSetCursorPos(window, Manager.windows[0].width/2f, Manager.windows[0].height/2f);
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                     mouseLocked = true;
                     firstMouse = true;
                 }
                 if (button == 1 && action == 1 && mouseLocked) {
-                    glfwSetInputMode(Manager.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                    glfwSetCursorPos(Manager.window, Manager.WIDTH/2f, Manager.HEIGHT/2f);
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    glfwSetCursorPos(window, Manager.windows[0].width/2f, Manager.windows[0].height/2f);
                     mouseLocked = false;
                     firstMouse = true;
                 }
@@ -92,7 +92,7 @@ public class Control {
         deltaMouseY = 0;
 
         // Reset mouse position to center
-        glfwSetCursorPos(Manager.window, Manager.WIDTH / 2.0, Manager.HEIGHT / 2.0);
+        glfwSetCursorPos(Manager.windows[0].handle, Manager.windows[0].width / 2.0, Manager.windows[0].height / 2.0);
 
         // Force firstMouse true so the next movement doesn't apply a delta
         firstMouse = true;

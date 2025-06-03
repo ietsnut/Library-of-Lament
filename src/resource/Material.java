@@ -78,6 +78,11 @@ public class Material implements Resource {
 
     public static final int LINE = 0xFFA29F7C;
 
+    public Material() {
+        this.file = null;
+        this.queue();
+    }
+
     public Material(String name) {
         this.file = "/resources/" + name + ".png";
         this.queue();
@@ -88,9 +93,11 @@ public class Material implements Resource {
         this.queue();
     }
 
+    /*
     public Material(String type, int state) {
         this(type, Integer.toString(state));
     }
+    */
 
     @Override
     public String toString() {
@@ -145,7 +152,6 @@ public class Material implements Resource {
         }
         return closestIndex;
     }
-
 
     public static BufferedImage load(String file) {
         BufferedImage image;
@@ -238,7 +244,7 @@ public class Material implements Resource {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (width / 4), height, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, (width / 4), height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
         this.buffer.clear();
         this.buffer = null;

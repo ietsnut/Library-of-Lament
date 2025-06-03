@@ -22,7 +22,7 @@ public class Forest extends Scene {
         entities.add(vase);
 
 
-        Vase vase2 = new Vase("pillar2");
+        Entity vase2 = new Entity("pillar2");
         vase2.scale.set(1/16f);
         vase2.position.set(-8, 4, 9);
         vase2.rotation.set(0, 0 ,0);
@@ -34,7 +34,7 @@ public class Forest extends Scene {
         arch.rotation.set(0, 0 ,0);
         entities.add(arch);
 
-        Vase wall = new Vase("wall");
+        Entity wall = new Entity("wall");
         wall.scale.set(1/16f);
         wall.position.set(2, 2, 11);
         wall.rotation.set(0, 0 ,0);
@@ -47,12 +47,14 @@ public class Forest extends Scene {
         entities.add(vase3);
         */
 
+        /*
         entities.add(new Sky("12", new Cylinder(8, 60), 5));
         entities.getLast().rotation.x = (float) (Math.random() * 90);
         entities.add(new Sky("12", new Cylinder(8, 80), 3));
         entities.getLast().rotation.y = (float) (Math.random() * 90);
         entities.add(new Sky("12", new Cylinder(8, 120), 1));
         entities.getLast().rotation.z = (float) (Math.random() * 90);
+         */
 
         guis.add(new GUI(new Material("rat3"), new Vector2f(0.5f, 0.5f), new Vector2f(0.3f, 0.3f)));
 

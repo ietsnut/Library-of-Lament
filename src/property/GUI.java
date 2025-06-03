@@ -16,4 +16,8 @@ public class GUI {
         this.scale = scale;
     }
 
+    public void unbind() {
+        this.material.unbind();
+    }
+
 }

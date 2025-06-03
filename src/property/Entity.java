@@ -21,10 +21,8 @@ public class Entity {
     public final Material[] materials;
     public final Mesh[]     meshes;
 
-    int states;
+    final int states;
     public int state = 0;
-
-    //TODO: Add invalid state detection and constrain
 
     public Entity(Material material, Mesh mesh) {
         this.states     = 1;
@@ -74,6 +72,15 @@ public class Entity {
     public void update() {
         this.model.inactive().identity().translate(position.x, position.y, position.z).scale(scale).rotate((float) Math.toRadians(rotation.y), Y).rotate((float) Math.toRadians(rotation.x), X).rotate((float) Math.toRadians(rotation.z), Z);
         this.model.swap();
+    }
+
+    public void unbind() {
+        for (Mesh mesh : meshes) {
+            mesh.unbind();
+        }
+        for (Material material : materials) {
+            material.unbind();
+        }
     }
 
 }

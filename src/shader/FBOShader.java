@@ -20,8 +20,8 @@ public class FBOShader extends Shader {
     }
 
     public void bind() {
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO.ID);
-        glViewport(0, 0, Manager.WIDTH, Manager.HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 1);
+        glViewport(0, 0, Manager.windows[0].width, Manager.windows[0].height);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearDepth(1.0f);
@@ -53,7 +53,7 @@ public class FBOShader extends Shader {
 
     public void unbind() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Manager.WIDTH, Manager.HEIGHT);
+        glViewport(0, 0, Manager.windows[0].width, Manager.windows[0].height);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }

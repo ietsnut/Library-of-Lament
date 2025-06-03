@@ -12,10 +12,16 @@ public abstract class Scene {
     public Terrain terrain;
 
     public void clear() {
+        for (Entity entity : entities) {
+            entity.unbind();
+        }
         entities.clear();
         lights.clear();
+        for (GUI gui : guis) {
+            gui.unbind();
+        }
         guis.clear();
-        terrain = null;
+        terrain.unbind();
         System.gc();
     }
 

@@ -1,22 +1,20 @@
 package scene;
 
 import content.Door;
-import content.Train;
 import content.Vase;
 import engine.Manager;
 import engine.Scene;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
-import property.Entity;
-import property.Light;
-import property.Machine;
-import property.Terrain;
+import property.*;
+import resource.Material;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Driving extends Scene implements Machine {
+public class Train extends Scene implements Machine {
 
     private final List<Entity> forests = new ArrayList<>();
     private final int forestCount = 3;
@@ -24,10 +22,16 @@ public class Driving extends Scene implements Machine {
 
     private final Map<Entity, Vector3f> basePositions = new HashMap<>();
 
-    public Driving() {
+    @Override
+    public void clear() {
+        super.clear();
+        basePositions.clear();
+        forests.clear();
+    }
+
+    public Train() {
 
         terrain = new Terrain("train_inside");
-        terrain.update();
 
         basePositions.put(terrain, new Vector3f(terrain.position));
 
@@ -52,16 +56,15 @@ public class Driving extends Scene implements Machine {
 
         Door door = new Door("train");
         door.scale.set(0.8f);
-        door.position.set(0, 0, 0.2f);
+        door.position.set(0, 0, 0.3f);
         door.update();
         entities.add(door);
 
         basePositions.put(door, new Vector3f(door.position));
 
-        // Create multiple forest tiles spaced in the Z-direction
         for (int i = 0; i < forestCount; i++) {
             Entity forest = new Entity("forest");
-            forest.position.set(0, -10, -i * 220f);  // Going backwards in z
+            forest.position.set(0, -10, -i * 220f);
             forest.update();
             entities.add(forest);
             forests.add(forest);
@@ -69,6 +72,8 @@ public class Driving extends Scene implements Machine {
 
         Light light1 = new Light(new Vector3f(0, 1.6f, -1.6f), new Vector3f(2.0f, 0.7f, 0.07f), 1f);
         lights.add(light1);
+
+        guis.add(new GUI(new Material("rat3"), new Vector2f(0.5f, 0.5f), new Vector2f(0.3f, 0.3f)));
 
         start(Manager.RATE);
     }

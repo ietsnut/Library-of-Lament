@@ -8,7 +8,7 @@ in vec3 fragNormal;
 layout(location = 0) out uint color;
 layout(location = 1) out vec3 normal;
 
-uniform sampler2D texture1;
+uniform usampler2D texture1;
 
 uniform int     lights;
 uniform vec3    lightPosition[MAX_LIGHTS];
@@ -17,12 +17,15 @@ uniform float   lightIntensity[MAX_LIGHTS];
 
 uniform float   illumination;
 
-uint t(sampler2D s, vec2 v) {
-    return int(texture(s,v).x*255.)>>(3-int(mod(v.x/(1./textureSize(s,0).x)*4.,4.)))*2&3;
+uint t(usampler2D s, vec2 v) {
+    ivec2 p = ivec2(fract(v) * vec2(textureSize(s,0) * ivec2(4,1)));
+    return (texelFetch(s, ivec2(p.x/4, p.y), 0).r >> (6 - (p.x%4)*2)) & 3u;
 }
 
 void main(void) {
+
     color = t(texture1, fragUV);
+
     if (color == 0) {
         discard;
     }

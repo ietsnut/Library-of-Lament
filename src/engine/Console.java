@@ -84,6 +84,7 @@ public class Console {
 
     public static void error(String... messages) {
         printWithCallerAndThread(ANSI_RED, messages);
+        System.exit(1);
     }
 
     public static void warning(String... messages) {

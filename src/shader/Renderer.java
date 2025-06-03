@@ -20,9 +20,9 @@ public class Renderer {
         fboShader.bind();
         aabbShader.render(scene);
         entityShader.render(scene);
+        //guiShader.render(scene);
         fboShader.unbind();
         fboShader.render(scene);
-        //guiShader.render(scene);
     }
 
 }

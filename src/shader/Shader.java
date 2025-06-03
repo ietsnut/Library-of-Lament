@@ -104,11 +104,12 @@ public abstract class Shader {
                 String line;
                 while((line = reader.readLine())!=null){
                     if (line.startsWith("#version")) {
-                        shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
+                        shaderSource.append(line).append("//\n");;
+                        //shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
                         shaderSource.append("#define MAX_LIGHTS ").append(Byte.toString(Byte.MAX_VALUE)).append("//\n");
                         shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
-                        shaderSource.append("#define WIDTH ").append(Manager.WIDTH).append("//\n");
-                        shaderSource.append("#define HEIGHT ").append(Manager.HEIGHT).append("//\n");
+                        shaderSource.append("#define WIDTH ").append(Manager.windows[0].width).append("//\n");
+                        shaderSource.append("#define HEIGHT ").append(Manager.windows[0].height).append("//\n");
                         shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
                         shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
                         shaderSource.append("const vec4 PALETTE[").append(Material.PALETTE.length).append("] = vec4[](\n");

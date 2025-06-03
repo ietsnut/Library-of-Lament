@@ -16,39 +16,47 @@ public class Camera implements Machine {
     public static final Matrix projection   = new Matrix();
 
     public static final Quaternionf orientation = new Quaternionf();
-    public static final Vector3f rotation = new Vector3f(0, 0, 0);
+    public static final Vector3f rotation = new Vector3f(0);
     public static final Vector3f position = new Vector3f(0, 1.7f, 0);
 
+    public static final float RANGE = 7.5f;
+    public static final float DEFAULT_FOV = 75;
     public static final float SPEED = 0.015f;
     public static final float SENS  = 0.15f;
     public static final float SLOPE = 0.7071f;
     public static final float NEAR  = 0.1f;
     public static final float FAR   = Byte.MAX_VALUE * 2;
 
-    public static final float DEFAULT_FOV = 75;
-    public static float FOV = 75;
-
-    private static float bob = 0;
+    private static float FOV = 75;
+    private static float BOB = 0;
 
     public static Entity intersecting   = null;
     public static Entity inside         = null;
 
     private static final Vector3f resetTarget = new Vector3f(0, 1.7f, 0);
+    private static final Vector3f resetRotation = new Vector3f(0);
     private static final Quaternionf resetOrientation = new Quaternionf().identity();
-    private static final Vector3f resetRotation = new Vector3f(0, 0, 0);
-    private static final Quaternionf startOrientation = new Quaternionf();
+
     public static boolean resetting = false;
     private static float resetProgress = 0.0f;
-    private static final float RESET_SPEED = 3.0f; // seconds to reach target
+    private static final float RESET_SPEED = 3.0f;
+
     private static final Vector3f startPosition = new Vector3f();
     private static final Vector3f startRotation = new Vector3f();
+    private static final Quaternionf startOrientation = new Quaternionf();
 
-    public static void reset() {
+    public static void moveTo(Vector3f targetPosition, Vector3f targetRotation) {
+        resetTarget.set(targetPosition);
+        resetRotation.set(targetRotation);
         resetProgress = 0.0f;
         resetting = true;
         startOrientation.set(orientation);
         startPosition.set(position);
         startRotation.set(rotation);
+    }
+
+    public static void moveTo(Vector3f targetPosition) {
+        moveTo(targetPosition, rotation);
     }
 
     public void turn() {
@@ -57,39 +65,37 @@ public class Camera implements Machine {
         updateProjection();
     }
 
+    private static final Vector3f forward = new Vector3f();
+
     public static void update() {
         if (resetting) {
             resetProgress += 1.0f / Manager.RATE;
             float linearT = Math.min(resetProgress / RESET_SPEED, 1.0f);
-            float t = (float)(1 - Math.cos(linearT * Math.PI)) * 0.5f; // smoothstep
-
+            float t = (float)(1 - Math.cos(linearT * Math.PI)) * 0.5f;
             position.set(startPosition).lerp(resetTarget, t);
             rotation.set(startRotation).lerp(resetRotation, t);
             orientation.set(startOrientation).slerp(resetOrientation, t);
-
             updateView();
             updateProjection();
-
             if (linearT >= 1.0f) {
                 resetting = false;
                 rotation.set(resetRotation);
                 orientation.set(resetOrientation);
                 position.set(resetTarget);
                 Control.resetMouse();
-                // No return; allow input in the same frame
             } else {
                 return;
             }
         }
-        if (glfwGetInputMode(Manager.window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
+        if (glfwGetInputMode(Manager.windows[0].handle, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
             FOV = Math.clamp(DEFAULT_FOV, 90, FOV - (20f / Manager.RATE));
             return;
         }
         rotation.add(0, Control.dx() * -SENS, 0);
         rotation.add(Control.dy() * -SENS, 0, 0);
         rotation.x = Math.min(Math.max(rotation.x, -80), 80);
-        Vector3f forward = new Vector3f(forward().x, 0, forward().z).normalize();
-        Vector3f origin = new Vector3f(position);
+        Camera.forward.set(forward()).setComponent(1, 0).normalize();
+        Vector3f position = new Vector3f(Camera.position);
         Vector3f movement = new Vector3f();
         if (Control.isKeyDown(GLFW_KEY_W) || Control.isKeyDown(GLFW_KEY_UP)) {
             movement.add(forward.x * -SPEED, 0, forward.z * -SPEED);
@@ -104,65 +110,51 @@ public class Camera implements Machine {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
 
-        /*
-        if (Manager.scene.terrain == null) return;
-        Terrain terrain = Manager.scene.terrain;
-        if (!terrain.meshes[0].loaded()) return;
-        Vector3f position = terrain.height(origin, new Vector3f(movement));
-         */
-
-
-        Vector3f position = origin;
-        if (Manager.scene.terrain != null) {
-            Terrain terrain = Manager.scene.terrain;
+        if (Manager.SCENE.terrain != null) {
+            Terrain terrain = Manager.SCENE.terrain;
             if (terrain.meshes[0].loaded()) {
-                position = terrain.height(origin, new Vector3f(movement));
+                position = terrain.height(position, new Vector3f(movement));
             }
         }
 
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
         boolean inside = false;
-        boolean stopped = false;
-        for (Entity entity : Manager.scene.entities) {
+        for (Entity entity : Manager.SCENE.entities) {
             entity.update();
             if (entity instanceof Interactive interactive) {
-                if (Camera.inside(position, entity)) {
+                double collision = collision(position, entity);
+                if (Math.signum(collision) == 0) {
                     if (Camera.inside == null) {
-                        if (entity instanceof Solid) {
-                            stopped = true;
-                            break;
-                        } else {
-                            Camera.inside = entity;
-                            interactive.enter();
-                        }
+                        Camera.inside = entity;
+                        interactive.enter();
                     }
                     inside = true;
                 }
                 float dist = position.distance(entity.position);
-                if (Camera.collision(position, entity) > 0 && dist < 7.5f && dist < distance) {
+                if (collision > 0 && dist < RANGE && dist < distance) {
                     distance = dist;
                     intersecting = entity;
                 }
             }
         }
         Camera.intersecting = intersecting;
-        if (!stopped && !Float.isNaN(position.x) && !Float.isNaN(position.z) && !Float.isNaN(position.y)) {
-            Camera.position.set(position);
-        }
         if (!inside) {
             if (Camera.inside instanceof Interactive interactive) {
                 interactive.leave();
             }
             Camera.inside = null;
         }
-        if (movement.length() > 0 && !position.equals(origin)) {
-            if (bob <= 0.0f) {
-                bob = 360.0f;
+        if (!Float.isNaN(position.x) && !Float.isNaN(position.z) && !Float.isNaN(position.y)) {
+            Camera.position.set(position);
+        }
+        if (movement.length() > 0) {
+            if (BOB <= 0.0f) {
+                BOB = 360.0f;
             } else {
-                bob -= 7.5f;
+                BOB -= 7.5f;
             }
-            Camera.position.y += Math.sin(Math.toRadians(bob)) / 30.0f;
+            Camera.position.y += Math.sin(Math.toRadians(BOB)) / 30.0f;
             FOV = Math.clamp(DEFAULT_FOV, 90, FOV + (20f / Manager.RATE));
         } else {
             FOV = Math.clamp(DEFAULT_FOV, 90, FOV - (20f / Manager.RATE));
@@ -176,33 +168,13 @@ public class Camera implements Machine {
     }
 
     private static void updateView() {
-        Matrix4f viewBuffer = view.inactive();
-        orient();
-        viewBuffer.identity();
-        viewBuffer.m00(1.0f - 2.0f * (orientation.y * orientation.y + orientation.z * orientation.z));
-        viewBuffer.m01(2.0f * (orientation.x * orientation.y - orientation.z * orientation.w));
-        viewBuffer.m02(2.0f * (orientation.x * orientation.z + orientation.y * orientation.w));
-        viewBuffer.m03(0);
-        viewBuffer.m10(2.0f * (orientation.x * orientation.y + orientation.z * orientation.w));
-        viewBuffer.m11(1.0f - 2.0f * (orientation.x * orientation.x + orientation.z * orientation.z));
-        viewBuffer.m12(2.0f * (orientation.y * orientation.z - orientation.x * orientation.w));
-        viewBuffer.m13(0);
-        viewBuffer.m20(2.0f * (orientation.x * orientation.z - orientation.y * orientation.w));
-        viewBuffer.m21(2.0f * (orientation.y * orientation.z + orientation.x * orientation.w));
-        viewBuffer.m22(1.0f - 2.0f * (orientation.x * orientation.x + orientation.y * orientation.y));
-        viewBuffer.m23(0);
-        viewBuffer.m30(0);
-        viewBuffer.m31(0);
-        viewBuffer.m32(0);
-        viewBuffer.m33(1.0f);
-        viewBuffer.translate(-position.x, -position.y, -position.z);
+        orientation.identity().rotateYXZ(Math.toRadians(rotation.y), Math.toRadians(rotation.x), Math.toRadians(rotation.z));
+        view.inactive().identity().rotate(orientation.conjugate(new Quaternionf())).translate(-position.x, -position.y, -position.z);
         view.swap();
     }
 
-
     public static void updateProjection() {
-        Matrix4f projectionBuffer = projection.inactive();
-        projectionBuffer.identity().perspective(Math.toRadians(Camera.FOV), (float) Manager.WIDTH / (float) Manager.HEIGHT, NEAR, FAR);
+        projection.inactive().identity().perspective(Math.toRadians(Camera.FOV), (float) Manager.windows[0].width / (float) Manager.windows[0].height, NEAR, FAR);
         projection.swap();
     }
 
@@ -221,65 +193,71 @@ public class Camera implements Machine {
             turn();
     }*/
 
-    private static void rot(Vector3f axis, float angle) {
-        Quaternionf deltaRotation = new Quaternionf().rotationAxis(angle, axis);
-        orientation.mul(deltaRotation);
-    }
-
-    private static void orient() {
-        orientation.identity();
-        rot(Entity.Y, Math.toRadians(rotation.y));
-        rot(Entity.X, Math.toRadians(rotation.x));
-        rot(Entity.Z, Math.toRadians(rotation.z));
-    }
-
     public static Vector3f forward() {
         return orientation.transform(new Vector3f(0, 0, 1));
     }
 
+    private static final Vector3f rayOrigin = new Vector3f();
+    private static final Vector3f rayDir = new Vector3f();
+
     public static double collision(Vector3f camera, Entity entity) {
         Mesh mesh = entity.meshes[entity.state];
-        if (mesh.collider == null || mesh.collider.min == null || mesh.collider.max == null) {
-            return -1f;
-        }
-
         Mesh.Collider collider = mesh.collider;
 
-        // to model space
-        Matrix4f inverseModelMatrix = new Matrix4f(entity.model.get()).invert();
-        Vector3f rayOriginModelSpace = inverseModelMatrix.transformPosition(new Vector3f(Camera.position));
-        Vector3f rayDirectionModelSpace = inverseModelMatrix.transformDirection(Camera.forward().negate()).normalize();
-
-        // inverse direction vector
-        Vector3f invDir = new Vector3f(
-                1.0f / rayDirectionModelSpace.x,
-                1.0f / rayDirectionModelSpace.y,
-                1.0f / rayDirectionModelSpace.z
-        );
-
-        // tmin and tmax for each axis
-        float t1 = (collider.min.x - rayOriginModelSpace.x) * invDir.x;
-        float t2 = (collider.max.x - rayOriginModelSpace.x) * invDir.x;
-        float t3 = (collider.min.y - rayOriginModelSpace.y) * invDir.y;
-        float t4 = (collider.max.y - rayOriginModelSpace.y) * invDir.y;
-        float t5 = (collider.min.z - rayOriginModelSpace.z) * invDir.z;
-        float t6 = (collider.max.z - rayOriginModelSpace.z) * invDir.z;
-
-        // the nearest and farthest intersection distances
-        float tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
-        float tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
-
-        // intersection validity
-        if (tmax < 0 || tmin > tmax) {
-            return -1f; // No intersection
+        if (collider == null || collider.min == null || collider.max == null) {
+            return -1.0f;
         }
 
-        return Math.max(tmin, 0); // Return the intersection distance (or 0 if the ray starts inside)
-    }
+        // Reuse static temporary objects to reduce allocation
+        Matrix4f inverseModelMatrix = new Matrix4f(entity.model.get()).invert();
+        rayOrigin.set(Camera.position);
+        rayDir.set(Camera.forward()).negate().normalize();
 
-    //camera is inside AABB
-    public static boolean inside(Vector3f camera,Entity entity) {
-        return collision(camera, entity) == 0;
+        // Transform to model space
+        inverseModelMatrix.transformPosition(rayOrigin);
+        inverseModelMatrix.transformDirection(rayDir).normalize();
+
+        // Fail early if rayDir has zero component (avoid division by zero)
+        if (rayDir.x == 0 || rayDir.y == 0 || rayDir.z == 0) {
+            return -1.0f;
+        }
+
+        float invDirX = 1.0f / rayDir.x;
+        float invDirY = 1.0f / rayDir.y;
+        float invDirZ = 1.0f / rayDir.z;
+
+        float tminX = (collider.min.x - rayOrigin.x) * invDirX;
+        float tmaxX = (collider.max.x - rayOrigin.x) * invDirX;
+        if (invDirX < 0) {
+            float tmp = tminX;
+            tminX = tmaxX;
+            tmaxX = tmp;
+        }
+
+        float tminY = (collider.min.y - rayOrigin.y) * invDirY;
+        float tmaxY = (collider.max.y - rayOrigin.y) * invDirY;
+        if (invDirY < 0) {
+            float tmp = tminY;
+            tminY = tmaxY;
+            tmaxY = tmp;
+        }
+
+        float tminZ = (collider.min.z - rayOrigin.z) * invDirZ;
+        float tmaxZ = (collider.max.z - rayOrigin.z) * invDirZ;
+        if (invDirZ < 0) {
+            float tmp = tminZ;
+            tminZ = tmaxZ;
+            tmaxZ = tmp;
+        }
+
+        float tmin = Math.max(tminX, Math.max(tminY, tminZ));
+        float tmax = Math.min(tmaxX, Math.min(tmaxY, tmaxZ));
+
+        if (tmax < 0 || tmin > tmax) {
+            return -1.0f; // No intersection
+        }
+
+        return Math.max(tmin, 0.0f); // 0 if inside
     }
 
 }

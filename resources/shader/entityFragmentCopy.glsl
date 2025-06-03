@@ -1,3 +1,4 @@
+// Fragment Shader
 #version 410 core
 
 in vec2 fragUV;
@@ -27,16 +28,17 @@ void main(void) {
     }
     float lightEffect = illumination;
     for(int i = 0; i < lights; i++) {
-        float distance      = length(fragPosition - lightPosition[i]);
-        float attenuation   = lightIntensity[i] / (lightAttenuation[i].x + lightAttenuation[i].y * distance + lightAttenuation[i].z * distance * distance);
-        lightEffect         += attenuation;
+        vec3 lightDir = lightPosition[i] - fragPosition;
+        float distance = length(lightDir);
+        lightDir = normalize(lightDir);
+        float attenuation = lightIntensity[i] / (lightAttenuation[i].x + lightAttenuation[i].y * distance + lightAttenuation[i].z * distance * distance);
+        vec3 worldNormal = normalize(fragNormal * 2.0 - 1.0);
+        float diffuse = max(dot(worldNormal, lightDir), 0.0);
+        float lightingFactor = mix(1.0, diffuse, 0.8);
+        lightEffect += attenuation * lightingFactor;
     }
     lightEffect += (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 0.1;
     lightEffect = clamp(lightEffect, 0.0, 1.0);
     color += int(lightEffect * 3.0);
     normal = fragNormal;
 }
-
-
-
-

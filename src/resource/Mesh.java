@@ -81,8 +81,18 @@ public class Mesh implements Resource {
         this.queue();
     }
 
+    public Mesh(String name) {
+        this.file = "/resources/" + name + ".obj";
+        this.queue();
+    }
+
     public Mesh(String type, String name) {
         this.file = "/resources/" + type + "/" + name + ".obj";
+        this.queue();
+    }
+
+    public Mesh(String type, String name, int state) {
+        this.file = "/resources/" + type + "/" + name + "_" + state + ".obj";
         this.queue();
     }
 
