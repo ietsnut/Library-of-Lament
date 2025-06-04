@@ -4,7 +4,6 @@
 in vec2 fragUV;
 in vec3 fragPosition;
 in vec3 fragNormal;
-in float visibility;
 
 layout(location = 0) out uint color;
 layout(location = 1) out vec3 normal;
@@ -18,16 +17,9 @@ uniform float   lightIntensity[MAX_LIGHTS];
 
 uniform float   illumination;
 
-uint t(usampler2D s, vec2 v) {
-    ivec2 p = ivec2(fract(v) * vec2(textureSize(s,0) * ivec2(4,1)));
-    return (texelFetch(s, ivec2(p.x/4, p.y), 0).r >> (6 - (p.x%4)*2)) & 3u;
-}
-
 void main(void) {
-
-    color = t(texture1, fragUV);
-
-    if (color == 0) {
+    color = texture(texture1, fragUV).r;
+    if (color == 0u) {
         discard;
     }
     float lightEffect = illumination;
@@ -43,7 +35,6 @@ void main(void) {
     }
     lightEffect += (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 0.1;
     lightEffect = clamp(lightEffect, 0.0, 1.0);
-    color += int(lightEffect * 3.0);
-    color = int(mix(0.0, color * 255.0, visibility) / 255.0);
+    color += int(lightEffect * 3.0) + 1;
     normal = fragNormal;
 }

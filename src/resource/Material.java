@@ -25,6 +25,8 @@ public class Material implements Resource {
     private final String file;
 
     int[] pixels;
+    private byte[] grayscalePixels;
+    private boolean isIndexed = false;
 
     public static final int[] PALETTE = {
             0xFF000000, // #000000
@@ -70,12 +72,47 @@ public class Material implements Resource {
                 Console.warning("Failed to load", file);
                 return;
             }
+
             this.width = image.getWidth();
             this.height = image.getHeight();
-            if (image.getType() == BufferedImage.TYPE_INT_RGB || image.getType() == BufferedImage.TYPE_INT_ARGB) {
-                pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+            // Check if the image is indexed (has a color palette)
+            if (image.getType() == BufferedImage.TYPE_BYTE_INDEXED) {
+                this.isIndexed = true;
+                // Handle indexed image as before
+                if (image.getType() == BufferedImage.TYPE_INT_RGB || image.getType() == BufferedImage.TYPE_INT_ARGB) {
+                    pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+                } else {
+                    pixels = image.getRGB(0, 0, width, height, null, 0, width);
+                }
             } else {
-                pixels = image.getRGB(0, 0, width, height, null, 0, width);
+                this.isIndexed = false;
+                // Handle as grayscale image (similar to Texture class)
+
+                // Convert to ARGB if not already
+                BufferedImage argbImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                argbImage.getGraphics().drawImage(image, 0, 0, null);
+
+                int[] argbPixels = ((DataBufferInt) argbImage.getRaster().getDataBuffer()).getData();
+                this.grayscalePixels = new byte[width * height];
+
+                for (int i = 0; i < width * height; i++) {
+                    int argb = argbPixels[i];
+                    int a = (argb >> 24) & 0xFF;
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >> 8) & 0xFF;
+                    int b = argb & 0xFF;
+
+                    // If pixel is transparent (alpha < threshold), set to 0
+                    if (a < 128) {
+                        this.grayscalePixels[i] = 0;
+                    } else {
+                        // Convert to grayscale and map to range 1-255
+                        int gray = (int)(0.299 * r + 0.587 * g + 0.114 * b);
+                        // Ensure grayscale value is in range 1-255 (never 0)
+                        this.grayscalePixels[i] = (byte) Math.max(1, gray);
+                    }
+                }
             }
         } catch (IOException e) {
             Console.error("Failed to load", file);
@@ -96,24 +133,32 @@ public class Material implements Resource {
 
     @Override
     public void buffer() {
-        int totalPixels = width * height;
-        int totalBytes = (totalPixels + 3) / 4;
-        this.buffer = BufferUtils.createByteBuffer(totalBytes).order(ByteOrder.nativeOrder());
-        for (int i = 0; i < totalPixels; i += 4) {
-            byte packedData = 0;
-            for (int j = 0; j < 4 && (i + j) < totalPixels; j++) {
-                int argb = pixels[i + j];
-                int index = dither(argb);
-                packedData |= (byte) (index << (6 - 2 * j));
+        if (isIndexed) {
+            // Handle indexed images as before
+            if (pixels == null) {
+                Console.warning("No pixels to buffer for", file);
+                return;
             }
-            buffer.put(packedData);
+            buffer = BufferUtils.createByteBuffer(width * height);
+            for (int pixel : pixels) {
+                int paletteIndex = dither(pixel);
+                buffer.put((byte) paletteIndex);
+            }
+            buffer.flip();
+        } else {
+            // Handle grayscale images
+            if (grayscalePixels == null) {
+                Console.warning("No grayscale pixels to buffer for", file);
+                return;
+            }
+            buffer = ByteBuffer.allocateDirect(grayscalePixels.length).order(ByteOrder.nativeOrder());
+            buffer.put(grayscalePixels).flip();
         }
-        buffer.flip();
     }
 
     @Override
     public boolean loaded() {
-        return this.buffer.capacity() > 0;
+        return this.buffer != null && this.buffer.capacity() > 0;
     }
 
     @Override
@@ -130,7 +175,7 @@ public class Material implements Resource {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, (width / 4), height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
         this.buffer.clear();
         this.buffer = null;
@@ -139,6 +184,7 @@ public class Material implements Resource {
     @Override
     public void unload() {
         pixels = null;
+        grayscalePixels = null;
     }
 
     @Override

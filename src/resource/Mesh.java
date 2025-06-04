@@ -52,10 +52,10 @@ public class Mesh implements Resource {
         @Override
         public void load() {
             this.vertices = new byte[] {
-                    -10, 0, -10,  // bottom-left
-                    10, 0, -10,  // bottom-right
-                    10, 0,  10,  // top-right
-                    -10, 0,  10   // top-left
+                    -1, 0, -1,  // bottom-left
+                    1, 0, -1,  // bottom-right
+                    1, 0,  1,  // top-right
+                    -1, 0,  1   // top-left
             };
             this.indices = new int[] {
                     0, 1, 2,  // first triangle
@@ -72,6 +72,67 @@ public class Mesh implements Resource {
                     0, 1, 0,  // bottom-right
                     0, 1, 0,  // top-right
                     0, 1, 0   // top-left
+            };
+        }
+    };
+
+    public static final Mesh X_PLANE = new Mesh() {
+        @Override
+        public void load() {
+            // Two perpendicular planes crossing at center
+            // First plane: X-Y oriented (normal along Z)
+            // Second plane: Z-Y oriented (normal along X)
+
+            this.vertices = new byte[] {
+                    // First plane vertices (X-Y plane)
+                    -1, 0, 0,  // bottom-left
+                    1, 0, 0,  // bottom-right
+                    1, 2, 0,  // top-right
+                    -1, 2, 0,  // top-left
+
+                    // Second plane vertices (Z-Y plane)
+                    0, 0, -1, // bottom-back
+                    0, 0,  1, // bottom-front
+                    0, 2,  1, // top-front
+                    0, 2, -1  // top-back
+            };
+
+            this.indices = new int[] {
+                    // First plane triangles
+                    0, 1, 2,  // first triangle
+                    2, 3, 0,  // second triangle
+
+                    // Second plane triangles
+                    4, 5, 6,  // first triangle
+                    6, 7, 4   // second triangle
+            };
+
+            this.uvs = new float[] {
+                    // First plane UVs
+                    0, 1,  // bottom-left
+                    1, 1,  // bottom-right
+                    1, 0,  // top-right
+                    0, 0,  // top-left
+
+                    // Second plane UVs
+                    0, 1,  // bottom-back
+                    1, 1,  // bottom-front
+                    1, 0,  // top-front
+                    0, 0   // top-back
+            };
+
+            this.normals = new float[] {
+                    // First plane normals - averaged for smooth shading
+                    -0.707f, 0, 0.707f,  // bottom-left (blend of -X and +Z)
+                    0.707f, 0, 0.707f,  // bottom-right (blend of +X and +Z)
+                    0.707f, 0, 0.707f,  // top-right (blend of +X and +Z)
+                    -0.707f, 0, 0.707f,  // top-left (blend of -X and +Z)
+
+                    // Second plane normals - averaged for smooth shading
+                    0.707f, 0, -0.707f, // bottom-back (blend of +X and -Z)
+                    0.707f, 0,  0.707f, // bottom-front (blend of +X and +Z)
+                    0.707f, 0,  0.707f, // top-front (blend of +X and +Z)
+                    0.707f, 0, -0.707f  // top-back (blend of +X and -Z)
             };
         }
     };

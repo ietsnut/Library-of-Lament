@@ -1,13 +1,11 @@
 package scene;
 
 import content.Door;
-import content.Sky;
+import content.Real;
 import content.Vase;
 import engine.Scene;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import property.*;
-import resource.Material;
 
 public class Forest extends Scene {
 
@@ -20,7 +18,6 @@ public class Forest extends Scene {
         vase.position.set(1, 2, 10);
         vase.rotation.set(0, -45 ,0);
         entities.add(vase);
-
 
         Entity vase2 = new Entity("pillar2");
         vase2.scale.set(1/16f);

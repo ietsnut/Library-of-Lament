@@ -1,15 +1,10 @@
 package shader;
 
-import content.Sky;
-import engine.Console;
-import engine.Manager;
 import property.Light;
 import engine.Scene;
 import object.*;
 import org.joml.Vector3f;
 import property.Entity;
-
-import java.util.List;
 
 import static org.lwjgl.opengl.GL40.*;
 
@@ -55,17 +50,10 @@ public class EntityShader extends Shader<Scene> {
             LIGHT++;
         }
         uniform("lights", LIGHT);
-        uniform("illumination", 0f);
-        uniform("fogDensity",           0.007f);
-        uniform("fogGradient",          1.5f);
         uniform("texture1", 0);
         for (Entity entity : scene.entities) {
-            if (entity.meshes[entity.state].binded()) {
-                if (entity instanceof Sky) {
-                    uniform("illumination", 2f);
-                }
+            if (entity.meshes[entity.state].binded() && entity.materials[entity.state].binded()) {
                 render(entity);
-                uniform("illumination", 0f);
             }
         }
         if (scene.terrain != null && scene.terrain.meshes[scene.terrain.state].binded() && scene.terrain.materials[scene.terrain.state].binded()) {

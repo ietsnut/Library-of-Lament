@@ -47,7 +47,7 @@ public class Control {
                 }
                 if (mouseLocked && !firstMouse && button == 0 && action == 1) {
                     Camera.click();
-                    Manager.map.open();
+                    //Manager.map.open();
                 }
                 if (mouseLocked && !firstMouse && button == 0 && action == GLFW_PRESS) {
                     holding = true;

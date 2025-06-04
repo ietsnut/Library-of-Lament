@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.FloatBuffer;
 import java.util.*;
 
+import engine.Console;
 import engine.Manager;
 import object.Camera;
 import org.joml.*;
@@ -131,7 +132,7 @@ public abstract class Shader<T> {
         glCompileShader(shaderID);
         if(glGetShaderi(shaderID, GL_COMPILE_STATUS) == GL_FALSE){
             System.out.println(glGetShaderInfoLog(shaderID, 500));
-            System.err.println("Could not compile shader!");
+            Console.error("Could not compile shader!");
             System.exit(-1);
         }
         return shaderID;

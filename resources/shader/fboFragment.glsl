@@ -41,21 +41,31 @@ void main(void) {
         discard;
     }
 
-    color               = PALETTE[texture(texture1, fragUV).r];
+    uint value = texture(texture1, fragUV).r;
 
-    float depthDelta    = depth(texture3);
-    float depth         = texture(texture3, fragUV).r;
-    float normalDelta   = max(sobel(texture2, 0), max(sobel(texture2, 1), sobel(texture2, 2)));
-    float dither        = (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2;
+    if (value == 0) {
+        color = vec4(vec3(0.5), 1.0);
+    } else if (value <= 8) {
+        value -= 1;
+        color               = PALETTE[value];
 
-    if (normalDelta > 0.1 && dither > 0.01) {
-        color = PALETTE[4];
-        if (depth < 0.99) {
-            color = PALETTE[5];
-        } if (depth < 0.98) {
-            color = PALETTE[6];
+        float depthDelta    = depth(texture3);
+        float depth         = texture(texture3, fragUV).r;
+        float normalDelta   = max(sobel(texture2, 0), max(sobel(texture2, 1), sobel(texture2, 2)));
+        float dither        = (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2;
+
+        if (normalDelta > 0.1 && dither > 0.01) {
+            color = PALETTE[4];
+            if (depth < 0.99) {
+                color = PALETTE[5];
+            } if (depth < 0.98) {
+                color = PALETTE[6];
+            }
         }
+    } else {
+        color = vec4(vec3(float(value - 9) / 246.0), 1.0);
     }
+
     if (distance > 0.499) {
         color = LINE;
     }

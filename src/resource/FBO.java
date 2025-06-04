@@ -1,11 +1,14 @@
 package resource;
 
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 import engine.Console;
 import engine.Manager;
+import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.opengl.GL40.*;
+import static org.lwjgl.opengl.GL44.glClearTexImage;
 
 public class FBO implements Resource {
 

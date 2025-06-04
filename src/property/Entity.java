@@ -5,6 +5,7 @@ import org.lwjgl.BufferUtils;
 import resource.Material;
 import resource.Mesh;
 import org.joml.Vector3f;
+import resource.Texture;
 
 import java.nio.FloatBuffer;
 
