@@ -1,7 +1,6 @@
 #version 410 core
 
-layout(location = 0) out uint color;
-layout(location = 1) out vec3 normal;
+layout(location = 0) out vec4 color;
 
 in vec2 fragUV;
 
@@ -13,8 +12,17 @@ uint t(usampler2D s, vec2 v) {
 }
 
 void main() {
-    color = t(texture1, fragUV);
-    if (color == 0) {
+    uint albedo = t(texture1, fragUV);
+    if (albedo == 0) {
         discard;
+    }
+    if (albedo == 1) {
+        color = PALETTE[0];
+    }
+    if (albedo == 2) {
+        color = PALETTE[4];
+    }
+    if (albedo == 3) {
+        color = PALETTE[5];
     }
 }

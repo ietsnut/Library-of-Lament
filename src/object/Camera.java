@@ -7,6 +7,7 @@ import property.*;
 import engine.Control;
 import engine.Manager;
 import resource.Mesh;
+import window.Main;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -87,7 +88,7 @@ public class Camera implements Machine {
                 return;
             }
         }
-        if (glfwGetInputMode(Manager.windows[0].handle, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
+        if (glfwGetInputMode(Manager.main.handle, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
             FOV = Math.clamp(DEFAULT_FOV, 90, FOV - (20f / Manager.RATE));
             return;
         }
@@ -110,8 +111,8 @@ public class Camera implements Machine {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
 
-        if (Manager.SCENE.terrain != null) {
-            Terrain terrain = Manager.SCENE.terrain;
+        if (Main.scene.terrain != null) {
+            Terrain terrain = Main.scene.terrain;
             if (terrain.meshes[0].loaded()) {
                 position = terrain.height(position, new Vector3f(movement));
             }
@@ -120,7 +121,7 @@ public class Camera implements Machine {
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
         boolean inside = false;
-        for (Entity entity : Manager.SCENE.entities) {
+        for (Entity entity : Main.scene.entities) {
             entity.update();
             if (entity instanceof Interactive interactive) {
                 double collision = collision(position, entity);
@@ -174,7 +175,7 @@ public class Camera implements Machine {
     }
 
     public static void updateProjection() {
-        projection.inactive().identity().perspective(Math.toRadians(Camera.FOV), (float) Manager.windows[0].width / (float) Manager.windows[0].height, NEAR, FAR);
+        projection.inactive().identity().perspective(Math.toRadians(Camera.FOV), (float) Manager.main.width / (float) Manager.main.height, NEAR, FAR);
         projection.swap();
     }
 

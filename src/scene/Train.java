@@ -35,16 +35,6 @@ public class Train extends Scene implements Machine {
 
         basePositions.put(terrain, new Vector3f(terrain.position));
 
-        /*
-        Train train = new Train("train_inside");
-        train.position.set(0, 0, 0.5f);
-        train.update();
-        entities.add(train);
-
-        basePositions.put(train, new Vector3f(train.position));
-
-         */
-
         Vase entity2 = new Vase("2");
         entity2.scale.set(1 / 64f);
         entity2.position.set(-0.5f, 1, -1.5f);
@@ -72,8 +62,6 @@ public class Train extends Scene implements Machine {
 
         Light light1 = new Light(new Vector3f(0, 1.6f, -1.6f), new Vector3f(2.0f, 0.7f, 0.07f), 1f);
         lights.add(light1);
-
-        guis.add(new GUI(new Material("rat3"), new Vector2f(0.5f, 0.5f), new Vector2f(0.3f, 0.3f)));
 
         start(Manager.RATE);
     }

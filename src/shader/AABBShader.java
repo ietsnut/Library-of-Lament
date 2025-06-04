@@ -9,21 +9,14 @@ import property.Entity;
 import static org.lwjgl.opengl.GL40.*;
 
 
-public class AABBShader extends Shader {
+public class AABBShader extends Shader<Entity> {
 
     public AABBShader() {
         super("AABB", "position");
     }
 
-    public void shader(Scene scene) {
-        if (Camera.intersecting == null ||
-                Camera.intersecting.meshes[Camera.intersecting.state] == null ||
-                Camera.intersecting.meshes[Camera.intersecting.state].collider == null ||
-                !Camera.intersecting.meshes[Camera.intersecting.state].collider.binded()) return;
-        render(Camera.intersecting);
-    }
-
-    protected void render(Entity entity) {
+    @Override
+    protected void shader(Entity entity) {
         uniform("model",        entity.model.buffer());
         uniform("projection",   Camera.projection.buffer());
         uniform("view",         Camera.view.buffer());

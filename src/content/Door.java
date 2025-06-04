@@ -13,19 +13,16 @@ public class Door extends Entity implements Interactive {
 
     @Override
     public void click() {
-        System.out.println("Clicked");
         Camera.moveTo(new Vector3f(0, 1.7f, 0));
     }
 
     @Override
     public void enter() {
-        System.out.println("Entered");
         Camera.moveTo(new Vector3f(0, 1.7f, 0));
     }
 
     @Override
     public void leave() {
-        System.out.println("Left");
     }
 
 }

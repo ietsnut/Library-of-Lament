@@ -5,7 +5,6 @@ import java.nio.FloatBuffer;
 import java.util.*;
 
 import engine.Manager;
-import engine.Scene;
 import object.Camera;
 import org.joml.*;
 import resource.Material;
@@ -13,9 +12,9 @@ import resource.Material;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 
-public abstract class Shader {
+public abstract class Shader<T> {
 
-    public static final List<Shader> ALL = new ArrayList<>();
+    public static final List<Shader<?>> ALL = new ArrayList<>();
 
     private final HashMap<String, Integer> uniforms = new HashMap<>();
     final String[] attributes;
@@ -68,11 +67,11 @@ public abstract class Shader {
         }
     }
 
-    protected abstract void shader(Scene scene);
+    protected abstract void shader(T object);
 
-    protected final void render(Scene scene) {
+    public final void render(T object) {
         start();
-        shader(scene);
+        shader(object);
         stop();
     }
 
@@ -85,7 +84,7 @@ public abstract class Shader {
     }
 
     public static void clear() {
-        for (Shader shader : Shader.ALL) {
+        for (Shader<?> shader : Shader.ALL) {
             shader.stop();
             glDetachShader(shader.program, shader.vertex);
             glDetachShader(shader.program, shader.fragment);
@@ -104,12 +103,11 @@ public abstract class Shader {
                 String line;
                 while((line = reader.readLine())!=null){
                     if (line.startsWith("#version")) {
-                        shaderSource.append(line).append("//\n");;
-                        //shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.window, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
+                        shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.main.handle, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.main.handle, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
                         shaderSource.append("#define MAX_LIGHTS ").append(Byte.toString(Byte.MAX_VALUE)).append("//\n");
                         shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
-                        shaderSource.append("#define WIDTH ").append(Manager.windows[0].width).append("//\n");
-                        shaderSource.append("#define HEIGHT ").append(Manager.windows[0].height).append("//\n");
+                        shaderSource.append("#define WIDTH ").append(Manager.main.width).append("//\n");
+                        shaderSource.append("#define HEIGHT ").append(Manager.main.height).append("//\n");
                         shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
                         shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
                         shaderSource.append("const vec4 PALETTE[").append(Material.PALETTE.length).append("] = vec4[](\n");

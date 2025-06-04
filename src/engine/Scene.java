@@ -8,7 +8,7 @@ public abstract class Scene {
 
     public final ArrayList<Entity>  entities = new ArrayList<>();
     public final ArrayList<Light>   lights   = new ArrayList<>();
-    public final ArrayList<GUI>     guis   = new ArrayList<>();
+
     public Terrain terrain;
 
     public void clear() {
@@ -17,10 +17,6 @@ public abstract class Scene {
         }
         entities.clear();
         lights.clear();
-        for (GUI gui : guis) {
-            gui.unbind();
-        }
-        guis.clear();
         terrain.unbind();
         System.gc();
     }

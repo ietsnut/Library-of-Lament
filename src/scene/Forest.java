@@ -56,8 +56,6 @@ public class Forest extends Scene {
         entities.getLast().rotation.z = (float) (Math.random() * 90);
          */
 
-        guis.add(new GUI(new Material("rat3"), new Vector2f(0.5f, 0.5f), new Vector2f(0.3f, 0.3f)));
-
         /*
         for (int i = 0; i < 30; i+= 5) {
             Vase vase = new Vase("2");

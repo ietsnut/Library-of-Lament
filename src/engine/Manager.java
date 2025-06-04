@@ -1,68 +1,36 @@
 package engine;
 
-import org.joml.Vector3f;
+import resource.FBO;
 import scene.Train;
 import shader.*;
-import object.*;
 
 import org.lwjgl.Version;
 import org.lwjgl.system.Callback;
-import org.lwjgl.system.MemoryStack;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import property.Machine;
 import resource.Resource;
-import scene.Forest;
+import window.*;
 
 import java.nio.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
-import static org.lwjgl.system.MemoryStack.*;
-import static org.lwjgl.system.MemoryUtil.*;
 
 public class Manager {
 
-    public static long  TIME;
     public static long  RATE;
-    public static float PLAYTIME;
-    public static Scene SCENE;
+    public static long  WIDTH;
+    public static long  HEIGHT;
 
-    // Window management
-    public static Window[] windows = new Window[10]; // Initialize with max 10 windows
-    private static int windowCount = 0;
+    public static Main main;
+    public static Map map;
 
-    public static Callback debugProc;
-    public static Process jwindow;
+    private static Window[] windows;
 
-    // Window class to encapsulate window-specific data
-    public static class Window {
-        public final long handle;
-        public final String name;
-        public final int width;
-        public final int height;
-        public GLCapabilities capabilities;
-        public boolean shouldClose = false;
-
-        public Window(long handle, String name, int width, int height) {
-            this.handle = handle;
-            this.name = name;
-            this.width = width;
-            this.height = height;
-        }
-
-        public void makeContextCurrent() {
-            glfwMakeContextCurrent(handle);
-            if (capabilities != null) {
-                GL.setCapabilities(capabilities);
-            }
-        }
-    }
+    private static Callback debugProc;
 
     public static void run() {
         try {
@@ -90,33 +58,11 @@ public class Manager {
             Console.error("Failed to get video mode");
         }
         RATE = vidmode.refreshRate();
+        WIDTH = vidmode.width();
+        HEIGHT = vidmode.height();
 
-        // Create primary window (main game window)
-        int primaryWidth = vidmode.height() * 4 / 5;
-        int primaryHeight = primaryWidth;
-        windows[0] = createWindow(0, "Library of Lament", primaryWidth, primaryHeight, "Main Game");
+        main = new Main((int) HEIGHT * 4 / 5);
 
-        if (windows[0] == null) {
-            Console.error("Failed to create primary window!");
-            return;
-        }
-
-        // Position primary window
-        try (MemoryStack stack = stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
-            glfwGetWindowSize(windows[0].handle, pWidth, pHeight);
-            glfwSetWindowPos(windows[0].handle,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2);
-        }
-
-        // Setup OpenGL context for primary window
-        windows[0].makeContextCurrent();
-        GL.createCapabilities();
-        windows[0].capabilities = GL.getCapabilities();
-
-        // Setup debug output (only once, shared across contexts)
         if (!System.getProperty("os.name").toLowerCase().contains("mac")) {
             debugProc = GLUtil.setupDebugMessageCallback();
             glEnable(GL_DEBUG_OUTPUT);
@@ -128,149 +74,82 @@ public class Manager {
         }
 
         Console.log("Starting...");
-        Renderer.init();
 
-        // Set initial scenes
-        SCENE = new Train();
+        main.setup();
 
-        Resource.process();
-        Camera.listen();
+        map = new Map((int) HEIGHT * 4 / 5);
 
-        // Show primary window
-        glfwShowWindow(windows[0].handle);
-    }
+        map.setup();
 
-    // Create a new window
-    public static Window createWindow(int i, String name, int width, int height, String title) {
+        windows = new Window[2];
 
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
-        glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        glfwWindowHint(GLFW_FLOATING, GLFW_FALSE);
-        glfwWindowHint(GLFW_FOCUSED, name.equals("primary") ? GLFW_TRUE : GLFW_FALSE);
+        windows[0] = main;
+        windows[1] = map;
 
-        if (glfwGetPlatform() == GLFW_PLATFORM_COCOA) {
-            glfwWindowHint(GLFW_COCOA_GRAPHICS_SWITCHING, GLFW_TRUE);
-            glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
-        }
-
-        // For primary window, no shared context. For others, share with primary
-        long sharedContext = (i == 0) ? NULL : windows[0].handle;
-        long windowHandle = glfwCreateWindow(width, height, title, NULL, sharedContext);
-
-        if (windowHandle == NULL) {
-            Console.error("Failed to create GLFW window: " + name);
-            return null;
-        }
-
-        windows[i] = new Window(windowHandle, name, width, height);
-        windowCount = Math.max(windowCount, i + 1);
-
-        // Setup callbacks for the new window
-        Control.listen(windowHandle);
-
-        // If this isn't the primary window, create its OpenGL context
-        if (i != 0 && windows[0] != null) {
-            windows[i].makeContextCurrent();
-            windows[i].capabilities = GL.createCapabilities();
-        }
-
-        Console.log("Created window: " + name + " (" + width + "x" + height + ")");
-        return windows[i];
-    }
-
-    // Create a map window
-    public static void createMapWindow() {
-        Window mapWindow = createWindow(1, "map", 400, 300, "Map View");
-        if (mapWindow != null) {
-            // Position map window to the right of primary window
-            glfwSetWindowPos(mapWindow.handle,
-                    windows[0].width + 100, 100);
-
-            glfwShowWindow(mapWindow.handle);
-        }
     }
 
     private static void loop() {
-        int fps = 0;
-        long lastFrameTime = time();
 
-        while (!shouldCloseAnyWindow()) {
-            TIME = time();
-            PLAYTIME = (TIME - lastFrameTime) / 1000f;
+        while (main != null && !glfwWindowShouldClose(main.handle)) {
 
-            if (TIME - lastFrameTime > 1000) {
-                glfwSetWindowTitle(windows[0].handle, Integer.toString(fps));
-                fps = 0;
-                lastFrameTime += 1000;
-                System.gc();
-            }
-            fps++;
+            glfwPollEvents();
 
             Resource.process();
 
-            // Render all windows
-            for (int i = 0; i < windowCount; i++) {
+            for (int i = 0; i < windows.length; i++) {
+
                 Window window = windows[i];
-                if (window == null || window.shouldClose) continue;
+
+                if (window == null) continue;
+
+                if (window.open && !window.visible) {
+                    glfwShowWindow(window.handle);
+                    glfwSetWindowShouldClose(window.handle, false);
+                    window.visible = true;
+                    Console.log("Showing window[" + i + "]", window.title);
+                } else if (!window.open && window.visible) {
+                    glfwHideWindow(window.handle);
+                    window.visible = false;
+                    Console.log("Hiding window[" + i + "]", window.title);
+                    continue;
+                }
 
                 window.makeContextCurrent();
 
-                // Set viewport for this window
                 glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 glViewport(0, 0, window.width, window.height);
-                glDepthRange(0.0, 1.0);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                // Render the scene for this window
-                if (SCENE != null) {
-                    Renderer.render(SCENE);
-                }
+                window.draw();
 
                 glfwSwapBuffers(window.handle);
 
-                // Check if this window should close
                 if (glfwWindowShouldClose(window.handle)) {
-                    window.shouldClose = true;
+                    window.close();
+                    if (i == 0) {
+                        Console.log("Main window closed. Exiting.");
+                        return;
+                    }
                 }
             }
-
-            glfwPollEvents();
         }
-    }
-
-    private static boolean shouldCloseAnyWindow() {
-        // Close all if primary window should close
-        if (windows[0] != null) {
-            return glfwWindowShouldClose(windows[0].handle);
-        }
-        return true;
     }
 
     public static void close() {
+
         Console.log("Closing...");
 
-        // IMPORTANT: Make primary context current before cleaning up OpenGL resources
-        if (windows[0] != null) {
-            windows[0].makeContextCurrent();
+        if (main != null) {
+            main.makeContextCurrent();
         }
 
-        // Now clean up OpenGL resources while context is active
         Control.clear();
         Machine.clear();
         Resource.clear();
-        FBO.unload();
         Shader.clear();
 
         // Close all windows
-        for (int i = 0; i < windowCount; i++) {
+        for (int i = 0; i < windows.length; i++) {
             if (windows[i] != null) {
                 //glfwFreeCallbacks(windows[i].handle);
                 glfwDestroyWindow(windows[i].handle);
@@ -286,9 +165,9 @@ public class Manager {
     }
 
     public static void stop() {
-        for (int i = 0; i < windowCount; i++) {
-            if (windows[i] != null) {
-                glfwSetWindowShouldClose(windows[i].handle, true);
+        for (Window window : windows) {
+            if (window != null) {
+                glfwSetWindowShouldClose(window.handle, true);
             }
         }
     }
