@@ -24,6 +24,8 @@ public class Material implements Resource {
 
     private final String file;
 
+    int[] pixels;
+
     public static final int[] PALETTE = {
             0xFF000000, // #000000
             0xFF1F1C23, // #1F1C23
@@ -60,36 +62,21 @@ public class Material implements Resource {
     public void load() {
         try (InputStream in = Material.class.getResourceAsStream(file)) {
             if (in == null) {
-                Console.error("Failed to load", file);
+                Console.warning("Failed to load", file);
                 return;
             }
             BufferedImage image = ImageIO.read(in);
             if (image == null) {
-                Console.error("Failed to load", file);
+                Console.warning("Failed to load", file);
                 return;
             }
             this.width = image.getWidth();
             this.height = image.getHeight();
-            int[] pixels = null;
             if (image.getType() == BufferedImage.TYPE_INT_RGB || image.getType() == BufferedImage.TYPE_INT_ARGB) {
                 pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
             } else {
                 pixels = image.getRGB(0, 0, width, height, null, 0, width);
             }
-            int totalPixels = width * height;
-            int totalBytes = (totalPixels + 3) / 4;
-            this.buffer = BufferUtils.createByteBuffer(totalBytes).order(ByteOrder.nativeOrder());
-            for (int i = 0; i < totalPixels; i += 4) {
-                byte packedData = 0;
-                for (int j = 0; j < 4 && (i + j) < totalPixels; j++) {
-                    int argb = pixels[i + j];
-                    int index = dither(argb);
-                    packedData |= (byte) (index << (6 - 2 * j));
-                }
-                buffer.put(packedData);
-            }
-            buffer.flip();
-
         } catch (IOException e) {
             Console.error("Failed to load", file);
         }
@@ -109,7 +96,19 @@ public class Material implements Resource {
 
     @Override
     public void buffer() {
-
+        int totalPixels = width * height;
+        int totalBytes = (totalPixels + 3) / 4;
+        this.buffer = BufferUtils.createByteBuffer(totalBytes).order(ByteOrder.nativeOrder());
+        for (int i = 0; i < totalPixels; i += 4) {
+            byte packedData = 0;
+            for (int j = 0; j < 4 && (i + j) < totalPixels; j++) {
+                int argb = pixels[i + j];
+                int index = dither(argb);
+                packedData |= (byte) (index << (6 - 2 * j));
+            }
+            buffer.put(packedData);
+        }
+        buffer.flip();
     }
 
     @Override
@@ -139,7 +138,7 @@ public class Material implements Resource {
 
     @Override
     public void unload() {
-
+        pixels = null;
     }
 
     @Override

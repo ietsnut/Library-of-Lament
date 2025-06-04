@@ -56,6 +56,8 @@ public class EntityShader extends Shader<Scene> {
         }
         uniform("lights", LIGHT);
         uniform("illumination", 0f);
+        uniform("fogDensity",           0.007f);
+        uniform("fogGradient",          1.5f);
         uniform("texture1", 0);
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.state].binded()) {

@@ -10,17 +10,13 @@ import resource.FBO;
 import org.lwjgl.opengl.GL;
 import resource.Mesh;
 import resource.Resource;
+import scene.Forest;
 import scene.Train;
 import shader.AABBShader;
 import shader.EntityShader;
 import shader.FBOShader;
 
-import java.nio.ByteBuffer;
-
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glReadPixels;
-import static org.lwjgl.opengl.GL30.GL_RED_INTEGER;
 
 public class Main extends Window {
 
@@ -48,7 +44,7 @@ public class Main extends Window {
         aabbShader = new AABBShader();
 
         fbo = new FBO(3);
-        scene = new Train();
+        scene = new Forest();
 
         Resource.process();
         Camera.listen();

@@ -17,7 +17,7 @@ public class Console {
     public static final String ANSI_CYAN   = "\u001B[36m";
     public static final String ANSI_WHITE  = "\u001B[37m";
 
-    private static final int CELL_WIDTH = 25;
+    private static final int CELL_WIDTH = 20;
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     private static String getCurrentTimestamp() {

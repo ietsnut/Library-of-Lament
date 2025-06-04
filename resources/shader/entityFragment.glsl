@@ -4,6 +4,7 @@
 in vec2 fragUV;
 in vec3 fragPosition;
 in vec3 fragNormal;
+in float visibility;
 
 layout(location = 0) out uint color;
 layout(location = 1) out vec3 normal;
@@ -43,5 +44,6 @@ void main(void) {
     lightEffect += (fract(sin(dot(fragUV.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 0.1;
     lightEffect = clamp(lightEffect, 0.0, 1.0);
     color += int(lightEffect * 3.0);
+    color = int(mix(0.0, color * 255.0, visibility) / 255.0);
     normal = fragNormal;
 }
