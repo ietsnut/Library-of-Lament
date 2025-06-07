@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 
 public class Terrain extends Entity {
 
-    Mesh terrain;
+    private final Mesh terrain;
 
     public Terrain(String name) {
         super(name);
@@ -19,11 +19,15 @@ public class Terrain extends Entity {
     private static final float[] y = new float[3];
     private static final float[] z = new float[3];
     private static final float[] bary = new float[3];
+
     private static final Vector3f edgeVector = new Vector3f();
     private static final Vector3f movementDirection = new Vector3f();
     private static final Vector3f projectedMovement = new Vector3f();
     private static final Vector3f newPosition = new Vector3f();
     private static final Vector3f tempPos = new Vector3f();
+    private static final Vector3f v0 = new Vector3f();
+    private static final Vector3f v1 = new Vector3f();
+    private static final Vector3f faceNormal = new Vector3f();
 
     public float height(float xQuery, float zQuery) {
         for (int t = 0; t < terrain.indices.length; t += 3) {
@@ -50,7 +54,9 @@ public class Terrain extends Entity {
                 y[i] = terrain.vertices[idx[i] + 1];
                 z[i] = terrain.vertices[idx[i] + 2];
             }
-            if (terrain.normals[idx[0] + 1] < Camera.SLOPE) continue;
+
+            normal(x, y, z, faceNormal);
+            if (faceNormal.y < Camera.SLOPE) continue;
 
             bary(x[0], z[0], x[1], z[1], x[2], z[2], tempPos.x, tempPos.z, bary);
             if (inside(bary)) {
@@ -68,7 +74,9 @@ public class Terrain extends Entity {
                 y[i] = terrain.vertices[idx[i] + 1];
                 z[i] = terrain.vertices[idx[i] + 2];
             }
-            if (terrain.normals[idx[0] + 1] < Camera.SLOPE) continue;
+
+            normal(x, y, z, faceNormal);
+            if (faceNormal.y < Camera.SLOPE) continue;
 
             bary(x[0], z[0], x[1], z[1], x[2], z[2], origin.x, origin.z, bary);
             if (inside(bary)) {
@@ -95,6 +103,12 @@ public class Terrain extends Entity {
         }
 
         return origin;
+    }
+
+    private void normal(float[] x, float[] y, float[] z, Vector3f out) {
+        v0.set(x[1] - x[0], y[1] - y[0], z[1] - z[0]);
+        v1.set(x[2] - x[0], y[2] - y[0], z[2] - z[0]);
+        v0.cross(v1, out).normalize();
     }
 
     private boolean inside(float[] bary) {

@@ -21,9 +21,10 @@ import static org.lwjgl.opengl.GL43.*;
 
 public class Manager {
 
-    public static long  RATE;
-    public static long  WIDTH;
-    public static long  HEIGHT;
+    public static long RATE;
+    public static long WIDTH;
+    public static long HEIGHT;
+    public static long DELTATIME = 0;
 
     public static Main main;
     public static Map map;
@@ -31,6 +32,7 @@ public class Manager {
     private static Window[] windows;
 
     private static Callback debugProc;
+    private static long previousTime = System.nanoTime();
 
     public static void run() {
         try {
@@ -77,14 +79,14 @@ public class Manager {
 
         main.setup();
 
-        //map = new Map((int) HEIGHT * 4 / 5);
+        map = new Map((int) HEIGHT * 4 / 5);
 
-        //map.setup();
+        map.setup();
 
-        windows = new Window[1];
+        windows = new Window[2];
 
         windows[0] = main;
-        //windows[1] = map;
+        windows[1] = map;
 
     }
 
@@ -113,6 +115,10 @@ public class Manager {
                     Console.log("Hiding window[" + i + "]", window.title);
                     continue;
                 }
+
+                long currentTime = System.nanoTime();
+                DELTATIME = currentTime - previousTime;
+                previousTime = currentTime;
 
                 window.makeContextCurrent();
 

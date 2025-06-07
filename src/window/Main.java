@@ -23,17 +23,15 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Main extends Window {
 
-    private EntityShader entityShader;
-    private FBOShader fboShader;
-    private AABBShader aabbShader;
-
-    private EnvironmentShader environmentShader;
+    private EntityShader        entityShader;
+    private FBOShader           fboShader;
+    private AABBShader          aabbShader;
+    private EnvironmentShader   environmentShader;
 
     private FBO fbo;
 
-    public static Scene scene;
-
-    private static Scene test;
+    public static Scene background;
+    public static Scene foreground;
 
     public Main(int size) {
         super(size, size);
@@ -46,17 +44,13 @@ public class Main extends Window {
 
     @Override
     public void setup() {
-
-        fboShader = new FBOShader();
-        entityShader = new EntityShader();
-        //aabbShader = new AABBShader();
-
-        fbo = new FBO(3);
-
-        environmentShader = new EnvironmentShader();
-
-        scene = new Forest();
-        test = new Test();
+        fboShader           = new FBOShader();
+        entityShader        = new EntityShader();
+        aabbShader          = new AABBShader();
+        environmentShader   = new EnvironmentShader();
+        fbo     = new FBO(1, width, height);
+        background   = new Forest();
+        foreground   = new Test();
         Resource.process();
         Camera.listen();
     }
@@ -64,15 +58,14 @@ public class Main extends Window {
     @Override
     public void draw() {
         fboShader.bind(fbo);
-        /*
         if (Camera.intersecting != null &&
                 Camera.intersecting.meshes[Camera.intersecting.state] != null &&
                 Camera.intersecting.meshes[Camera.intersecting.state].collider != null &&
                 Camera.intersecting.meshes[Camera.intersecting.state].collider.binded()) {
             aabbShader.render(Camera.intersecting);
-        }*/
-        environmentShader.render(test);
-        entityShader.render(scene);
+        }
+        environmentShader.render(background);
+        entityShader.render(foreground);
         fboShader.unbind(fbo);
         fboShader.render(fbo);
     }

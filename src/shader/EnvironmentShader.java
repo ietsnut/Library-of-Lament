@@ -1,11 +1,8 @@
 package shader;
 
-import engine.Console;
 import engine.Scene;
 import object.Camera;
-import org.joml.Vector3f;
 import property.Entity;
-import property.Light;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -17,7 +14,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 public class EnvironmentShader extends Shader<Scene> {
 
     public EnvironmentShader() {
-        super("env", "position", "uv", "normal");
+        super("env", "position", "uv");
         start();
         uniform("texture1", 0);
         stop();
@@ -44,18 +41,6 @@ public class EnvironmentShader extends Shader<Scene> {
         glEnable(GL_DEPTH_TEST);
         uniform("projection",           Camera.projection.buffer());
         uniform("view",                 Camera.view.buffer());
-        uniform("lightPosition[0]",     Camera.position);
-        //uniform("lightAttenuation[0]",  new Vector3f(2.0f, 0.7f, 0.07f));
-        uniform("lightAttenuation[0]", new Vector3f(1.0f, 0.2f, 0.02f));
-        uniform("lightIntensity[0]",   4f);
-        int LIGHT = 1;
-        for (Light light : scene.lights) {
-            uniform("lightPosition[" + LIGHT + "]",     light.position);
-            uniform("lightAttenuation[" + LIGHT + "]",  light.attenuation);
-            uniform("lightIntensity[" + LIGHT + "]",    light.intensity);
-            LIGHT++;
-        }
-        uniform("lights", LIGHT);
         uniform("skyColor",             0.5f);
         uniform("fogDensity",           0.04f);
         uniform("fogGradient",          1.5f);

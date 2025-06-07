@@ -16,11 +16,13 @@ public class FBO implements Resource {
     public final int[] textures;
     public final int[] buffers;
 
-    public boolean bound = false;
+    public int width, height;
 
-    public FBO(int textures) {
-        this.textures = new int[textures];
+    public FBO(int textures, int width, int height) {
+        this.textures = new int[textures + 1];
         this.buffers = new int[textures];
+        this.width = width;
+        this.height = height;
         this.queue();
     }
 
@@ -40,44 +42,36 @@ public class FBO implements Resource {
         this.framebuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, this.framebuffer);
 
-        for (int i = 0; i < textures.length; i++) {
+        for (int i = 0; i < textures.length - 1; i++) {
             textures[i] = glGenTextures();
             buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+            glBindTexture(GL_TEXTURE_2D, textures[i]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[i], 0);
         }
 
-        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        textures[textures.length - 1] = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textures[textures.length - 1]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, Manager.main.width, Manager.main.height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[0], 0);
-
-        glBindTexture(GL_TEXTURE_2D, textures[1]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Manager.main.width, Manager.main.height, 0, GL_RGB, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, textures[1], 0);
-
-        glBindTexture(GL_TEXTURE_2D, textures[2]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, Manager.main.width, Manager.main.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textures[2], 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textures[textures.length - 1], 0);
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glDrawBuffers(this.buffers);
-        glViewport(0, 0, Manager.main.width, Manager.main.height);
         int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             Console.error("FBO Not complete", Integer.toString(status));
             Manager.stop();
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     }
 
     @Override
@@ -99,7 +93,9 @@ public class FBO implements Resource {
 
     @Override
     public boolean binded() {
-        return true;
+        return framebuffer != 0 &&
+                java.util.Arrays.stream(textures).allMatch(t -> t != 0) &&
+                java.util.Arrays.stream(buffers).allMatch(b -> b != 0);
     }
 
     @Override

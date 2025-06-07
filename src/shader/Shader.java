@@ -34,6 +34,7 @@ public abstract class Shader<T> {
         }
         glLinkProgram(program);
         glValidateProgram(program);
+        Console.log("Shader: " + program, type);
         ALL.add(this);
     }
 
@@ -105,16 +106,15 @@ public abstract class Shader<T> {
                 while((line = reader.readLine())!=null){
                     if (line.startsWith("#version")) {
                         shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.main.handle, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.main.handle, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
-                        shaderSource.append("#define MAX_LIGHTS ").append(Byte.toString(Byte.MAX_VALUE)).append("//\n");
-                        shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
                         shaderSource.append("#define WIDTH ").append(Manager.main.width).append("//\n");
                         shaderSource.append("#define HEIGHT ").append(Manager.main.height).append("//\n");
+                        shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
                         shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
                         shaderSource.append("#define FAR " + Camera.FAR).append("//\n");
-                        shaderSource.append("const vec4 PALETTE[").append(Material.PALETTE.length).append("] = vec4[](\n");
-                        for (int i = 0; i < Material.PALETTE.length; i++) {
-                            int color = Material.PALETTE[i];
-                            shaderSource.append(String.format(Locale.US,"    vec4(%.3f, %.3f, %.3f, 1.0)%s\n", ((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f, ((color) & 0xFF) / 255.0f, (i < Material.PALETTE.length - 1) ? "," : ""));
+                        shaderSource.append("const vec4 PALETTE[").append(Material.MIYAZAKI_16.length).append("] = vec4[](\n");
+                        for (int i = 0; i < Material.MIYAZAKI_16.length; i++) {
+                            int color = Material.MIYAZAKI_16[i];
+                            shaderSource.append(String.format(Locale.US,"    vec4(%.3f, %.3f, %.3f, 1.0)%s\n", ((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f, ((color) & 0xFF) / 255.0f, (i < Material.MIYAZAKI_16.length - 1) ? "," : ""));
                         }
                         shaderSource.append(");\n");
                         shaderSource.append("const vec4 LINE = ").append(String.format(Locale.US, "vec4(%.3f, %.3f, %.3f, 1.0);\n", ((Material.LINE >> 16) & 0xFF) / 255.0f, ((Material.LINE >> 8) & 0xFF) / 255.0f, ((Material.LINE) & 0xFF) / 255.0f)).append("//\n");

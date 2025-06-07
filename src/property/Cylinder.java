@@ -26,7 +26,6 @@ public class Cylinder extends Mesh {
         int totalIndices  = sides * 6;
 
         this.vertices   = new byte[totalVertices * 3];
-        this.normals    = new float[totalVertices * 3];
         this.uvs        = new float[totalVertices * 2];
         this.indices    = new int[totalIndices];
 
@@ -60,11 +59,6 @@ public class Cylinder extends Mesh {
             float nx = (float) Math.cos(midAngle);
             float nz = (float) Math.sin(midAngle);
 
-            this.normals[vx]     = nx; this.normals[vx + 1]  = 0.0f; this.normals[vx + 2]  = nz;
-            this.normals[vx + 3] = nx; this.normals[vx + 4]  = 0.0f; this.normals[vx + 5]  = nz;
-            this.normals[vx + 6] = nx; this.normals[vx + 7]  = 0.0f; this.normals[vx + 8]  = nz;
-            this.normals[vx + 9] = nx; this.normals[vx + 10] = 0.0f; this.normals[vx + 11] = nz;
-
             this.uvs[tx]     = 0.0f;  this.uvs[tx + 1]  = 0.0f;  // bottom-left
             this.uvs[tx + 2] = 1.0f;  this.uvs[tx + 3]  = 0.0f;  // bottom-right
             this.uvs[tx + 4] = 1.0f;  this.uvs[tx + 5]  = 1.0f;  // top-right
@@ -85,7 +79,6 @@ public class Cylinder extends Mesh {
         indices     = null;
         vertices    = null;
         uvs         = null;
-        normals     = null;
     }
 
 }

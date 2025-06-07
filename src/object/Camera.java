@@ -111,8 +111,8 @@ public class Camera implements Machine {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
 
-        if (Main.scene.terrain != null) {
-            Terrain terrain = Main.scene.terrain;
+        if (Main.background.terrain != null) {
+            Terrain terrain = Main.background.terrain;
             if (terrain.meshes[0].loaded()) {
                 position = terrain.height(position, new Vector3f(movement));
             }
@@ -121,7 +121,7 @@ public class Camera implements Machine {
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
         boolean inside = false;
-        for (Entity entity : Main.scene.entities) {
+        for (Entity entity : Main.foreground.entities) {
             entity.update();
             if (entity instanceof Interactive interactive) {
                 double collision = collision(position, entity);

@@ -1,13 +1,12 @@
 package property;
 
 import object.Matrix;
-import org.lwjgl.BufferUtils;
 import resource.Material;
 import resource.Mesh;
 import org.joml.Vector3f;
-import resource.Texture;
 
-import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Entity {
 
@@ -25,45 +24,36 @@ public class Entity {
     final int states;
     public int state = 0;
 
-    public Entity(Material material, Mesh mesh) {
-        this.states     = 1;
-        this.materials  = new Material[states];
-        this.meshes     = new Mesh[states];
-        this.materials[state]   = material;
-        this.meshes[state]      = mesh;
+    private static final Map<String, Mesh>      meshCache       = new HashMap<>();
+    private static final Map<String, Material>  materialCache   = new HashMap<>();
+
+    public Entity(Mesh mesh, Material material) {
+        this.states = 1;
+        this.meshes = new Mesh[states];
+        this.materials = new Material[states];
+        this.meshes[state] = mesh;
+        this.materials[state] = material;
     }
 
     public Entity(Mesh mesh, String name) {
-        this.states     = 1;
-        this.materials  = new Material[states];
-        this.meshes     = new Mesh[states];
-        this.materials[state]   = new Material(type, name);
-        this.meshes[state]      = mesh;
+        this.states = 1;
+        this.materials = new Material[states];
+        this.meshes = new Mesh[states];
+        this.materials[state] = materialCache.computeIfAbsent(type + name, k -> new Material(type, name));
+        this.meshes[state] = mesh;
     }
 
     public Entity(String name) {
-        this.states     = 1;
-        this.materials  = new Material[states];
-        this.meshes     = new Mesh[states];
-        this.materials[state]   = new Material(type, name);
-        this.meshes[state]      = new Mesh(type, name);
+        this.states = 1;
+        this.materials = new Material[states];
+        this.meshes = new Mesh[states];
+        this.materials[state] = materialCache.computeIfAbsent(type + name, k -> new Material(type, name));
+        this.meshes[state] = meshCache.computeIfAbsent(type + name, k -> new Mesh(type, name));
     }
-
-    /*
-    public Entity(int states) {
-        this.states     = states;
-        this.materials  = new Material[states];
-        this.meshes     = new Mesh[states];
-        for (int state = 0; state < states; state++) {
-            this.materials[state]   = new Material(type, state);
-            this.meshes[state]      = new Mesh(type, state);
-        }
-    }
-    */
 
     @Override
     public String toString() {
-        return "< " + type + " > [ state: " + state + " ] : " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
+        return "< " + type + " > [state: " + state + "]: " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;
     }
 
     public static final Vector3f X = new Vector3f(1, 0, 0);

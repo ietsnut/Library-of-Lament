@@ -10,7 +10,7 @@ uniform float scale;
 void main(void) {
     float pattern = mod((pos.x + pos.y + pos.z) * (100.0 / scale) + time * 5.0, 20) / 20;
     if (pattern < 0.5) {
-        color = 6;
+        color = 3;
     } else {
         discard;
     }

@@ -60,9 +60,6 @@ public class Train extends Scene implements Machine {
             forests.add(forest);
         }
 
-        Light light1 = new Light(new Vector3f(0, 1.6f, -1.6f), new Vector3f(2.0f, 0.7f, 0.07f), 1f);
-        lights.add(light1);
-
         start(Manager.RATE);
     }
 

@@ -17,18 +17,16 @@ import static org.lwjgl.opengl.GL40.*;
 public class Mesh implements Resource {
 
     public int      vao, ebo;
-    public int[]    vbo = new int[3];
+    public int[]    vbo = new int[2];
 
     public int[]    indices;
     public byte[]   vertices;
-    public float[]  normals;
     public float[]  uvs;
 
     public int index;
 
     private IntBuffer   indicesBuffer;
     private ByteBuffer  verticesBuffer;
-    private FloatBuffer normalsBuffer;
     private FloatBuffer uvsBuffer;
 
     public Collider collider;
@@ -45,6 +43,11 @@ public class Mesh implements Resource {
         @Override
         public int dimensions() {
             return 2;
+        }
+
+        @Override
+        public String toString() {
+            return "QUAD";
         }
     };
 
@@ -67,22 +70,17 @@ public class Mesh implements Resource {
                     1, 1,  // top-right
                     0, 1   // top-left
             };
-            this.normals = new float[] {
-                    0, 1, 0,  // bottom-left
-                    0, 1, 0,  // bottom-right
-                    0, 1, 0,  // top-right
-                    0, 1, 0   // top-left
-            };
+        }
+
+        @Override
+        public String toString() {
+            return "PLANE";
         }
     };
 
     public static final Mesh X_PLANE = new Mesh() {
         @Override
         public void load() {
-            // Two perpendicular planes crossing at center
-            // First plane: X-Y oriented (normal along Z)
-            // Second plane: Z-Y oriented (normal along X)
-
             this.vertices = new byte[] {
                     // First plane vertices (X-Y plane)
                     -1, 0, 0,  // bottom-left
@@ -120,20 +118,10 @@ public class Mesh implements Resource {
                     1, 0,  // top-front
                     0, 0   // top-back
             };
-
-            this.normals = new float[] {
-                    // First plane normals - averaged for smooth shading
-                    -0.707f, 0, 0.707f,  // bottom-left (blend of -X and +Z)
-                    0.707f, 0, 0.707f,  // bottom-right (blend of +X and +Z)
-                    0.707f, 0, 0.707f,  // top-right (blend of +X and +Z)
-                    -0.707f, 0, 0.707f,  // top-left (blend of -X and +Z)
-
-                    // Second plane normals - averaged for smooth shading
-                    0.707f, 0, -0.707f, // bottom-back (blend of +X and -Z)
-                    0.707f, 0,  0.707f, // bottom-front (blend of +X and +Z)
-                    0.707f, 0,  0.707f, // top-front (blend of +X and +Z)
-                    0.707f, 0, -0.707f  // top-back (blend of +X and -Z)
-            };
+        }
+        @Override
+        public String toString() {
+            return "X_PLANE";
         }
     };
 
@@ -184,7 +172,6 @@ public class Mesh implements Resource {
             this.vertices[i] = (byte) vertices[i];
         }
         this.uvs        = ObjData.getTexCoordsArray(obj, 2, true);
-        this.normals    = ObjData.getNormalsArray(obj);
     }
 
     @Override
@@ -198,9 +185,6 @@ public class Mesh implements Resource {
         }
         if (uvs != null && uvs.length > 0) {
             uvsBuffer = BufferUtils.createFloatBuffer(uvs.length).put(uvs).flip();
-        }
-        if (normals != null && normals.length > 0) {
-            normalsBuffer = BufferUtils.createFloatBuffer(normals.length).put(normals).flip();
         }
     }
 
@@ -241,13 +225,6 @@ public class Mesh implements Resource {
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
         }
-        if (normalsBuffer != null && normalsBuffer.hasRemaining()) {
-            vbo[2] = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-            glBufferData(GL_ARRAY_BUFFER, normalsBuffer, GL_STATIC_DRAW);
-            glEnableVertexAttribArray(2);
-            glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
-        }
         glBindVertexArray(0);
         if (indicesBuffer != null) {
             indicesBuffer.clear();
@@ -260,10 +237,6 @@ public class Mesh implements Resource {
         if (uvsBuffer != null) {
             uvsBuffer.clear();
             uvsBuffer = null;
-        }
-        if (normalsBuffer != null) {
-            normalsBuffer.clear();
-            normalsBuffer = null;
         }
         if (file != null && !(this instanceof Collider)) {
             this.collider = new Collider();
@@ -318,17 +291,15 @@ public class Mesh implements Resource {
             indices     = null;
             vertices    = null;
             uvs         = null;
-            normals     = null;
             if (file.contains("terrain")) return;
+            Mesh.this.uvs         = null;
             Mesh.this.indices     = null;
             Mesh.this.vertices    = null;
-            Mesh.this.uvs         = null;
-            Mesh.this.normals     = null;
         }
 
         @Override
         public String toString() {
-            return "collider of " + Mesh.this.file;
+            return "collider " + Mesh.this.file;
         }
 
     }
