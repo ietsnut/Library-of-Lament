@@ -2,6 +2,7 @@ package engine;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -19,6 +20,8 @@ public class Console {
 
     private static final int CELL_WIDTH = 20;
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+
+    private static ArrayList<String> messages = new ArrayList<>();
 
     private static String getCurrentTimestamp() {
         return LocalDateTime.now().format(TIMESTAMP_FORMAT);
@@ -85,6 +88,12 @@ public class Console {
             messages[i] = String.valueOf(objects[i]);
         }
         printWithTimestampCallerAndThread(ANSI_GREEN, messages);
+    }
+
+    public static void notify(String message) {
+        if (messages.contains(message)) return;
+        messages.add(message);
+        printWithTimestampCallerAndThread(ANSI_CYAN, message);
     }
 
     public static void log(String... messages) {

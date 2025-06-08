@@ -3,12 +3,14 @@ package window;
 import engine.Console;
 import engine.Manager;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GLCapabilities;
 import resource.Mesh;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public abstract class Window {
@@ -44,7 +46,7 @@ public abstract class Window {
         glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
         //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        glfwWindowHint(GLFW_SAMPLES, 8);
+        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_FLOATING, GLFW_FALSE);
         glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
         glfwWindowHint(GLFW_FOCUSED, this instanceof Main ? GLFW_TRUE : GLFW_FALSE);

@@ -44,7 +44,7 @@ public class EnvironmentShader extends Shader<Scene> {
         uniform("view",                 Camera.view.buffer());
         //uniform("fogDensity",           0.04f);
         //uniform("fogGradient",          1.5f);
-        uniform("fogDensity",           0.01f);
+        uniform("fogDensity",           0.02f);
         uniform("fogGradient",          1.5f);
         uniform("texture1", 0);
         for (Entity entity : scene.background) {

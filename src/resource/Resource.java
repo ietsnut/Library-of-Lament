@@ -9,35 +9,46 @@ import java.util.concurrent.Executors;
 
 public interface Resource extends Runnable {
 
-    ConcurrentLinkedQueue<Resource> LOADED      = new ConcurrentLinkedQueue<>();
-    List<Resource>                  BINDED      = new ArrayList<>();
-    ExecutorService                 THREADS     = Executors.newVirtualThreadPerTaskExecutor();
+    ConcurrentLinkedQueue<Resource> LOADED = new ConcurrentLinkedQueue<>();
+    List<Resource> BINDED = new ArrayList<>();
+    ExecutorService THREADS = Executors.newVirtualThreadPerTaskExecutor();
 
     void load();
+
     void unload();
 
     void bind();
+
     void unbind();
 
     void buffer();
 
     boolean loaded();
+
     boolean binded();
 
     default void run() {
-        Console.log("Loading", this.toString());
-        this.load();
-        this.buffer();
-        this.unload();
-        LOADED.add(this);
+        try {
+            Console.log("Loading", this.toString());
+            this.load();
+            this.buffer();
+            this.unload();
+            LOADED.add(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     default Resource direct() {
-        this.load();
-        this.buffer();
-        this.unload();
-        this.bind();
-        BINDED.add(this);
+        try {
+            this.load();
+            this.buffer();
+            this.unload();
+            this.bind();
+            BINDED.add(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return this;
     }
 
@@ -48,10 +59,14 @@ public interface Resource extends Runnable {
     static void process() {
         Resource loaded;
         while ((loaded = LOADED.poll()) != null) {
-            Console.log("Binding", loaded.toString());
-            loaded.bind();
-            BINDED.add(loaded);
-            System.gc();
+            try {
+                Console.log("Binding", loaded.toString());
+                loaded.bind();
+                BINDED.add(loaded);
+                System.gc();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
