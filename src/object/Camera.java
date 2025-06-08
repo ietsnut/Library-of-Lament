@@ -69,6 +69,7 @@ public class Camera implements Machine {
     private static final Vector3f forward = new Vector3f();
 
     public static void update() {
+
         if (resetting) {
             resetProgress += 1.0f / Manager.RATE;
             float linearT = Math.min(resetProgress / RESET_SPEED, 1.0f);
@@ -111,8 +112,8 @@ public class Camera implements Machine {
             movement.add(forward.z * -SPEED, 0, forward.x * SPEED);
         }
 
-        if (Main.background.terrain != null) {
-            Terrain terrain = Main.background.terrain;
+        if (Main.scene.terrain != null) {
+            Terrain terrain = Main.scene.terrain;
             if (terrain.meshes[0].loaded()) {
                 position = terrain.height(position, new Vector3f(movement));
             }
@@ -121,7 +122,7 @@ public class Camera implements Machine {
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
         boolean inside = false;
-        for (Entity entity : Main.foreground.entities) {
+        for (Entity entity : Main.scene.foreground) {
             entity.update();
             if (entity instanceof Interactive interactive) {
                 double collision = collision(position, entity);

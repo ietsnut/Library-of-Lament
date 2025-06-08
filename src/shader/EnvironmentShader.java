@@ -1,5 +1,6 @@
 package shader;
 
+import engine.Console;
 import engine.Scene;
 import object.Camera;
 import property.Entity;
@@ -41,10 +42,12 @@ public class EnvironmentShader extends Shader<Scene> {
         glEnable(GL_DEPTH_TEST);
         uniform("projection",           Camera.projection.buffer());
         uniform("view",                 Camera.view.buffer());
-        uniform("fogDensity",           0.04f);
+        //uniform("fogDensity",           0.04f);
+        //uniform("fogGradient",          1.5f);
+        uniform("fogDensity",           0.01f);
         uniform("fogGradient",          1.5f);
         uniform("texture1", 0);
-        for (Entity entity : scene.entities) {
+        for (Entity entity : scene.background) {
             if (entity.meshes[entity.state].binded() && entity.materials[entity.state].binded()) {
                 render(entity);
             }

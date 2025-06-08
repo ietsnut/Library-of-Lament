@@ -97,8 +97,6 @@ public class Manager {
 
         while (main != null && !glfwWindowShouldClose(main.handle)) {
 
-            Resource.process();
-
             glfwPollEvents();
 
             for (int i = 0; i < windows.length; i++) {
@@ -124,6 +122,8 @@ public class Manager {
                 previousTime = currentTime;
 
                 window.makeContextCurrent();
+
+                if (i == 0) Resource.process();
 
                 glViewport(0, 0, window.width, window.height);
                 glClearColor(0, 0, 0, 0);

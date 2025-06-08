@@ -55,6 +55,14 @@ void main(void) {
     } else if (value <= 16u) {
         color = PALETTE[value - 1u];  // Direct colors 1-16 -> palette 0-15
     } else {
-        color = mix(PALETTE[(value - 17u) % 16u], PALETTE[5], 1.0 - float((value - 17u) / 16u) / 13.0);
+        uint stride = 16u;
+        uint adjustedValue = value - 17u;  // Shift to 0-based for fogged colors
+        uint baseIndex = adjustedValue % stride;
+        uint fogLevel = (adjustedValue / stride) + 1u;  // Add 1 since we stored fogLevel+1
+
+        vec4 baseColor = PALETTE[baseIndex];
+        vec4 skyColor = PALETTE[5];
+        float fogFactor = float(fogLevel) / 14.0;  // fogLevel 1-14 -> fogFactor 1/14 to 1.0
+        color = mix(baseColor, skyColor, fogFactor);
     }
 }

@@ -11,7 +11,6 @@ import org.lwjgl.opengl.GL;
 import resource.Mesh;
 import resource.Resource;
 import scene.Forest;
-import scene.Test;
 import shader.AABBShader;
 import shader.EntityShader;
 import shader.EnvironmentShader;
@@ -28,8 +27,7 @@ public class Main extends Window {
 
     private FBO fbo;
 
-    public static Scene background;
-    public static Scene foreground;
+    public static Scene scene;
 
     public Main(int size) {
         super(size, size);
@@ -47,8 +45,7 @@ public class Main extends Window {
         aabbShader          = new AABBShader();
         environmentShader   = new EnvironmentShader();
         fbo     = new FBO(1, width, height);
-        background   = new Forest();
-        foreground   = new Test();
+        scene   = new Forest();
         Resource.process();
         Camera.listen();
     }
@@ -62,8 +59,8 @@ public class Main extends Window {
                 Camera.intersecting.meshes[Camera.intersecting.state].collider.binded()) {
             aabbShader.render(Camera.intersecting);
         }
-        environmentShader.render(background);
-        entityShader.render(foreground);
+        environmentShader.render(scene);
+        entityShader.render(scene);
         fboShader.unbind(fbo);
         fboShader.render(fbo);
     }
