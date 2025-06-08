@@ -47,8 +47,9 @@ public class Control {
                 }
                 if (mouseLocked && !firstMouse && button == 0 && action == 1) {
                     Camera.click();
-                    Manager.map.open();
-                    Manager.text.open();
+                    //Manager.map.open();
+                    //Manager.text.open();
+                    Console.debug(String.format("(%.1f, %.1f, %.1f)", Camera.position.x, Camera.position.y, Camera.position.z));
                     glfwFocusWindow(Manager.main.handle);
                 }
                 if (mouseLocked && !firstMouse && button == 0 && action == GLFW_PRESS) {

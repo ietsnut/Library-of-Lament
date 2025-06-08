@@ -9,6 +9,11 @@ uniform sampler2D texture2;
 uniform int width;
 uniform int height;
 
+float linearizeDepth(float depth) {
+    float z = depth * 2.0 - 1.0; // Convert to NDC
+    return (2.0 * NEAR * FAR) / (FAR + NEAR - z * (FAR - NEAR));
+}
+
 float depth(sampler2D sampler) {
     float dx = 1.0 / width;
     float dy = 1.0 / height;
@@ -17,11 +22,18 @@ float depth(sampler2D sampler) {
     vec2(-dx,  0),                 vec2( dx,  0),
     vec2(-dx,  dy), vec2( 0,  dy), vec2( dx,  dy)
     );
+
     float m[8];
     for (int i = 0; i < 8; ++i) {
-        m[i] = texture(sampler, fragUV + offset[i]).r;
+        m[i] = linearizeDepth(texture(sampler, fragUV + offset[i]).r);
     }
-    return abs(m[2] + 2.0 * m[4] + m[7] - (m[0] + 2.0 * m[3] + m[5])) + abs(m[7] + 2.0 * m[6] + m[5] - (m[0] + 2.0 * m[1] + m[2]));
+
+    return abs(m[2] + 2.0 * m[4] + m[7] - (m[0] + 2.0 * m[3] + m[5])) +
+    abs(m[7] + 2.0 * m[6] + m[5] - (m[0] + 2.0 * m[1] + m[2]));
+}
+
+float rand(vec2 co) {
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
 void main(void) {
@@ -42,9 +54,11 @@ void main(void) {
         color = dot(color.rgb, GRAYSCALE) > 0.5 ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(1.0);
         return;
     }
+
     float depthDelta    = depth(texture2);
-    if (depthDelta > 0.01) {
-        color = LINE;
+
+    if (depthDelta > 25) {
+        color = PALETTE[2];
         return;
     }
 

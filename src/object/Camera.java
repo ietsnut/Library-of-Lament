@@ -119,6 +119,10 @@ public class Camera implements Machine {
             }
         }
 
+        for (Entity entity : Main.scene.background) {
+            entity.update();
+        }
+
         float distance = Float.MAX_VALUE;
         Entity intersecting = null;
         boolean inside = false;

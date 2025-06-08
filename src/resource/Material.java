@@ -22,7 +22,9 @@ public class Material implements Resource {
     private int[] mipHeights;
     private byte[][] mipPixels;
     private int mipLevels;
-    private int colorMapSize; // Store the actual size of the color palette
+    private int colorMapSize;
+
+    private IndexColorModel colorModel;
 
     public int id;
     public int width;
@@ -62,7 +64,6 @@ public class Material implements Resource {
     public String toString() {
         return file;
     }
-
     @Override
     public void load() {
         try (InputStream in = Material.class.getResourceAsStream(file)) {
@@ -81,16 +82,11 @@ public class Material implements Resource {
                 Console.error("Expected indexed image format", file);
                 return;
             }
-
-            // Get the actual color map size from the IndexColorModel
+            this.colorModel = colorModel;
             this.colorMapSize = colorModel.getMapSize();
-
             WritableRaster raster = image.getRaster();
             pixels = ((DataBufferByte) raster.getDataBuffer()).getData();
-
-            // Generate mip levels during load
             generateMipLevels();
-
         } catch (IOException e) {
             Console.error("Failed to load", file);
         }
@@ -99,16 +95,13 @@ public class Material implements Resource {
     private void generateMipLevels() {
         if (pixels == null) return;
 
-        // Calculate how many mip levels we can/should generate
         int maxPossibleLevels = (int) (Math.log(Math.max(width, height)) / Math.log(2)) + 1;
         mipLevels = Math.min(MAX_MIP_LEVELS, maxPossibleLevels);
 
-        // Initialize arrays
         mipPixels = new byte[mipLevels][];
         mipWidths = new int[mipLevels];
         mipHeights = new int[mipLevels];
 
-        // Generate mip levels
         byte[] currentPixels = pixels;
         int currentWidth = width;
         int currentHeight = height;
@@ -118,7 +111,6 @@ public class Material implements Resource {
             mipWidths[level] = currentWidth;
             mipHeights[level] = currentHeight;
 
-            // Check if we should generate the next level
             if (level < mipLevels - 1 && currentWidth > MIN_MIP_SIZE && currentHeight > MIN_MIP_SIZE) {
                 int nextWidth = Math.max(MIN_MIP_SIZE, currentWidth / 2);
                 int nextHeight = Math.max(MIN_MIP_SIZE, currentHeight / 2);
@@ -127,7 +119,6 @@ public class Material implements Resource {
                 currentWidth = nextWidth;
                 currentHeight = nextHeight;
             } else {
-                // Adjust mipLevels to actual generated levels
                 mipLevels = level + 1;
                 break;
             }
@@ -135,57 +126,68 @@ public class Material implements Resource {
 
         Console.log("Generated " + mipLevels, file);
     }
-
     private byte[] generateMipLevel(byte[] sourcePixels, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
         byte[] targetPixels = new byte[targetWidth * targetHeight];
 
         float xRatio = (float) sourceWidth / targetWidth;
         float yRatio = (float) sourceHeight / targetHeight;
 
+        int[] palette = new int[colorMapSize];
+        for (int i = 0; i < colorMapSize; i++) {
+            palette[i] = colorModel.getRGB(i);
+        }
+
         for (int y = 0; y < targetHeight; y++) {
             for (int x = 0; x < targetWidth; x++) {
-                float sourceX1 = x * xRatio;
-                float sourceY1 = y * yRatio;
-                float sourceX2 = (x + 1) * xRatio;
-                float sourceY2 = (y + 1) * yRatio;
+                float srcX1 = x * xRatio;
+                float srcY1 = y * yRatio;
+                float srcX2 = (x + 1) * xRatio;
+                float srcY2 = (y + 1) * yRatio;
 
-                int startX = (int) Math.floor(sourceX1);
-                int startY = (int) Math.floor(sourceY1);
-                int endX = Math.min((int) Math.ceil(sourceX2), sourceWidth);
-                int endY = Math.min((int) Math.ceil(sourceY2), sourceHeight);
+                int startX = (int) Math.floor(srcX1);
+                int startY = (int) Math.floor(srcY1);
+                int endX = Math.min((int) Math.ceil(srcX2), sourceWidth);
+                int endY = Math.min((int) Math.ceil(srcY2), sourceHeight);
 
-                int[] counts = new int[colorMapSize];
-                int totalSamples = 0;
+                int totalR = 0, totalG = 0, totalB = 0, count = 0;
 
                 for (int sy = startY; sy < endY; sy++) {
                     for (int sx = startX; sx < endX; sx++) {
-                        if (sx >= 0 && sx < sourceWidth && sy >= 0 && sy < sourceHeight) {
-                            byte pixelValue = sourcePixels[sy * sourceWidth + sx];
-                            int index = pixelValue & 0xFF;
-                            if (index < colorMapSize) {
-                                counts[index]++;
-                                totalSamples++;
-                            }
+                        int index = sourcePixels[sy * sourceWidth + sx] & 0xFF;
+                        if (index < colorMapSize) {
+                            int rgb = palette[index];
+                            totalR += (rgb >> 16) & 0xFF;
+                            totalG += (rgb >> 8) & 0xFF;
+                            totalB += rgb & 0xFF;
+                            count++;
                         }
                     }
                 }
 
-                byte mostFrequent = 0;
-                int maxCount = 0;
+                if (count == 0) {
+                    targetPixels[y * targetWidth + x] = sourcePixels[Math.min(startY, sourceHeight - 1) * sourceWidth + Math.min(startX, sourceWidth - 1)];
+                    continue;
+                }
+
+                int avgR = totalR / count;
+                int avgG = totalG / count;
+                int avgB = totalB / count;
+
+                int bestIndex = 0;
+                int bestDist = Integer.MAX_VALUE;
                 for (int i = 0; i < colorMapSize; i++) {
-                    if (counts[i] > maxCount) {
-                        maxCount = counts[i];
-                        mostFrequent = (byte) i;
+                    int rgb = palette[i];
+                    int dr = ((rgb >> 16) & 0xFF) - avgR;
+                    int dg = ((rgb >> 8) & 0xFF) - avgG;
+                    int db = (rgb & 0xFF) - avgB;
+                    int dist = dr * dr + dg * dg + db * db;
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        bestIndex = i;
                     }
                 }
 
-                if (totalSamples == 0) {
-                    int fallbackX = Math.min(startX, sourceWidth - 1);
-                    int fallbackY = Math.min(startY, sourceHeight - 1);
-                    mostFrequent = sourcePixels[fallbackY * sourceWidth + fallbackX];
-                }
-
-                targetPixels[y * targetWidth + x] = mostFrequent;
+                targetPixels[y * targetWidth + x] = (byte) bestIndex;
             }
         }
 
@@ -228,7 +230,7 @@ public class Material implements Resource {
         glBindTexture(GL_TEXTURE_2D, this.id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipLevels - 1);
@@ -238,7 +240,7 @@ public class Material implements Resource {
             glTexImage2D(GL_TEXTURE_2D, level, GL_R8UI, mipWidths[level], mipHeights[level], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, mipBuffers[level]);
         }
         if (GL.getCapabilities().GL_EXT_texture_filter_anisotropic) {
-            float amount = Math.max(4f, GL40.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
+            float amount = Math.min(4f, GL40.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
             glTexParameterf(GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, amount);
         } else {
             Console.notify("No anisotropic filtering.");
@@ -272,11 +274,6 @@ public class Material implements Resource {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Material material && this.file.equals(material.file);
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 
 }

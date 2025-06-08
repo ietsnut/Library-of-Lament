@@ -33,6 +33,23 @@ public class Mesh implements Resource {
 
     private final String file;
 
+    public static final Mesh QAUD = new Mesh() {
+        @Override
+        public void load() {
+            vertices = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
+            indices  = new int[] {0, 1, 2, 2, 1, 3};
+            uvs = new float[]{ 0, 0, 1, 0, 1, 1, 0, 1 };
+        }
+        @Override
+        public int dimensions() {
+            return 2;
+        }
+        @Override
+        public String toString() {
+            return "QUAD";
+        }
+    };
+
     public static final Mesh PLANE = new Mesh() {
         @Override
         public void load() {
