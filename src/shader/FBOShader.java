@@ -1,5 +1,6 @@
 package shader;
 
+import engine.Manager;
 import org.lwjgl.BufferUtils;
 import resource.FBO;
 import resource.Mesh;
@@ -42,14 +43,14 @@ public class FBOShader extends Shader<FBO> {
         glDisable(GL_DEPTH_TEST);
         uniform("width", fbo.width);
         uniform("height", fbo.height);
-        glBindVertexArray(Mesh.QUAD.vao);
+        glBindVertexArray(Manager.main.quad.vao);
         glEnableVertexAttribArray(0);
         for (int i = 0; i < fbo.textures.length; i++) {
             uniform("texture" + (i + 1), i + 1);
             glActiveTexture(GL_TEXTURE0 + (i + 1));
             glBindTexture(GL_TEXTURE_2D, fbo.textures[i]);
         }
-        glDrawElements(GL_TRIANGLES, Mesh.QUAD.index, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, Manager.main.quad.index, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < fbo.textures.length; i++) {
             glActiveTexture(GL_TEXTURE0 + (i + 1));
             glBindTexture(GL_TEXTURE_2D, 0);

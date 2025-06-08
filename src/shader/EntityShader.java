@@ -1,8 +1,8 @@
 package shader;
 
+import engine.Manager;
 import engine.Scene;
 import object.*;
-import org.joml.Vector3f;
 import property.Entity;
 
 import static org.lwjgl.opengl.GL40.*;
@@ -11,9 +11,6 @@ public class EntityShader extends Shader<Scene> {
 
     public EntityShader() {
         super("entity", "position", "uv");
-        start();
-        uniform("texture1", 0);
-        stop();
     }
 
 
@@ -26,7 +23,6 @@ public class EntityShader extends Shader<Scene> {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, entity.materials[entity.state].id);
         glDrawElements(GL_TRIANGLES, entity.meshes[entity.state].index, GL_UNSIGNED_INT, 0);
-        //glDrawElementsInstanced();
         glBindTexture(GL_TEXTURE_2D, 0);
         for (int i = 0; i < attributes.length; i++) {
             glDisableVertexAttribArray(i);
@@ -38,10 +34,8 @@ public class EntityShader extends Shader<Scene> {
     protected void shader(Scene scene) {
         uniform("projection",           Camera.projection.buffer());
         uniform("view",                 Camera.view.buffer());
-        uniform("skyColor",             0.5f);
-        uniform("fogDensity",           0.07f);
-        uniform("fogGradient",          3f);
         uniform("texture1", 0);
+        uniform("time",                 Manager.time());
         for (Entity entity : scene.entities) {
             if (entity.meshes[entity.state].binded() && entity.materials[entity.state].binded()) {
                 render(entity);

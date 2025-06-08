@@ -4,6 +4,7 @@ import engine.Console;
 import engine.Manager;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
+import resource.Mesh;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
@@ -24,6 +25,8 @@ public abstract class Window {
     public volatile boolean open = this instanceof Main;
     public volatile boolean visible = false;
 
+    public final Mesh quad;
+
     public Window(int width, int height) {
 
         this.width = width;
@@ -39,8 +42,8 @@ public abstract class Window {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
-        glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+        //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+        //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         glfwWindowHint(GLFW_SAMPLES, 8);
         glfwWindowHint(GLFW_FLOATING, GLFW_FALSE);
         glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
@@ -58,14 +61,31 @@ public abstract class Window {
             Console.error("Failed to create GLFW window");
         }
 
+        glfwMakeContextCurrent(handle);
+        capabilities = GL.createCapabilities();
+        GL.setCapabilities(capabilities);
+
+        this.quad = (Mesh) new Mesh() {
+            @Override
+            public void load() {
+                vertices = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
+                indices  = new int[] {0, 1, 2, 2, 1, 3};
+                uvs = new float[]{ 0, 0, 1, 0, 1, 1, 0, 1 };
+            }
+            @Override
+            public int dimensions() {
+                return 2;
+            }
+            @Override
+            public String toString() {
+                return "QUAD";
+            }
+        }.direct();
+
         if (this instanceof Main) {
             glfwShowWindow(handle);
-        } else {
-            if (Manager.main != null && Manager.main.capabilities != null) {
-                makeContextCurrent();
-                capabilities = GL.createCapabilities();
-            }
         }
+
         Console.log("Created window", title + " (" + width + "x" + height + ")");
     }
 

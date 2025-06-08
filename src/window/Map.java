@@ -3,6 +3,7 @@ package window;
 import org.joml.Vector2f;
 import property.GUI;
 import resource.Material;
+import resource.Mesh;
 import shader.GUIShader;
 
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;

@@ -1,7 +1,6 @@
 package engine;
 
-import resource.FBO;
-import scene.Train;
+import resource.Mesh;
 import shader.*;
 
 import org.lwjgl.Version;
@@ -16,6 +15,7 @@ import window.*;
 import java.nio.*;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.nanovg.NanoVGGL3.nvgDelete;
 import static org.lwjgl.opengl.GL40.*;
 import static org.lwjgl.opengl.GL43.*;
 
@@ -28,6 +28,7 @@ public class Manager {
 
     public static Main main;
     public static Map map;
+    public static Text text;
 
     private static Window[] windows;
 
@@ -80,13 +81,15 @@ public class Manager {
         main.setup();
 
         map = new Map((int) HEIGHT * 4 / 5);
-
         map.setup();
 
-        windows = new Window[2];
+        text = new Text((int) HEIGHT * 2 / 5);
+        text.setup();
 
+        windows = new Window[3];
         windows[0] = main;
         windows[1] = map;
+        windows[2] = text;
 
     }
 
@@ -94,9 +97,9 @@ public class Manager {
 
         while (main != null && !glfwWindowShouldClose(main.handle)) {
 
-            glfwPollEvents();
-
             Resource.process();
+
+            glfwPollEvents();
 
             for (int i = 0; i < windows.length; i++) {
 
@@ -149,6 +152,11 @@ public class Manager {
             main.makeContextCurrent();
         }
 
+        if (text.vg != 0) {
+            nvgDelete(text.vg);
+            text.vg = 0;
+        }
+
         Control.clear();
         Machine.clear();
         Resource.clear();
@@ -178,7 +186,7 @@ public class Manager {
         }
     }
 
-    public static long time() {
-        return (long) (GLFW.glfwGetTime() * 1000);
+    public static float time() {
+        return (float) GLFW.glfwGetTime();
     }
 }

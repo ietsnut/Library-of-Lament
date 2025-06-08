@@ -6,18 +6,26 @@
         <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="Library of Lament" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/obj-0.4.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jSerialComm-2.11.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jsvg-1.7.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/obj-0.4.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-1.10.7-javadoc.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-1.10.7-sources.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-1.10.7.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-primitives-1.10.0-javadoc.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-primitives-1.10.0-sources.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/joml-primitives-1.10.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-egl-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-egl-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-egl.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-fmod-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-fmod-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-fmod.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-freebsd.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-linux-arm32.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-linux-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-linux-ppc64le.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-linux-riscv64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-linux.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-macos-arm64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-macos.jar" path-in-jar="/" />
@@ -27,17 +35,54 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-sources.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-jawt-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-jawt-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-jawt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-freebsd.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-linux-arm32.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-linux-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-linux-ppc64le.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-linux-riscv64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-macos-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-macos.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-windows-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-windows-x86.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-natives-windows.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-nanovg.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-freebsd.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-linux-arm32.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-linux-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-linux-ppc64le.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-linux-riscv64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-linux.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-macos-arm64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-macos.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-windows-arm64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-windows-x86.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-windows.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-freebsd.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-linux-arm32.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-linux-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-linux-ppc64le.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-linux-riscv64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-macos-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-macos.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-windows-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-windows-x86.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-natives-windows.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-openal.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-freebsd.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-linux-arm32.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-linux-arm64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-linux-ppc64le.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-linux-riscv64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-linux.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-macos-arm64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-macos.jar" path-in-jar="/" />
@@ -46,26 +91,6 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-windows.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-sources.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-sources.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8-javadoc.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8-sources.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0-javadoc.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0-sources.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-egl-javadoc.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-egl-sources.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-egl.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-freebsd.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-linux-ppc64le.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-glfw-natives-linux-riscv64.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-freebsd.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-linux-ppc64le.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-natives-linux-riscv64.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-freebsd.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-linux-ppc64le.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengl-natives-linux-riscv64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-javadoc.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-natives-freebsd.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-natives-linux-arm32.jar" path-in-jar="/" />
@@ -80,6 +105,14 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-natives-windows.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles-sources.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-opengles.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjgl3-awt-0.1.8.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0-javadoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-3.3.6/lwjglx-debug-1.0.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

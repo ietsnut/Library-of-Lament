@@ -1,10 +1,8 @@
 package scene;
 
-import content.Door;
 import content.Real;
-import content.Vase;
 import engine.Scene;
-import org.joml.Vector3f;
+
 import property.*;
 
 public class Forest extends Scene {

@@ -20,7 +20,7 @@
     "linux-ppc64le",
     "linux-riscv64"
   ],
-  "descriptions": false,
+  "descriptions": true,
   "compact": false,
   "hardcoded": false,
   "javadoc": true,
@@ -33,7 +33,17 @@
     "lwjgl-glfw",
     "lwjgl-opengl",
     "lwjgl-egl",
-    "lwjgl-opengles"
+    "lwjgl-opengles",
+    "lwjgl-jawt",
+    "lwjgl-freetype",
+    "lwjgl-nanovg",
+    "lwjgl-nuklear",
+    "lwjgl-fmod",
+    "lwjgl-assimp",
+    "lwjgl-libdivide",
+    "lwjgl-ktx",
+    "lwjgl-jemalloc",
+    "lwjgl-openal"
   ],
   "version": "3.3.6",
   "versionLatest": "3.3.6"

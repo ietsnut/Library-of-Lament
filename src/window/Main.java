@@ -12,8 +12,6 @@ import resource.Mesh;
 import resource.Resource;
 import scene.Forest;
 import scene.Test;
-import scene.Top;
-import scene.Train;
 import shader.AABBShader;
 import shader.EntityShader;
 import shader.EnvironmentShader;

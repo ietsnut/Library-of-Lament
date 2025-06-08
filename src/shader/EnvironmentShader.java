@@ -41,7 +41,6 @@ public class EnvironmentShader extends Shader<Scene> {
         glEnable(GL_DEPTH_TEST);
         uniform("projection",           Camera.projection.buffer());
         uniform("view",                 Camera.view.buffer());
-        uniform("skyColor",             0.5f);
         uniform("fogDensity",           0.04f);
         uniform("fogGradient",          1.5f);
         uniform("texture1", 0);

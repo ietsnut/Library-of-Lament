@@ -32,6 +32,15 @@ public interface Resource extends Runnable {
         LOADED.add(this);
     }
 
+    default Resource direct() {
+        this.load();
+        this.buffer();
+        this.unload();
+        this.bind();
+        BINDED.add(this);
+        return this;
+    }
+
     default void queue() {
         THREADS.submit(this);
     }
