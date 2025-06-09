@@ -23,19 +23,20 @@ public class Forest extends Scene implements Machine {
         real.rotation.set(10, 0 ,5);
         background.add(real);
 
-        Entity sword = new Entity(Mesh.PLANE, "sword");
+        Billboard sword = new Billboard("sword");
         sword.position.set(13.8, 10.1, -36.0);
-        sword.rotation.setComponent(0, 90);
         sword.scale.set(8f);
         background.add(sword);
 
         sun1 = new Entity(Mesh.PLANE, "sun1");
         sun1.position.y = 124;
+        sun1.rotation.setComponent(0, 90);
         sun1.scale.set(48);
         foreground.add(sun1);
 
         sun2 = new Entity(Mesh.PLANE, "sun2");
         sun2.position.y = 120;
+        sun2.rotation.setComponent(0, 90);
         sun2.scale.set(48);
         foreground.add(sun2);
 

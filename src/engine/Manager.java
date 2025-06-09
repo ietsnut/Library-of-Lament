@@ -34,6 +34,7 @@ public class Manager {
 
     private static Callback debugProc;
     private static long previousTime = System.nanoTime();
+    private static int error = GL_NO_ERROR;
 
     public static void run() {
         try {
@@ -131,12 +132,18 @@ public class Manager {
 
                 window.draw();
 
+                error = glGetError();
+                while (error != GL_NO_ERROR) {
+                    Console.error("OpenGL", error, getGLErrorString(error));
+                    error = glGetError();
+                }
+
                 glfwSwapBuffers(window.handle);
 
                 if (glfwWindowShouldClose(window.handle)) {
                     window.close();
                     if (i == 0) {
-                        Console.log("Main window closed. Exiting.");
+                        Console.log("Main window closed");
                         return;
                     }
                 }
@@ -162,7 +169,6 @@ public class Manager {
         Resource.clear();
         Shader.clear();
 
-        // Close all windows
         for (int i = 0; i < windows.length; i++) {
             if (windows[i] != null) {
                 //glfwFreeCallbacks(windows[i].handle);
@@ -189,4 +195,18 @@ public class Manager {
     public static float time() {
         return (float) GLFW.glfwGetTime();
     }
+
+    private static String getGLErrorString(int error) {
+        return switch (error) {
+            case GL_NO_ERROR -> "No error";
+            case GL_INVALID_ENUM -> "Invalid enum";
+            case GL_INVALID_VALUE -> "Invalid value";
+            case GL_INVALID_OPERATION -> "Invalid operation";
+            case GL_OUT_OF_MEMORY -> "Out of memory";
+            case GL_STACK_UNDERFLOW -> "Stack underflow";
+            case GL_STACK_OVERFLOW -> "Stack overflow";
+            default -> "Unknown error";
+        };
+    }
+
 }

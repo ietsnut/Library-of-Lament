@@ -10,6 +10,7 @@ import resource.FBO;
 import org.lwjgl.opengl.GL;
 import resource.Mesh;
 import resource.Resource;
+import scene.Dungeon;
 import scene.Forest;
 import shader.AABBShader;
 import shader.EntityShader;

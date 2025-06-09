@@ -79,7 +79,7 @@ public class Material implements Resource {
             this.width = image.getWidth();
             this.height = image.getHeight();
             if (!(image.getColorModel() instanceof IndexColorModel colorModel)) {
-                Console.error("Expected indexed image format", file);
+                Console.error("Unexpected format", file);
                 return;
             }
             this.colorModel = colorModel;
@@ -123,8 +123,6 @@ public class Material implements Resource {
                 break;
             }
         }
-
-        Console.log("Generated " + mipLevels, file);
     }
     private byte[] generateMipLevel(byte[] sourcePixels, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
         byte[] targetPixels = new byte[targetWidth * targetHeight];
@@ -197,7 +195,7 @@ public class Material implements Resource {
     @Override
     public void buffer() {
         if (mipPixels == null) {
-            Console.warning("No mip levels to buffer for", file);
+            Console.warning("No mipmaps", file);
             return;
         }
         mipBuffers = new ByteBuffer[mipLevels];
@@ -206,7 +204,6 @@ public class Material implements Resource {
             buffer.put(mipPixels[level]).flip();
             mipBuffers[level] = buffer;
         }
-        Console.log("Buffered " + mipLevels, file);
     }
 
     @Override
@@ -222,7 +219,7 @@ public class Material implements Resource {
     @Override
     public void bind() {
         if (mipBuffers == null) {
-            Console.warning("No buffers to bind for", file);
+            Console.warning("No buffers", file);
             return;
         }
 

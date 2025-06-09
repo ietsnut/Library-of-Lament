@@ -33,7 +33,7 @@ public class Mesh implements Resource {
 
     private final String file;
 
-    public static final Mesh QAUD = new Mesh() {
+    public static final Mesh QUAD = new Mesh() {
         @Override
         public void load() {
             vertices = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
@@ -54,20 +54,20 @@ public class Mesh implements Resource {
         @Override
         public void load() {
             this.vertices = new byte[] {
-                    -1, 0, -1,  // bottom-left
-                    1, 0, -1,  // bottom-right
-                    1, 0,  1,  // top-right
-                    -1, 0,  1   // top-left
+                    -1, -1, 0,  // bottom-left
+                    1, -1, 0,  // bottom-right
+                    1,  1, 0,  // top-right
+                    -1,  1, 0   // top-left
             };
             this.indices = new int[] {
-                    0, 1, 2,  // first triangle
-                    2, 3, 0   // second triangle
+                    0, 1, 2,
+                    2, 3, 0
             };
             this.uvs = new float[] {
-                    0, 0,  // bottom-left
-                    1, 0,  // bottom-right
-                    1, 1,  // top-right
-                    0, 1   // top-left
+                    0, 1,  // bottom-left
+                    1, 1,  // bottom-right
+                    1, 0,  // top-right
+                    0, 0   // top-left
             };
         }
 

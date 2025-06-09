@@ -18,7 +18,7 @@ public class Console {
     public static final String ANSI_CYAN   = "\u001B[36m";
     public static final String ANSI_WHITE  = "\u001B[37m";
 
-    private static final int CELL_WIDTH = 20;
+    private static final int CELL_WIDTH = 24;
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
     private static ArrayList<String> messages = new ArrayList<>();
@@ -37,13 +37,28 @@ public class Console {
             int lastDot = className.lastIndexOf('.');
             return lastDot != -1 ? className.substring(lastDot + 1) : className;
         }
-        return "Unknown";
+        return "?";
     }
 
     private static void printFormatted(String color, String... messages) {
-        System.out.printf(color
-                + String.join("", Collections.nCopies(messages.length, "%-" + CELL_WIDTH + "s"))
-                + ANSI_RESET + "\n", (Object[]) messages);
+        StringBuilder format = new StringBuilder(color);
+        Object[] args = new Object[messages.length];
+
+        for (int i = 0; i < messages.length; i++) {
+            String message = messages[i];
+            int messageLength = message.length();
+
+            // Calculate how many cells this message spans
+            int cellsNeeded = (messageLength + CELL_WIDTH - 1) / CELL_WIDTH; // Ceiling division
+            if (cellsNeeded == 0) cellsNeeded = 1; // At least one cell
+
+            int totalWidth = cellsNeeded * CELL_WIDTH;
+            format.append("%-").append(totalWidth).append("s");
+            args[i] = message;
+        }
+
+        format.append(ANSI_RESET).append("\n");
+        System.out.printf(format.toString(), args);
     }
 
     private static void printWithTimestampCallerAndThread(String color, String... messages) {
@@ -58,58 +73,62 @@ public class Console {
         printFormatted(color, args);
     }
 
-    public static void debug(Object message) {
-        printWithTimestampCallerAndThread(ANSI_GREEN, String.valueOf(message));
+    public static void debug(Object... messages) {
+        printWithTimestampCallerAndThread(ANSI_GREEN, Arrays.stream(messages).map(String::valueOf).toArray(String[]::new));
     }
 
-    public static void debug(boolean message) {
-        printWithTimestampCallerAndThread(ANSI_GREEN, Boolean.toString(message));
+    public static void notify(Object... messages) {
+        String combined = Arrays.stream(messages).map(String::valueOf).reduce((a, b) -> a + " " + b).orElse("");
+        if (Console.messages.contains(combined)) return;
+        Console.messages.add(combined);
+        printWithTimestampCallerAndThread(ANSI_PURPLE, combined);
     }
 
-    public static void debug(int message) {
-        printWithTimestampCallerAndThread(ANSI_GREEN, Integer.toString(message));
+    public static void log(Object... messages) {
+        printWithTimestampCallerAndThread(ANSI_WHITE, Arrays.stream(messages).map(String::valueOf).toArray(String[]::new));
     }
 
-    public static void debug(double message) {
-        printWithTimestampCallerAndThread(ANSI_GREEN, Double.toString(message));
+    public static void warning(Object... messages) {
+        printWithTimestampCallerAndThread(ANSI_YELLOW, Arrays.stream(messages).map(String::valueOf).toArray(String[]::new));
     }
 
-    public static void debug(float message) {
-        printWithTimestampCallerAndThread(ANSI_GREEN, Float.toString(message));
+    public static void error(Object... messages) {
+        printWithTimestampCallerAndThread(ANSI_RED, Arrays.stream(messages).map(String::valueOf).toArray(String[]::new));
     }
 
-    public static void debug(String... messages) {
-        printWithTimestampCallerAndThread(ANSI_GREEN, messages);
-    }
 
-    public static void debug(Object... objects) {
-        String[] messages = new String[objects.length];
-        for (int i = 0; i < objects.length; i++) {
-            messages[i] = String.valueOf(objects[i]);
+    public static void error(Throwable t, Object... messages) {
+        String[] logMessages = new String[messages.length + 1];
+        logMessages[0] = t.toString().replace("java.lang.", "");
+        for (int i = 0; i < messages.length; i++) {
+            logMessages[i + 1] = String.valueOf(messages[i]);
         }
-        printWithTimestampCallerAndThread(ANSI_GREEN, messages);
-    }
+        error((Object[]) logMessages);
 
-    public static void notify(String message) {
-        if (messages.contains(message)) return;
-        messages.add(message);
-        printWithTimestampCallerAndThread(ANSI_CYAN, message);
-    }
+        for (StackTraceElement element : t.getStackTrace()) {
+            System.out.println(ANSI_RED + element + ANSI_RESET);
+        }
 
-    public static void log(String... messages) {
-        printWithTimestampCallerAndThread(ANSI_WHITE, messages);
-    }
+        Throwable cause = t.getCause();
+        int indentLevel = 0;
+        while (cause != null) {
+            // Use 8 spaces per level for clear visual separation
+            String indent = String.join("", Collections.nCopies(4 + (indentLevel * 8), " "));
+            System.out.println(ANSI_RED + indent + "└─▶ " + cause + ANSI_RESET);
 
-    public static void error(String... messages) {
-        printWithTimestampCallerAndThread(ANSI_RED, messages);
-    }
+            StackTraceElement[] causeStack = cause.getStackTrace();
+            int maxElements = Math.min(causeStack.length, 4);
+            for (int i = 0; i < maxElements; i++) {
+                // Stack traces get same base indent + 4 more spaces for alignment
+                System.out.println(ANSI_RED + indent + "    " + causeStack[i] + ANSI_RESET);
+            }
 
-    public static void warning(String... messages) {
-        printWithTimestampCallerAndThread(ANSI_YELLOW, messages);
+            cause = cause.getCause();
+            indentLevel++;
+        }
     }
 
     public static void ln() {
         System.out.println();
     }
-
 }

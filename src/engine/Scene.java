@@ -21,6 +21,7 @@ public abstract class Scene {
         foreground.clear();
         background.clear();
         terrain.unbind();
+        terrain = null;
         System.gc();
     }
 

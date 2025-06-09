@@ -34,7 +34,6 @@ public abstract class Shader<T> {
         }
         glLinkProgram(program);
         glValidateProgram(program);
-        Console.log("Shader: " + program, type);
         ALL.add(this);
     }
 
@@ -65,7 +64,7 @@ public abstract class Shader<T> {
                 glUniform4f(uniform, v.x, v.y, v.z, v.w);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported data type: " + data.getClass());
+                Console.error(new IllegalArgumentException("Unsupported data type"), data.getClass());
         }
     }
 
