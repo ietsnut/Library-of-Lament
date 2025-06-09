@@ -9,6 +9,7 @@ import engine.Manager;
 import object.Camera;
 import org.joml.*;
 import resource.Material;
+import window.Window;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL40.*;
@@ -22,7 +23,10 @@ public abstract class Shader<T> {
 
     protected final int program, vertex, fragment;
 
-    public Shader(String type, String... attributes) {
+    final Window window;
+
+    public Shader(Window window, String type, String... attributes) {
+        this.window = window;
         vertex      = loadShader("/resources/shader/" + type + "Vertex.glsl",     GL_VERTEX_SHADER);
         fragment    = loadShader("/resources/shader/" + type + "Fragment.glsl",   GL_FRAGMENT_SHADER);
         program     = glCreateProgram();
@@ -105,8 +109,8 @@ public abstract class Shader<T> {
                 while((line = reader.readLine())!=null){
                     if (line.startsWith("#version")) {
                         shaderSource.append("#version ").append(glfwGetWindowAttrib(Manager.main.handle, GLFW_CONTEXT_VERSION_MAJOR)).append(glfwGetWindowAttrib(Manager.main.handle, GLFW_CONTEXT_VERSION_MINOR)).append("0 core").append("//\n");
-                        shaderSource.append("#define WIDTH ").append(Manager.main.width).append("//\n");
-                        shaderSource.append("#define HEIGHT ").append(Manager.main.height).append("//\n");
+                        shaderSource.append("#define WIDTH ").append(window.width).append("//\n");
+                        shaderSource.append("#define HEIGHT ").append(window.height).append("//\n");
                         shaderSource.append("#define GRAYSCALE vec3(0.299, 0.587, 0.114)").append("//\n");
                         shaderSource.append("#define NEAR " + Camera.NEAR).append("//\n");
                         shaderSource.append("#define FAR " + Camera.FAR).append("//\n");

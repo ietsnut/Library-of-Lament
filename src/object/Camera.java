@@ -21,14 +21,14 @@ public class Camera implements Machine {
     public static final Vector3f position = new Vector3f(0, 1.7f, 0);
 
     public static final float RANGE = 7.5f;
-    public static final float DEFAULT_FOV = 75;
+    public static final float DEFAULT_FOV = 90;
     public static final float SPEED = 0.015f;
     public static final float SENS  = 0.15f;
     public static final float SLOPE = 0.7071f;
     public static final float NEAR  = 0.1f;
     public static final float FAR   = Byte.MAX_VALUE * 2;
 
-    private static float FOV = 75;
+    private static float FOV = 90;
     private static float BOB = 0;
 
     public static Entity intersecting   = null;
@@ -90,7 +90,7 @@ public class Camera implements Machine {
             }
         }
         if (glfwGetInputMode(Manager.main.handle, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
-            FOV = Math.clamp(DEFAULT_FOV, 90, FOV - (20f / Manager.RATE));
+            FOV = Math.clamp(DEFAULT_FOV, 110, FOV - (20f / Manager.RATE));
             return;
         }
         rotation.add(0, Control.dx() * -SENS, 0);
@@ -161,9 +161,9 @@ public class Camera implements Machine {
                 BOB -= 7.5f;
             }
             Camera.position.y += Math.sin(Math.toRadians(BOB)) / 30.0f;
-            FOV = Math.clamp(DEFAULT_FOV, 90, FOV + (20f / Manager.RATE));
+            FOV = Math.clamp(DEFAULT_FOV, 110, FOV + (20f / Manager.RATE));
         } else {
-            FOV = Math.clamp(DEFAULT_FOV, 90, FOV - (20f / Manager.RATE));
+            FOV = Math.clamp(DEFAULT_FOV, 110, FOV - (20f / Manager.RATE));
         }
     }
 

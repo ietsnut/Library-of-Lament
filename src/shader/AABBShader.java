@@ -5,14 +5,15 @@ import engine.Manager;
 import engine.Scene;
 import object.Camera;
 import property.Entity;
+import window.Window;
 
 import static org.lwjgl.opengl.GL40.*;
 
 
 public class AABBShader extends Shader<Entity> {
 
-    public AABBShader() {
-        super("AABB", "position");
+    public AABBShader(Window window) {
+        super(window, "AABB", "position");
     }
 
     @Override

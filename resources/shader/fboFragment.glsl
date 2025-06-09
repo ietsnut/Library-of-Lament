@@ -41,12 +41,8 @@ void main(void) {
     vec2 center = vec2(0.5, 0.5);
     vec2  uvDist   = fragUV - center;
     float distance = length(uvDist);
-    if (distance > 0.5) {
+    if (distance > 0.38) {
         discard;
-    }
-    if (distance > 0.499) {
-        color = LINE;
-        return;
     }
     uvDist.x      *= width / height;
     float distance2 = length(uvDist);

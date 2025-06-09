@@ -4,6 +4,7 @@ import engine.Console;
 import engine.Scene;
 import object.Camera;
 import property.Entity;
+import window.Window;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -14,8 +15,8 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 public class EnvironmentShader extends Shader<Scene> {
 
-    public EnvironmentShader() {
-        super("env", "position", "uv");
+    public EnvironmentShader(Window window) {
+        super(window, "env", "position", "uv");
         start();
         uniform("texture1", 0);
         stop();

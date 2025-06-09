@@ -65,7 +65,7 @@ public class Manager {
         WIDTH = vidmode.width();
         HEIGHT = vidmode.height();
 
-        main = new Main((int) HEIGHT * 4 / 5);
+        main = new Main((int) Math.min(WIDTH, HEIGHT));
 
         if (!System.getProperty("os.name").toLowerCase().contains("mac")) {
             debugProc = GLUtil.setupDebugMessageCallback();

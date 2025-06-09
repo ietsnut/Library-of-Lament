@@ -16,13 +16,13 @@ public class Map extends Window {
 
     public Map(int size) {
         super(size, size);
-        gui = new GUI(new Material("wall"), new Vector2f(0.5f, 0.5f), new Vector2f(0.3f, 0.3f));
+        gui = new GUI(new Material("wall"), new Vector2f(0.5f, 0.5f), new Vector2f(0.3f, 0.3f), 0);
         glfwSetWindowPos(handle, 50, 50);
     }
 
     @Override
     public void setup() {
-        guiShader = new GUIShader();
+        guiShader = new GUIShader(this);
     }
 
     @Override

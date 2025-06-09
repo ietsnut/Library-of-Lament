@@ -4,13 +4,14 @@ import engine.Manager;
 import engine.Scene;
 import object.*;
 import property.Entity;
+import window.Window;
 
 import static org.lwjgl.opengl.GL40.*;
 
 public class EntityShader extends Shader<Scene> {
 
-    public EntityShader() {
-        super("entity", "position", "uv");
+    public EntityShader(Window window) {
+        super(window, "entity", "position", "uv");
     }
 
 

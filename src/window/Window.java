@@ -44,9 +44,9 @@ public abstract class Window {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
-        //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-        //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+        //glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_FLOATING, GLFW_FALSE);
         glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
         glfwWindowHint(GLFW_FOCUSED, this instanceof Main ? GLFW_TRUE : GLFW_FALSE);
@@ -84,9 +84,9 @@ public abstract class Window {
             }
         }.direct();
 
-        if (this instanceof Main) {
+        //if (this instanceof Main)
             glfwShowWindow(handle);
-        }
+
 
         Console.log("Created window", title + " (" + width + "x" + height + ")");
     }
