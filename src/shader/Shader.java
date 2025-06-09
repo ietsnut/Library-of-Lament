@@ -64,7 +64,7 @@ public abstract class Shader<T> {
                 glUniform4f(uniform, v.x, v.y, v.z, v.w);
                 break;
             default:
-                Console.error(new IllegalArgumentException("Unsupported data type"), data.getClass());
+                Console.error("Unsupported type", data.getClass());
         }
     }
 
@@ -124,15 +124,13 @@ public abstract class Shader<T> {
                 reader.close();
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load shader: " + file, e);
+            Console.error(e, "Failed to load", file);
         }
         int shaderID = glCreateShader(type);
         glShaderSource(shaderID, shaderSource);
         glCompileShader(shaderID);
         if(glGetShaderi(shaderID, GL_COMPILE_STATUS) == GL_FALSE){
-            System.out.println(glGetShaderInfoLog(shaderID, 500));
-            Console.error("Could not compile shader!");
-            System.exit(-1);
+            Console.error("Could not compile shader!", glGetShaderInfoLog(shaderID, 500));
         }
         return shaderID;
     }

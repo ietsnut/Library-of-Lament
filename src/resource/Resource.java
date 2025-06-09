@@ -35,7 +35,7 @@ public interface Resource extends Runnable {
             this.unload();
             LOADED.add(this);
         } catch (Exception e) {
-            e.printStackTrace();
+            Console.error(e);
         }
     }
 
@@ -47,7 +47,7 @@ public interface Resource extends Runnable {
             this.bind();
             BINDED.add(this);
         } catch (Exception e) {
-            e.printStackTrace();
+            Console.error(e);
         }
         return this;
     }
@@ -65,7 +65,7 @@ public interface Resource extends Runnable {
                 BINDED.add(loaded);
                 System.gc();
             } catch (Exception e) {
-                e.printStackTrace();
+                Console.error(e);
             }
         }
     }

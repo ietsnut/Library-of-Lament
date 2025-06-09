@@ -161,7 +161,8 @@ public class Mesh implements Resource {
                 obj = ObjReader.read(bis);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load mesh: " + file, e);
+            Console.error(e, "Failed to load", file);
+            return;
         }
         obj             = ObjUtils.convertToRenderable(obj);
         this.indices    = ObjData.getFaceVertexIndicesArray(obj);

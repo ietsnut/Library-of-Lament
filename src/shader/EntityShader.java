@@ -34,8 +34,8 @@ public class EntityShader extends Shader<Scene> {
     protected void shader(Scene scene) {
         uniform("projection",           Camera.projection.buffer());
         uniform("view",                 Camera.view.buffer());
-        uniform("texture1", 0);
         uniform("time",                 Manager.time());
+        uniform("texture1",             0);
         for (Entity entity : scene.foreground) {
             if (entity.meshes[entity.state].binded() && entity.materials[entity.state].binded()) {
                 render(entity);
