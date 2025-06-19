@@ -1,13 +1,11 @@
 package resource;
 
 import engine.Console;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL40;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -25,6 +23,7 @@ public class Material implements Resource {
     private int colorMapSize;
 
     private IndexColorModel colorModel;
+    private final Mipmap mipmapper;
 
     public int id;
     public int width;
@@ -47,23 +46,27 @@ public class Material implements Resource {
 
     public Material() {
         this.file = null;
+        this.mipmapper = Mipmap.getInstance();
         this.queue();
     }
 
     public Material(String name) {
         this.file = "/resources/" + name + ".png";
+        this.mipmapper = Mipmap.getInstance();
         this.queue();
     }
 
     public Material(String type, String name) {
         this.file = "/resources/" + type + "/" + name + ".png";
+        this.mipmapper = Mipmap.getInstance();
         this.queue();
     }
 
     @Override
     public String toString() {
-        return file;
+        return file.replace("/resources/", "");
     }
+
     @Override
     public void load() {
         try (InputStream in = Material.class.getResourceAsStream(file)) {
@@ -93,7 +96,10 @@ public class Material implements Resource {
     }
 
     private void generateMipLevels() {
-        if (pixels == null) return;
+        if (pixels == null)
+            return;
+
+        long startTime = System.nanoTime();
 
         int maxPossibleLevels = (int) (Math.log(Math.max(width, height)) / Math.log(2)) + 1;
         mipLevels = Math.min(MAX_MIP_LEVELS, maxPossibleLevels);
@@ -101,6 +107,12 @@ public class Material implements Resource {
         mipPixels = new byte[mipLevels][];
         mipWidths = new int[mipLevels];
         mipHeights = new int[mipLevels];
+
+        // Create palette array for OpenCL
+        int[] palette = new int[colorMapSize];
+        for (int i = 0; i < colorMapSize; i++) {
+            palette[i] = colorModel.getRGB(i);
+        }
 
         byte[] currentPixels = pixels;
         int currentWidth = width;
@@ -115,7 +127,21 @@ public class Material implements Resource {
                 int nextWidth = Math.max(MIN_MIP_SIZE, currentWidth / 2);
                 int nextHeight = Math.max(MIN_MIP_SIZE, currentHeight / 2);
 
-                currentPixels = generateMipLevel(currentPixels, currentWidth, currentHeight, nextWidth, nextHeight);
+                // Try OpenCL first, fallback to CPU if it fails
+                byte[] nextLevelPixels = null;
+                if (mipmapper.isInitialized()) {
+                    nextLevelPixels = mipmapper.generateMipLevel(
+                            currentPixels, currentWidth, currentHeight,
+                            nextWidth, nextHeight, palette, colorMapSize);
+                }
+
+                if (nextLevelPixels == null) {
+                    // Fallback to CPU implementation
+                    nextLevelPixels = generateMipLevelCPU(currentPixels, currentWidth, currentHeight,
+                            nextWidth, nextHeight, palette);
+                }
+
+                currentPixels = nextLevelPixels;
                 currentWidth = nextWidth;
                 currentHeight = nextHeight;
             } else {
@@ -123,17 +149,21 @@ public class Material implements Resource {
                 break;
             }
         }
+
+        long endTime = System.nanoTime();
+        double duration = (endTime - startTime) / 1_000_000.0; // Convert to milliseconds
+        Console.notify("Generated " + mipLevels + " mips", toString(), " in " +
+                String.format("%.2f", duration) + "ms using " +
+                (mipmapper.isInitialized() ? "OpenCL" : "CPU"));
     }
-    private byte[] generateMipLevel(byte[] sourcePixels, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
+
+    // Fallback CPU implementation (original method)
+    private byte[] generateMipLevelCPU(byte[] sourcePixels, int sourceWidth, int sourceHeight,
+                                       int targetWidth, int targetHeight, int[] palette) {
         byte[] targetPixels = new byte[targetWidth * targetHeight];
 
         float xRatio = (float) sourceWidth / targetWidth;
         float yRatio = (float) sourceHeight / targetHeight;
-
-        int[] palette = new int[colorMapSize];
-        for (int i = 0; i < colorMapSize; i++) {
-            palette[i] = colorModel.getRGB(i);
-        }
 
         for (int y = 0; y < targetHeight; y++) {
             for (int x = 0; x < targetWidth; x++) {
@@ -163,7 +193,8 @@ public class Material implements Resource {
                 }
 
                 if (count == 0) {
-                    targetPixels[y * targetWidth + x] = sourcePixels[Math.min(startY, sourceHeight - 1) * sourceWidth + Math.min(startX, sourceWidth - 1)];
+                    targetPixels[y * targetWidth + x] = sourcePixels[Math.min(startY, sourceHeight - 1) * sourceWidth
+                            + Math.min(startX, sourceWidth - 1)];
                     continue;
                 }
 
@@ -234,7 +265,8 @@ public class Material implements Resource {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.5f);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         for (int level = 0; level < mipLevels; level++) {
-            glTexImage2D(GL_TEXTURE_2D, level, GL_R8UI, mipWidths[level], mipHeights[level], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, mipBuffers[level]);
+            glTexImage2D(GL_TEXTURE_2D, level, GL_R8UI, mipWidths[level], mipHeights[level], 0, GL_RED_INTEGER,
+                    GL_UNSIGNED_BYTE, mipBuffers[level]);
         }
         if (GL.getCapabilities().GL_EXT_texture_filter_anisotropic) {
             float amount = Math.min(4f, GL40.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
@@ -272,5 +304,4 @@ public class Material implements Resource {
     public boolean equals(Object obj) {
         return obj instanceof Material material && this.file.equals(material.file);
     }
-
 }

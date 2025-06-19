@@ -25,6 +25,7 @@ public class Main extends Window {
     private FBOShader           fboShader;
     private AABBShader          aabbShader;
     private EnvironmentShader   environmentShader;
+
     private GUIShader           guiShader;
 
     private FBO fbo;
@@ -48,8 +49,11 @@ public class Main extends Window {
         aabbShader          = new AABBShader(this);
         environmentShader   = new EnvironmentShader(this);
         guiShader           = new GUIShader(this);
+
         fbo     = new FBO(1, width, height);
+
         gui     = new GUI(new Material("ui"), new Vector2f(0.5f, 0.5f), new Vector2f(0.5f, 0.5f), 0);
+
         scene   = new Forest();
         Resource.process();
         Camera.listen();
@@ -70,6 +74,11 @@ public class Main extends Window {
         fboShader.render(fbo);
         gui.rotation += 0.001f;
         guiShader.render(gui);
+    }
+
+    @Override
+    public void clear() {
+        fbo.unbind();
     }
 
 }

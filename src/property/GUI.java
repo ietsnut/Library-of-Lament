@@ -19,7 +19,4 @@ public class GUI {
         this.rotation = rotation;
     }
 
-    public void unbind() {
-        this.material.unbind();
-    }
 }

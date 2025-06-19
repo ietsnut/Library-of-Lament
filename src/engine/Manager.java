@@ -1,6 +1,7 @@
 package engine;
 
 import resource.Mesh;
+import resource.Mipmap;
 import shader.*;
 
 import org.lwjgl.Version;
@@ -47,8 +48,8 @@ public class Manager {
     }
 
     public static void open() {
-        Console.log("Architecture", System.getProperty("os.arch"));
-        Console.log("Version", Version.getVersion());
+        Console.debug("Architecture", System.getProperty("os.arch"));
+        Console.debug("Version", Version.getVersion());
 
         GLFWErrorCallback errorfun = GLFWErrorCallback.createPrint();
         glfwSetErrorCallback(errorfun);
@@ -159,18 +160,16 @@ public class Manager {
             main.makeContextCurrent();
         }
 
-        if (text.vg != 0) {
-            nvgDelete(text.vg);
-            text.vg = 0;
-        }
 
         Control.clear();
         Machine.clear();
         Resource.clear();
+        Mipmap.getInstance().cleanup();
         Shader.clear();
 
         for (int i = 0; i < windows.length; i++) {
             if (windows[i] != null) {
+                windows[i].clear();
                 //glfwFreeCallbacks(windows[i].handle);
                 glfwDestroyWindow(windows[i].handle);
                 windows[i] = null;

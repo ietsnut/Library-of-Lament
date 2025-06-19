@@ -41,19 +41,20 @@ public class EnvironmentShader extends Shader<Scene> {
     @Override
     protected void shader(Scene scene) {
         glEnable(GL_DEPTH_TEST);
-        uniform("projection",           Camera.projection.buffer());
-        uniform("view",                 Camera.view.buffer());
-        //uniform("fogDensity",           0.04f);
-        //uniform("fogGradient",          1.5f);
-        uniform("fogDensity",           0.02f);
-        uniform("fogGradient",          1.5f);
+        uniform("projection", Camera.projection.buffer());
+        uniform("view", Camera.view.buffer());
+        // uniform("fogDensity", 0.04f);
+        // uniform("fogGradient", 1.5f);
+        uniform("fogDensity", 0.02f);
+        uniform("fogGradient", 1.5f);
         uniform("texture1", 0);
         for (Entity entity : scene.background) {
             if (entity.meshes[entity.state].binded() && entity.materials[entity.state].binded()) {
                 render(entity);
             }
         }
-        if (scene.terrain != null && scene.terrain.meshes[scene.terrain.state].binded() && scene.terrain.materials[scene.terrain.state].binded()) {
+        if (scene.terrain != null && scene.terrain.meshes[scene.terrain.state].binded()
+                && scene.terrain.materials[scene.terrain.state].binded()) {
             render(scene.terrain);
         }
     }

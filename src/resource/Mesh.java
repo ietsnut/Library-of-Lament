@@ -146,7 +146,7 @@ public class Mesh implements Resource {
 
     @Override
     public String toString() {
-        return file;
+        return file.replace("/resources/", "");
     }
 
     @Override

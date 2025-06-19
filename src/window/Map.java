@@ -29,4 +29,9 @@ public class Map extends Window {
     public void draw() {
         guiShader.render(gui);
     }
+
+    @Override
+    public void clear() {
+
+    }
 }

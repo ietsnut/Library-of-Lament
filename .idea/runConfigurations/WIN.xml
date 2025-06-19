@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="WIN" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="LibraryOfLament" />
+    <option name="MAIN_CLASS_NAME" value="main.LibraryOfLament" />
     <module name="Library of Lament" />
     <method v="2">
       <option name="Make" enabled="true" />

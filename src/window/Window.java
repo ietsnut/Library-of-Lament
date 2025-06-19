@@ -112,5 +112,6 @@ public abstract class Window {
 
     abstract public void setup();
     abstract public void draw();
+    abstract public void clear();
 
 }

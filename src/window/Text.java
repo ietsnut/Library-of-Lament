@@ -97,6 +97,13 @@ public class Text extends Window {
         nvgEndFrame(vg);
     }
 
+    @Override
+    public void clear() {
+        if (vg != 0) {
+            nvgDelete(vg);
+            vg = 0;
+        }
+    }
 
 
 }

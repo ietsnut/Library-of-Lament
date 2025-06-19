@@ -78,10 +78,7 @@ public class Console {
     }
 
     public static void notify(Object... messages) {
-        String combined = Arrays.stream(messages).map(String::valueOf).reduce((a, b) -> a + " " + b).orElse("");
-        if (Console.messages.contains(combined)) return;
-        Console.messages.add(combined);
-        printWithTimestampCallerAndThread(ANSI_PURPLE, combined);
+        printWithTimestampCallerAndThread(ANSI_PURPLE, Arrays.stream(messages).map(String::valueOf).toArray(String[]::new));
     }
 
     public static void log(Object... messages) {
@@ -95,7 +92,6 @@ public class Console {
     public static void error(Object... messages) {
         printWithTimestampCallerAndThread(ANSI_RED, Arrays.stream(messages).map(String::valueOf).toArray(String[]::new));
     }
-
 
     public static void error(Throwable t, Object... messages) {
         String[] logMessages = new String[messages.length + 1];

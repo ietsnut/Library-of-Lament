@@ -134,7 +134,8 @@ public abstract class Shader<T> {
         glShaderSource(shaderID, shaderSource);
         glCompileShader(shaderID);
         if(glGetShaderi(shaderID, GL_COMPILE_STATUS) == GL_FALSE){
-            Console.error("Could not compile shader!", glGetShaderInfoLog(shaderID, 500));
+            Console.error("Compilation failed.", this.getClass().getSimpleName(), glGetShaderInfoLog(shaderID, 500));
+            System.exit(-1);
         }
         return shaderID;
     }
