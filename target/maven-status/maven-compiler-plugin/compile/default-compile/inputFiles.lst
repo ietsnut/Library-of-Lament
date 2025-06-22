@@ -1,8 +1,9 @@
 D:\Library-of-Lament\src\shader\Shader.java
-D:\Library-of-Lament\src\resource\Material2.java
 D:\Library-of-Lament\src\content\Real.java
 D:\Library-of-Lament\src\property\Terrain.java
+D:\Library-of-Lament\src\shader\BrightnessShader.java
 D:\Library-of-Lament\src\resource\Mipmap.java
+D:\Library-of-Lament\src\shader\BloomShader.java
 D:\Library-of-Lament\src\property\GUI.java
 D:\Library-of-Lament\src\resource\FBO.java
 D:\Library-of-Lament\src\property\Entity.java
@@ -11,6 +12,7 @@ D:\Library-of-Lament\src\window\Main.java
 D:\Library-of-Lament\src\property\Machine.java
 D:\Library-of-Lament\src\shader\EntityShader.java
 D:\Library-of-Lament\src\property\Billboard.java
+D:\Library-of-Lament\src\resource\BloomFBO.java
 D:\Library-of-Lament\src\shader\GUIShader.java
 D:\Library-of-Lament\src\engine\Console.java
 D:\Library-of-Lament\src\engine\Control.java
@@ -20,6 +22,7 @@ D:\Library-of-Lament\src\shader\FBOShader.java
 D:\Library-of-Lament\src\object\Matrix.java
 D:\Library-of-Lament\src\resource\Mesh.java
 D:\Library-of-Lament\src\resource\Resource.java
+D:\Library-of-Lament\src\resource\Calculation.java
 D:\Library-of-Lament\src\main\LibraryOfLament.java
 D:\Library-of-Lament\src\engine\Scene.java
 D:\Library-of-Lament\src\engine\Serial.java

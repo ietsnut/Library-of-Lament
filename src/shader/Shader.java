@@ -41,12 +41,12 @@ public abstract class Shader<T> {
         ALL.add(this);
     }
 
-    protected void uniform (String location, FloatBuffer buffer) {
+    protected void uniform(String location, FloatBuffer buffer) {
         int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
         glUniformMatrix4fv(uniform, false, buffer);
     }
 
-    protected void uniform(String location, Serializable data) {
+    public void uniform(String location, Serializable data) {
         int uniform = uniforms.computeIfAbsent(location, loc -> glGetUniformLocation(program, loc));
         switch (data) {
             case Float f:

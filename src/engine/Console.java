@@ -21,8 +21,6 @@ public class Console {
     private static final int CELL_WIDTH = 24;
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
-    private static ArrayList<String> messages = new ArrayList<>();
-
     private static String getCurrentTimestamp() {
         return LocalDateTime.now().format(TIMESTAMP_FORMAT);
     }

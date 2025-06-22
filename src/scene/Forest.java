@@ -17,7 +17,7 @@ public class Forest extends Scene implements Machine {
         //terrain = new Terrain("dungeon");
         terrain = new Terrain("hills");
 
-        Real real = new Real("tower");
+        Real real = new Real("unnamed");
         real.scale.set(1/4f);
         real.position.set(0, -0.3f, 0);
         real.rotation.set(10, 0 ,5);

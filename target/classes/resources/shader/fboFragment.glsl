@@ -3,13 +3,15 @@
 in vec2 fragUV;
 
 layout(location = 0) out vec4 color;
-layout(location = 1) out uint bloom;
 
 uniform usampler2D texture1;
 uniform sampler2D texture2;
+uniform sampler2D bloomTexture;
 
 uniform int width;
 uniform int height;
+uniform bool enableBloom;
+uniform float bloomIntensity;
 
 float linearizeDepth(float depth) {
     float z = depth * 2.0 - 1.0; // Convert to NDC
@@ -36,8 +38,6 @@ float depth(sampler2D sampler) {
 
 void main(void) {
 
-    bloom = 0u;
-
     vec2 center = vec2(0.5, 0.5);
     vec2  uvDist   = fragUV - center;
     float distance = length(uvDist);
@@ -59,24 +59,24 @@ void main(void) {
     }
 
     uint value = texture(texture1, fragUV).r;
-    vec4 finalColor;
 
+    vec4 sceneColor;
     if (value == 0u) {
-        finalColor = PALETTE[5];
-        bloom = 0u;
+        sceneColor = PALETTE[5];
     } else {
-        // Unified decoding for all colors: 1-255
         uint adjustedValue = value - 1u;
         uint baseIndex = adjustedValue % 16u;
         uint fogLevel = adjustedValue / 16u;
         vec4 baseColor = PALETTE[baseIndex];
         float fogFactor = float(fogLevel) / 14.0;  // fogLevel 0-13 -> fogFactor 0 to 13/14
-        finalColor = mix(baseColor, PALETTE[5], fogFactor);
-        if (baseIndex == 6u && fogLevel <= 2u) {
-            bloom = 1u;
-        }
+        sceneColor = mix(baseColor, PALETTE[5], fogFactor);
     }
 
-    color = finalColor;
-    bloom = 1u;
+    // Add bloom if enabled
+    if (enableBloom) {
+        vec3 bloomColor = texture(bloomTexture, fragUV).rgb;
+        sceneColor.rgb += bloomColor * bloomIntensity;
+    }
+
+    color = sceneColor;
 }

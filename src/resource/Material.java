@@ -99,8 +99,6 @@ public class Material implements Resource {
         if (pixels == null)
             return;
 
-        long startTime = System.nanoTime();
-
         int maxPossibleLevels = (int) (Math.log(Math.max(width, height)) / Math.log(2)) + 1;
         mipLevels = Math.min(MAX_MIP_LEVELS, maxPossibleLevels);
 
@@ -118,6 +116,8 @@ public class Material implements Resource {
         int currentWidth = width;
         int currentHeight = height;
 
+        boolean usingOpenCL = mipmapper.isInitialized();
+
         for (int level = 0; level < mipLevels; level++) {
             mipPixels[level] = currentPixels.clone();
             mipWidths[level] = currentWidth;
@@ -129,10 +129,16 @@ public class Material implements Resource {
 
                 // Try OpenCL first, fallback to CPU if it fails
                 byte[] nextLevelPixels = null;
-                if (mipmapper.isInitialized()) {
+                if (usingOpenCL) {
                     nextLevelPixels = mipmapper.generateMipLevel(
                             currentPixels, currentWidth, currentHeight,
                             nextWidth, nextHeight, palette, colorMapSize);
+
+                    // If OpenCL fails, switch to CPU for remaining levels
+                    if (nextLevelPixels == null) {
+                        usingOpenCL = false;
+                        Console.warning("OpenCL failed for " + toString() + ", switching to CPU");
+                    }
                 }
 
                 if (nextLevelPixels == null) {
@@ -149,12 +155,6 @@ public class Material implements Resource {
                 break;
             }
         }
-
-        long endTime = System.nanoTime();
-        double duration = (endTime - startTime) / 1_000_000.0; // Convert to milliseconds
-        Console.notify("Generated " + mipLevels + " mips", toString(), " in " +
-                String.format("%.2f", duration) + "ms using " +
-                (mipmapper.isInitialized() ? "OpenCL" : "CPU"));
     }
 
     // Fallback CPU implementation (original method)

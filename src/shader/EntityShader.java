@@ -14,7 +14,6 @@ public class EntityShader extends Shader<Scene> {
         super(window, "entity", "position", "uv");
     }
 
-
     private void render(Entity entity) {
         uniform("model", entity.model.buffer());
         glBindVertexArray(entity.meshes[entity.state].vao);

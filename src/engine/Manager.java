@@ -1,5 +1,6 @@
 package engine;
 
+import resource.Calculation;
 import resource.Mesh;
 import resource.Mipmap;
 import shader.*;
@@ -164,7 +165,7 @@ public class Manager {
         Control.clear();
         Machine.clear();
         Resource.clear();
-        Mipmap.getInstance().cleanup();
+        Calculation.shutdown();
         Shader.clear();
 
         for (int i = 0; i < windows.length; i++) {
