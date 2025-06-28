@@ -88,7 +88,7 @@ public class Calculation {
             checkCLError(pi.get(0));
 
             initialized = true;
-            Console.log("OpenCL initialized: ",
+            Console.log("OpenCL started: ",
                     (deviceType == CL_DEVICE_TYPE_GPU ? "GPU" : "CPU"));
 
         } catch (Exception e) {
@@ -154,7 +154,7 @@ public class Calculation {
             // Initialize kernel map for this program
             programKernels.put(programName, new ConcurrentHashMap<>());
 
-            Console.log("Loaded OpenCL program:", programName);
+            Console.log("Loaded OpenCL:", programName);
             return true;
 
         } catch (Exception e) {

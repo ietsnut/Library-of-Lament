@@ -41,20 +41,15 @@ public class Console {
     private static void printFormatted(String color, String... messages) {
         StringBuilder format = new StringBuilder(color);
         Object[] args = new Object[messages.length];
-
         for (int i = 0; i < messages.length; i++) {
             String message = messages[i];
             int messageLength = message.length();
-
-            // Calculate how many cells this message spans
-            int cellsNeeded = (messageLength + CELL_WIDTH - 1) / CELL_WIDTH; // Ceiling division
-            if (cellsNeeded == 0) cellsNeeded = 1; // At least one cell
-
+            int cellsNeeded = (messageLength + CELL_WIDTH - 1) / CELL_WIDTH;
+            if (cellsNeeded == 0) cellsNeeded = 1;
             int totalWidth = cellsNeeded * CELL_WIDTH;
             format.append("%-").append(totalWidth).append("s");
             args[i] = message;
         }
-
         format.append(ANSI_RESET).append("\n");
         System.out.printf(format.toString(), args);
     }
@@ -98,25 +93,19 @@ public class Console {
             logMessages[i + 1] = String.valueOf(messages[i]);
         }
         error((Object[]) logMessages);
-
         for (StackTraceElement element : t.getStackTrace()) {
             System.out.println(ANSI_RED + element + ANSI_RESET);
         }
-
         Throwable cause = t.getCause();
         int indentLevel = 0;
         while (cause != null) {
-            // Use 8 spaces per level for clear visual separation
             String indent = String.join("", Collections.nCopies(4 + (indentLevel * 8), " "));
             System.out.println(ANSI_RED + indent + "└─▶ " + cause + ANSI_RESET);
-
             StackTraceElement[] causeStack = cause.getStackTrace();
             int maxElements = Math.min(causeStack.length, 4);
             for (int i = 0; i < maxElements; i++) {
-                // Stack traces get same base indent + 4 more spaces for alignment
                 System.out.println(ANSI_RED + indent + "    " + causeStack[i] + ANSI_RESET);
             }
-
             cause = cause.getCause();
             indentLevel++;
         }

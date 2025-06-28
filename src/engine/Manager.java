@@ -161,7 +161,6 @@ public class Manager {
             main.makeContextCurrent();
         }
 
-
         Control.clear();
         Machine.clear();
         Resource.clear();

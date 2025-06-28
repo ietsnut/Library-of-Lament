@@ -130,6 +130,7 @@ public class Main extends Window {
 
     @Override
     public void clear() {
+        scene.terrain.cleanup();
         fbo.unbind();
         if (brightnessFBO != null) brightnessFBO.unbind();
         if (pingPongFBO1 != null) pingPongFBO1.unbind();
