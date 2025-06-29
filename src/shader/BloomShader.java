@@ -7,8 +7,6 @@ import static org.lwjgl.opengl.GL40.*;
 
 public class BloomShader extends Shader<Framebuffer[]> {
 
-    private final static int PASSES = 16; // Number of ping-pong passes
-
     public BloomShader(Window window) {
         super(window, "bloom", "position");
     }
@@ -16,31 +14,33 @@ public class BloomShader extends Shader<Framebuffer[]> {
     @Override
     protected void shader(Framebuffer... framebuffers) {
         if (framebuffers.length < 3) {
-            throw new IllegalArgumentException("BloomShader requires at least 3 framebuffers: [brightness, pingPong1, pingPong2]");
+            throw new IllegalArgumentException("BloomShader requires 3 framebuffers: [source, pingPong1, pingPong2]");
         }
 
-        Framebuffer brightnessFramebuffer = framebuffers[0];
-        Framebuffer pingPongFramebuffer1 = framebuffers[1];
-        Framebuffer pingPongFramebuffer2 = framebuffers[2];
+        Framebuffer sourceFramebuffer = framebuffers[0]; // Main framebuffer with bright pixels in attachment 1
+        Framebuffer pingPong1 = framebuffers[1];
+        Framebuffer pingPong2 = framebuffers[2];
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         boolean horizontal = true;
         boolean firstIteration = true;
+        int blurIterations = 10;
 
-        for (int i = 0; i < PASSES; i++) {
-            Framebuffer targetFramebuffer = horizontal ? pingPongFramebuffer1 : pingPongFramebuffer2;
-
+        for (int i = 0; i < blurIterations; i++) {
+            Framebuffer targetFramebuffer = horizontal ? pingPong1 : pingPong2;
             targetFramebuffer.bind();
 
-            uniform("horizontal", horizontal);
-            uniform("width", targetFramebuffer.width);
-            uniform("height", targetFramebuffer.height);
+            uniform("horizontal", horizontal ? 1 : 0);
 
-            glActiveTexture(GL_TEXTURE0);
             if (firstIteration) {
-                glBindTexture(GL_TEXTURE_2D, brightnessFramebuffer.textures[0]);
+                sourceFramebuffer.bindTexture(1, 0);
+                firstIteration = false;
             } else {
-                Framebuffer sourceFramebuffer = horizontal ? pingPongFramebuffer2 : pingPongFramebuffer1;
-                glBindTexture(GL_TEXTURE_2D, sourceFramebuffer.textures[0]);
+                Framebuffer sourceBuffer = horizontal ? pingPong2 : pingPong1;
+                sourceBuffer.bindTexture(0, 0);
             }
 
             window.quad.bind();
@@ -51,7 +51,9 @@ public class BloomShader extends Shader<Framebuffer[]> {
             targetFramebuffer.unbind();
 
             horizontal = !horizontal;
-            if (firstIteration) firstIteration = false;
         }
+
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
     }
 }

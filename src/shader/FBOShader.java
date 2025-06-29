@@ -5,21 +5,17 @@ import window.Window;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public class FBOShader extends Shader<Framebuffer> {
-
-    // Bloom properties
-    private int bloomTexture = 0;
+public class FBOShader extends Shader<Framebuffer[]> {
 
     public FBOShader(Window window) {
         super(window, "fbo", "position");
     }
 
-    public void setBloomTexture(int texture) {
-        this.bloomTexture = texture;
-    }
-
     @Override
-    protected void shader(Framebuffer framebuffer) {
+    protected void shader(Framebuffer... framebuffers) {
+
+        Framebuffer framebuffer = framebuffers[0];
+        int bloomTexture = framebuffers[1].textures[0];
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -30,26 +26,21 @@ public class FBOShader extends Shader<Framebuffer> {
 
         window.quad.bind();
 
-        // Bind FBO textures
         for (int i = 0; i < framebuffer.textures.length; i++) {
-            uniform("texture" + (i + 1), i);
             framebuffer.bindTexture(i, i);
         }
 
-        // Bind bloom texture if enabled
         if (bloomTexture != 0) {
             int bloomSlot = framebuffer.textures.length;
-            uniform("bloomTexture", bloomSlot);
+            uniform("texture4", bloomSlot);
             glActiveTexture(GL_TEXTURE0 + bloomSlot);
             glBindTexture(GL_TEXTURE_2D, bloomTexture);
         }
 
         glDrawElements(GL_TRIANGLES, window.quad.index, GL_UNSIGNED_INT, 0);
 
-        // Cleanup textures
         for (int i = 0; i < framebuffer.textures.length; i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, 0);
+            framebuffer.unbindTexture(i);
         }
         if (bloomTexture != 0) {
             glActiveTexture(GL_TEXTURE0 + framebuffer.textures.length);

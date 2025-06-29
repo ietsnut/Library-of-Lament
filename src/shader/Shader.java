@@ -41,6 +41,9 @@ public abstract class Shader<T> {
         ALL.add(this);
         start();
         uniform("texture1", 0);
+        uniform("texture2", 1);
+        uniform("texture3", 2);
+        uniform("texture4", 3);
         stop();
         Console.log("Attached", this.getClass().getSimpleName(), program);
     }

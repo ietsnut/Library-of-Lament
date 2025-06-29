@@ -23,15 +23,13 @@ public class Main extends Window {
     private EnvironmentShader   environmentShader;
     private GUIShader           guiShader;
 
-    // Bloom shaders
-    private BrightnessShader    brightnessShader;
+    // Bloom shader (brightness extraction removed)
     private BloomShader         bloomShader;
 
     private Framebuffer framebuffer;
     private GUI gui;
 
     // Bloom FBOs
-    private Framebuffer brightnessFramebuffer;
     private Framebuffer pingPongFramebuffer1;
     private Framebuffer pingPongFramebuffer2;
 
@@ -55,17 +53,15 @@ public class Main extends Window {
         environmentShader   = new EnvironmentShader(this);
         guiShader           = new GUIShader(this);
 
-        // Initialize bloom shaders
-        brightnessShader    = new BrightnessShader(this);
         bloomShader         = new BloomShader(this);
 
         int bloomWidth = width / 4;
         int bloomHeight = height / 4;
 
-        // Main scene framebuffer - depth testing enabled, auto clear
         framebuffer = new Framebuffer(width, height)
-                .attach(1, 8, false, false, false)  // Single channel for main scene
-                .depth(32, false, true, true)       // 32-bit floating point depth
+                .attach(1, 8, false, false, false)      // Attachment 0: Single channel for main scene
+                .attach(3, 16, false, true, true)       // Attachment 1: RGB16F for bright pixels
+                .depth(32, false, true, true)           // 32-bit floating point depth
                 .clearColor(0.0f, 0.0f, 0.0f, 0.0f)
                 .clearDepth(1.0f)
                 .autoClear(true)
@@ -76,19 +72,8 @@ public class Main extends Window {
                 .blend(false)
                 .direct();
 
-        // Brightness extraction framebuffer - no depth testing, auto clear
-        brightnessFramebuffer = new Framebuffer(bloomWidth, bloomHeight)
-                .attach(3, 16, false, true, true)   // RGB16F for HDR bloom
-                .clearColor(0.0f, 0.0f, 0.0f, 0.0f)
-                .autoClear(true)
-                .depthTest(false)
-                .blend(true)
-                .blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-                .direct();
-
-        // Ping-pong framebuffers for blur passes - no depth testing, auto clear
         pingPongFramebuffer1 = new Framebuffer(bloomWidth, bloomHeight)
-                .attach(3, 16, false, true, true)   // RGB16F for HDR bloom
+                .attach(3, 16, false, true, true)
                 .clearColor(0.0f, 0.0f, 0.0f, 0.0f)
                 .autoClear(true)
                 .depthTest(false)
@@ -97,7 +82,7 @@ public class Main extends Window {
                 .direct();
 
         pingPongFramebuffer2 = new Framebuffer(bloomWidth, bloomHeight)
-                .attach(3, 16, false, true, true)   // RGB16F for HDR bloom
+                .attach(3, 16, false, true, true)
                 .clearColor(0.0f, 0.0f, 0.0f, 0.0f)
                 .autoClear(true)
                 .depthTest(false)
@@ -127,17 +112,11 @@ public class Main extends Window {
 
         framebuffer.unbind();
 
-        // Extract bright pixels for bloom
-        brightnessShader.render(new Framebuffer[]{framebuffer, brightnessFramebuffer});
-
-        // Apply blur to bright pixels
-        bloomShader.render(new Framebuffer[]{brightnessFramebuffer, pingPongFramebuffer1, pingPongFramebuffer2});
-
-        // Set bloom texture for final composite
-        fboShader.setBloomTexture(pingPongFramebuffer1.textures[0]);
+        // Apply blur to bright pixels (using attachment 1 from main framebuffer)
+        bloomShader.render(new Framebuffer[]{framebuffer, pingPongFramebuffer1, pingPongFramebuffer2});
 
         // Render final composite to screen
-        fboShader.render(framebuffer);
+        fboShader.render(new Framebuffer[]{framebuffer, pingPongFramebuffer1});
 
         // Render GUI on top
         gui.rotation += 0.001f;
@@ -148,7 +127,6 @@ public class Main extends Window {
     public void clear() {
         scene.unbind();
         framebuffer.unlink();
-        brightnessFramebuffer.unlink();
         pingPongFramebuffer1.unlink();
         pingPongFramebuffer2.unlink();
     }

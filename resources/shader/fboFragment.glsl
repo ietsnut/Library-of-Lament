@@ -4,9 +4,10 @@ in vec2 fragUV;
 
 layout(location = 0) out vec4 color;
 
-uniform usampler2D texture1;
-uniform sampler2D texture2;
-uniform sampler2D bloomTexture;
+uniform usampler2D texture1;      // Main scene (attachment 0 from framebuffer)
+uniform sampler2D texture2;       // Bright pixels (attachment 1 from framebuffer)
+uniform sampler2D texture3;       // Depth buffer
+uniform sampler2D texture4;       // Blurred bright pixels from bloom pass
 
 uniform int width;
 uniform int height;
@@ -49,7 +50,7 @@ void main(void) {
         return;
     }
 
-    float depthDelta = depth(texture2);
+    float depthDelta = depth(texture3);
 
     if (depthDelta > 50) {
         color = PALETTE[2];
@@ -66,11 +67,11 @@ void main(void) {
         uint baseIndex = adjustedValue % 16u;
         uint fogLevel = adjustedValue / 16u;
         vec4 baseColor = PALETTE[baseIndex];
-        float fogFactor = float(fogLevel) / 14.0;  // fogLevel 0-13 -> fogFactor 0 to 13/14
+        float fogFactor = float(fogLevel) / 14.0;
         sceneColor = mix(baseColor, PALETTE[5], fogFactor);
     }
 
-    vec3 bloomColor = texture(bloomTexture, fragUV).rgb;
+    vec3 bloomColor = texture(texture4, fragUV).rgb;
     sceneColor.rgb += bloomColor * 0.7;
 
     color = sceneColor;
