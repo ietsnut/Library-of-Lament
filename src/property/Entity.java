@@ -44,6 +44,14 @@ public class Entity {
         this.material   = materialCache.computeIfAbsent(type + name + states, k -> new Material(name, type, states));
     }
 
+    public Entity(String name, Mesh mesh) {
+        this(name, 1, mesh);
+    }
+
+    public Entity(String name) {
+        this(name, 1);
+    }
+
     @Override
     public String toString() {
         return "< " + type + " > [state: " + (state + 1) + " of " + states + "]: " + position.x + ", " + position.y + ", " + position.z + " : " + rotation.x + ", " + rotation.y + ", " + rotation.z + " : " + scale;

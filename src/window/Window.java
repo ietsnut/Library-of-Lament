@@ -67,7 +67,7 @@ public abstract class Window {
         capabilities = GL.createCapabilities();
         GL.setCapabilities(capabilities);
 
-        this.quad = (Mesh) new Mesh() {
+        this.quad = new Mesh() {
             @Override
             public void load() {
                 vertices = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
@@ -84,10 +84,7 @@ public abstract class Window {
             }
         }.direct();
 
-        //if (this instanceof Main)
-            glfwShowWindow(handle);
-
-
+        glfwShowWindow(handle);
         Console.log("Created window", title + " (" + width + "x" + height + ")");
     }
 

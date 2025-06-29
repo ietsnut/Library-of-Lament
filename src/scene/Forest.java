@@ -30,19 +30,26 @@ public class Forest extends Scene implements Machine {
         sword.scale.set(8f);
         background.add(sword);
 
-        sun1 = new Entity("sun1", 1, Mesh.PLANE);
+        Knot wall = new Knot("wall");
+        wall.rotation.setComponent(0, -90);
+        wall.position.set(0, 10, 0);
+        wall.scale.set(0.1);
+        wall.update();
+        foreground.add(wall);
+
+        sun1 = new Entity("sun1", Mesh.PLANE);
         sun1.position.y = 124;
         sun1.rotation.setComponent(0, 90);
         sun1.scale.set(48);
         foreground.add(sun1);
 
-        sun2 = new Entity("sun2", 1, Mesh.PLANE);
+        sun2 = new Entity("sun2", Mesh.PLANE);
         sun2.position.y = 120;
         sun2.rotation.setComponent(0, 90);
         sun2.scale.set(48);
         foreground.add(sun2);
 
-        start(1);
+        start();
 
     }
 

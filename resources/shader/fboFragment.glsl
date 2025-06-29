@@ -10,8 +10,6 @@ uniform sampler2D bloomTexture;
 
 uniform int width;
 uniform int height;
-uniform bool enableBloom;
-uniform float bloomIntensity;
 
 float linearizeDepth(float depth) {
     float z = depth * 2.0 - 1.0; // Convert to NDC
@@ -53,7 +51,7 @@ void main(void) {
 
     float depthDelta = depth(texture2);
 
-    if (depthDelta > 25) {
+    if (depthDelta > 50) {
         color = PALETTE[2];
         return;
     }
@@ -72,11 +70,8 @@ void main(void) {
         sceneColor = mix(baseColor, PALETTE[5], fogFactor);
     }
 
-    // Add bloom if enabled
-    if (enableBloom) {
-        vec3 bloomColor = texture(bloomTexture, fragUV).rgb;
-        sceneColor.rgb += bloomColor * bloomIntensity;
-    }
+    vec3 bloomColor = texture(bloomTexture, fragUV).rgb;
+    sceneColor.rgb += bloomColor * 0.7;
 
     color = sceneColor;
 }

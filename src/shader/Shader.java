@@ -26,10 +26,10 @@ public abstract class Shader<T> {
     final Window window;
 
     public Shader(Window window, String type, String... attributes) {
-        this.window = window;
-        vertex      = loadShader("/resources/shader/" + type + "Vertex.glsl",     GL_VERTEX_SHADER);
-        fragment    = loadShader("/resources/shader/" + type + "Fragment.glsl",   GL_FRAGMENT_SHADER);
-        program     = glCreateProgram();
+        this.window     = window;
+        this.vertex     = loadShader("/resources/shader/" + type + "Vertex.glsl",     GL_VERTEX_SHADER);
+        this.fragment   = loadShader("/resources/shader/" + type + "Fragment.glsl",   GL_FRAGMENT_SHADER);
+        this.program    = glCreateProgram();
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
         this.attributes = attributes;
@@ -39,6 +39,15 @@ public abstract class Shader<T> {
         glLinkProgram(program);
         glValidateProgram(program);
         ALL.add(this);
+        start();
+        uniform("texture1", 0);
+        stop();
+        Console.log("Attached", this.getClass().getSimpleName(), program);
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + ": " + program;
     }
 
     protected void uniform(String location, FloatBuffer buffer) {

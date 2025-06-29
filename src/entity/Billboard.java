@@ -9,7 +9,7 @@ import org.joml.Vector3f;
 public class Billboard extends Entity {
 
     public Billboard(String name) {
-        super(name, 1, Mesh.PLANE);
+        super(name, Mesh.PLANE);
     }
 
     @Override

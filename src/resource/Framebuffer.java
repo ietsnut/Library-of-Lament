@@ -12,20 +12,100 @@ import static org.lwjgl.opengl.GL40.*;
 
 public final class Framebuffer implements Resource {
 
-    private record Attachment(int internalFormat, int format, int type, boolean linear) {};
+    private record Attachment(int internalFormat, int format, int type, boolean linear) {}
 
     public final int width, height;
     private final List<Attachment> attachments = new ArrayList<>();
-    private final IntBuffer viewport = BufferUtils.createIntBuffer(4);
     boolean depth = false;
+
+    private float clearR = 0.0f, clearG = 0.0f, clearB = 0.0f, clearA = 0.0f;
+    private float clearDepth = 1.0f;
+    private boolean autoClear = true;
+    private boolean depthTest = true;
+    private int depthFunc = GL_LESS;
+    private boolean depthMask = true;
+    private double depthRangeNear = 0.0;
+    private double depthRangeFar = 1.0;
+    private boolean blend = false;
+    private int blendSrcFactor = GL_SRC_ALPHA;
+    private int blendDstFactor = GL_ONE_MINUS_SRC_ALPHA;
+    private int blendEquation = GL_FUNC_ADD;
+    private boolean multisampling = false;
+    private boolean cullFace = false;
+    private int cullFaceMode = GL_BACK;
+
+    private final IntBuffer savedViewport = BufferUtils.createIntBuffer(4);
 
     public Framebuffer(int width, int height) {
         this.width = width;
         this.height = height;
     }
 
-    public Framebuffer attach(int channels, int bits, boolean signed, boolean floating, boolean linear) {
+    // Configuration methods
+    public Framebuffer clearColor(float r, float g, float b, float a) {
+        this.clearR = r; this.clearG = g; this.clearB = b; this.clearA = a;
+        return this;
+    }
 
+    public Framebuffer clearDepth(float depth) {
+        this.clearDepth = depth;
+        return this;
+    }
+
+    public Framebuffer autoClear(boolean autoClear) {
+        this.autoClear = autoClear;
+        return this;
+    }
+
+    public Framebuffer depthTest(boolean enable) {
+        this.depthTest = enable;
+        return this;
+    }
+
+    public Framebuffer depthFunc(int func) {
+        this.depthFunc = func;
+        return this;
+    }
+
+    public Framebuffer depthMask(boolean mask) {
+        this.depthMask = mask;
+        return this;
+    }
+
+    public Framebuffer depthRange(double near, double far) {
+        this.depthRangeNear = near;
+        this.depthRangeFar = far;
+        return this;
+    }
+
+    public Framebuffer blend(boolean enable) {
+        this.blend = enable;
+        return this;
+    }
+
+    public Framebuffer blendFunc(int src, int dst) {
+        this.blendSrcFactor = src;
+        this.blendDstFactor = dst;
+        return this;
+    }
+
+    public Framebuffer blendEquation(int equation) {
+        this.blendEquation = equation;
+        return this;
+    }
+
+    public Framebuffer multisampling(boolean enable) {
+        this.multisampling = enable;
+        return this;
+    }
+
+    public Framebuffer cullFace(boolean enable, int mode) {
+        this.cullFace = enable;
+        this.cullFaceMode = mode;
+        return this;
+    }
+
+    public Framebuffer attach(int channels, int bits, boolean signed, boolean floating, boolean linear) {
         int internalFormat = 0;
         int format = 0;
         int type = 0;
@@ -89,13 +169,10 @@ public final class Framebuffer implements Resource {
         }
 
         attachments.add(new Attachment(internalFormat, format, type, linear));
-
         return this;
-
     }
 
     public Framebuffer depth(int bits, boolean stencil, boolean floating, boolean linear) {
-
         if (depth) {
             return this;
         }
@@ -124,34 +201,59 @@ public final class Framebuffer implements Resource {
         }
 
         attachments.add(new Attachment(internalFormat, format, type, linear));
-
         depth = true;
-
         return this;
-
     }
 
     @Override
     public void bind() {
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        glGetIntegerv(GL_VIEWPORT, savedViewport);
+
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
         glViewport(0, 0, width, height);
+
+        glClearColor(clearR, clearG, clearB, clearA);
+        glClearDepth(clearDepth);
+
+        if (autoClear) {
+            int clearBits = GL_COLOR_BUFFER_BIT;
+            if (depth) clearBits |= GL_DEPTH_BUFFER_BIT;
+            glClear(clearBits);
+        }
+
+        if (depthTest) glEnable(GL_DEPTH_TEST);
+        else glDisable(GL_DEPTH_TEST);
+        glDepthFunc(depthFunc);
+        glDepthMask(depthMask);
+        glDepthRange(depthRangeNear, depthRangeFar);
+
+        if (blend) glEnable(GL_BLEND);
+        else glDisable(GL_BLEND);
+        glBlendFunc(blendSrcFactor, blendDstFactor);
+        glBlendEquation(blendEquation);
+
+        if (multisampling) glEnable(GL_MULTISAMPLE);
+        else glDisable(GL_MULTISAMPLE);
+        if (cullFace) glEnable(GL_CULL_FACE);
+        else glDisable(GL_CULL_FACE);
+        glCullFace(cullFaceMode);
     }
 
     @Override
     public void unbind() {
-        glViewport(0, 0, viewport.get(2), viewport.get(3));
+        glViewport(0, 0, savedViewport.get(2), savedViewport.get(3));
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     public void clear() {
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT | (depth ? GL_DEPTH_BUFFER_BIT : 0));
+        int clearBits = GL_COLOR_BUFFER_BIT;
+        if (depth) clearBits |= GL_DEPTH_BUFFER_BIT;
+        glClear(clearBits);
     }
 
     public void clear(float r, float g, float b, float a) {
         glClearColor(r, g, b, a);
-        glClear(GL_COLOR_BUFFER_BIT | (depth ? GL_DEPTH_BUFFER_BIT : 0));
+        clear();
     }
 
     public void bindTexture(int index, int textureUnit) {
@@ -167,12 +269,11 @@ public final class Framebuffer implements Resource {
     @Override
     public void load() {
         drawBuffers = new int[attachments.size()];
-        textures    = new int[attachments.size()];
+        textures = new int[attachments.size()];
     }
 
     @Override
     public void unload() {
-
     }
 
     int framebufferId;
@@ -181,12 +282,10 @@ public final class Framebuffer implements Resource {
 
     @Override
     public void link() {
-
         framebufferId = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
 
         for (int i = 0; i < attachments.size(); i++) {
-
             Attachment attachment = attachments.get(i);
 
             textures[i] = glGenTextures();
@@ -232,6 +331,7 @@ public final class Framebuffer implements Resource {
         if (drawBuffers.length > 0) {
             glDrawBuffers(Arrays.stream(drawBuffers).filter(attachment -> attachment >= GL_COLOR_ATTACHMENT0).toArray());
         }
+
         // Check completeness
         int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -240,9 +340,7 @@ public final class Framebuffer implements Resource {
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
         attachments.clear();
-
     }
 
     @Override
@@ -254,7 +352,6 @@ public final class Framebuffer implements Resource {
 
     @Override
     public void buffer() {
-
     }
 
     @Override

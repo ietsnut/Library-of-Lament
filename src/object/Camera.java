@@ -1,5 +1,6 @@
 package object;
 
+import engine.Console;
 import entity.Terrain;
 import org.joml.*;
 import org.joml.Math;
@@ -20,7 +21,7 @@ public class Camera implements Machine {
     public static final Vector3f rotation = new Vector3f(0);
     public static final Vector3f position = new Vector3f(0, 1.7f, 0);
 
-    public static final float RANGE = 7.5f;
+    public static final float RANGE = 10f;
     public static final float DEFAULT_FOV = 90;
     public static final float SPEED = 0.015f;
     public static final float SENS  = 0.15f;
@@ -137,7 +138,8 @@ public class Camera implements Machine {
                     }
                     inside = true;
                 }
-                float dist = position.distance(entity.position);
+                // Calculate distance to bounding box instead of entity center
+                float dist = distance(position, entity);
                 if (collision > 0 && dist < RANGE && dist < distance) {
                     distance = dist;
                     intersecting = entity;
@@ -167,8 +169,24 @@ public class Camera implements Machine {
         }
     }
 
+    private static float distance(Vector3f point, Entity entity) {
+        Mesh.Collider collider = entity.mesh.collider;
+        if (collider == null || collider.min == null || collider.max == null) {
+            return point.distance(entity.position);
+        }
+        Matrix4f inverseModelMatrix = new Matrix4f(entity.model.get()).invert();
+        Vector3f localPoint = new Vector3f(point);
+        inverseModelMatrix.transformPosition(localPoint);
+        Vector3f closestPoint = new Vector3f();
+        closestPoint.x = Math.max(collider.min.x, Math.min(localPoint.x, collider.max.x));
+        closestPoint.y = Math.max(collider.min.y, Math.min(localPoint.y, collider.max.y));
+        closestPoint.z = Math.max(collider.min.z, Math.min(localPoint.z, collider.max.z));
+        entity.model.get().transformPosition(closestPoint);
+        return point.distance(closestPoint);
+    }
+
     public static void click() {
-        if (intersecting != null && intersecting instanceof Interactive interactive) {
+        if (intersecting instanceof Interactive interactive) {
             interactive.click();
         }
     }
@@ -185,19 +203,9 @@ public class Camera implements Machine {
     }
 
     public static void listen() {
-
         Camera camera = new Camera();
         camera.start(Manager.RATE * 2);
-        //Thread thread = new Thread(new Camera());
-        //thread.start();
     }
-
-/*
-    @Override
-    public void run() {
-        while (true)
-            turn();
-    }*/
 
     public static Vector3f forward() {
         return orientation.transform(new Vector3f(0, 0, 1));

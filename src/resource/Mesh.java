@@ -12,63 +12,50 @@ import org.lwjgl.BufferUtils;
 import java.io.*;
 import java.nio.*;
 
+import org.lwjgl.util.par.ParShapes;
+import org.lwjgl.util.par.ParShapesMesh;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
+
 import static org.lwjgl.opengl.GL40.*;
 
 public class Mesh implements Resource {
 
-    public int      vao, ebo;
-    public int[]    vbo = new int[2];
+    public int vao, ebo;
+    public int[] vbo = new int[2];
 
-    public int[]    indices;
-    public byte[]   vertices;
-    public float[]  uvs;
+    public int[] indices;
+    public byte[] vertices;
+    public float[] uvs;
 
     public int index;
 
-    private IntBuffer   indicesBuffer;
-    private ByteBuffer  verticesBuffer;
+    private IntBuffer indicesBuffer;
+    private ByteBuffer verticesBuffer;
     private FloatBuffer uvsBuffer;
 
     public Collider collider;
 
-    public static final Mesh QUAD = new Mesh() {
-        @Override
-        public void load() {
-            vertices = new byte[] {-1, 1, -1, -1, 1, 1, 1, -1};
-            indices  = new int[] {0, 1, 2, 2, 1, 3};
-            uvs = new float[]{ 0, 0, 1, 0, 1, 1, 0, 1 };
-        }
-        @Override
-        public int dimensions() {
-            return 2;
-        }
-        @Override
-        public String toString() {
-            return "QUAD";
-        }
-    };
-
     public static final Mesh PLANE = new Mesh() {
         @Override
         public void load() {
-            this.vertices = new byte[] {
+            this.vertices = new byte[]{
                     -1, -1, 0,  // bottom-left
                     1, -1, 0,  // bottom-right
-                    1,  1, 0,  // top-right
-                    -1,  1, 0   // top-left
+                    1, 1, 0,  // top-right
+                    -1, 1, 0   // top-left
             };
-            this.indices = new int[] {
+            this.indices = new int[]{
                     0, 1, 2,
                     2, 3, 0
             };
-            this.uvs = new float[] {
+            this.uvs = new float[]{
                     0, 1,  // bottom-left
                     1, 1,  // bottom-right
                     1, 0,  // top-right
                     0, 0   // top-left
             };
         }
-
         @Override
         public String toString() {
             return "PLANE";
@@ -78,7 +65,7 @@ public class Mesh implements Resource {
     public static final Mesh X_PLANE = new Mesh() {
         @Override
         public void load() {
-            this.vertices = new byte[] {
+            this.vertices = new byte[]{
                     // First plane vertices (X-Y plane)
                     -1, 0, 0,  // bottom-left
                     1, 0, 0,  // bottom-right
@@ -87,12 +74,12 @@ public class Mesh implements Resource {
 
                     // Second plane vertices (Z-Y plane)
                     0, 0, -1, // bottom-back
-                    0, 0,  1, // bottom-front
-                    0, 2,  1, // top-front
+                    0, 0, 1, // bottom-front
+                    0, 2, 1, // top-front
                     0, 2, -1  // top-back
             };
 
-            this.indices = new int[] {
+            this.indices = new int[]{
                     // First plane triangles
                     0, 1, 2,  // first triangle
                     2, 3, 0,  // second triangle
@@ -102,7 +89,7 @@ public class Mesh implements Resource {
                     6, 7, 4   // second triangle
             };
 
-            this.uvs = new float[] {
+            this.uvs = new float[]{
                     // First plane UVs
                     0, 1,  // bottom-left
                     1, 1,  // bottom-right
@@ -116,6 +103,7 @@ public class Mesh implements Resource {
                     0, 0   // top-back
             };
         }
+
         @Override
         public String toString() {
             return "X_PLANE";
@@ -136,7 +124,6 @@ public class Mesh implements Resource {
     public Mesh(String name, String type) {
         this.type = type;
         this.name = name;
-        //
         if (dimensions() == 3) this.queue();
     }
 
@@ -166,14 +153,14 @@ public class Mesh implements Resource {
             Console.error(e, "Failed to load", file);
             return;
         }
-        obj             = ObjUtils.convertToRenderable(obj);
-        this.indices    = ObjData.getFaceVertexIndicesArray(obj);
-        float[] vertices= ObjData.getVerticesArray(obj);
+        obj = ObjUtils.convertToRenderable(obj);
+        this.indices = ObjData.getFaceVertexIndicesArray(obj);
+        float[] vertices = ObjData.getVerticesArray(obj);
         this.vertices = new byte[vertices.length];
         for (int i = 0; i < vertices.length; i++) {
             this.vertices[i] = (byte) vertices[i];
         }
-        this.uvs        = ObjData.getTexCoordsArray(obj, 2, true);
+        this.uvs = ObjData.getTexCoordsArray(obj, 2, true);
 
     }
 
@@ -236,7 +223,7 @@ public class Mesh implements Resource {
             uvsBuffer.clear();
             uvsBuffer = null;
         }
-        if (name != null && !(this instanceof Collider)) {
+        if (dimensions() == 3 && !(this instanceof Collider)) {
             this.collider = new Collider();
         }
     }
@@ -289,10 +276,10 @@ public class Mesh implements Resource {
                 max.set(Math.max(max.x, vertices[i]), Math.max(max.y, vertices[i + 1]), Math.max(max.z, vertices[i + 2]));
             }
             size = new Vector3f(max).sub(min).length();
-            this.vertices = new byte[] {
+            this.vertices = new byte[]{
                     (byte) min.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) min.y, (byte) min.z, (byte) max.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) max.y, (byte) min.z, (byte) min.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) min.y, (byte) max.z, (byte) max.x, (byte) max.y, (byte) max.z, (byte) min.x, (byte) max.y, (byte) max.z
             };
-            this.indices = new int[] {
+            this.indices = new int[]{
                     0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
             };
             this.index = indices.length;
@@ -300,24 +287,67 @@ public class Mesh implements Resource {
 
         @Override
         public void unload() {
-            indices     = null;
-            vertices    = null;
-            uvs         = null;
-            if (type.equalsIgnoreCase("terrain")) return;
-            Mesh.this.uvs         = null;
-            Mesh.this.indices     = null;
-            Mesh.this.vertices    = null;
+            indices = null;
+            vertices = null;
+            uvs = null;
+            if (Mesh.this.type != null && Mesh.this.type.equalsIgnoreCase("terrain")) return;
+            Mesh.this.uvs = null;
+            Mesh.this.indices = null;
+            Mesh.this.vertices = null;
         }
 
         @Override
         public String toString() {
-            return Mesh.this.name;
+            return Mesh.this.toString();
         }
     }
 
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Mesh mesh && this.name.equals(mesh.name);
+    }
+
+    public enum Shape {
+
+    }
+
+    public static Mesh knot(int scale, int slices, int stacks, float radius) {
+        return new Mesh() {
+            @Override
+            public void load() {
+                try (MemoryStack stack = MemoryStack.stackPush()) {
+                    ParShapesMesh parMesh = ParShapes.par_shapes_create_trefoil_knot(slices, stacks, radius);
+                    if (parMesh == null) {
+                        Console.error("Failed to create cylinder mesh");
+                        return;
+                    }
+
+                    // Extract vertices
+                    FloatBuffer verticesFloatBuffer = parMesh.points(parMesh.npoints() * 3);
+                    this.vertices = new byte[verticesFloatBuffer.remaining()];
+                    for (int i = 0; i < this.vertices.length; i++) {
+                        this.vertices[i] = (byte) (verticesFloatBuffer.get(i) * scale);
+                    }
+
+                    // Extract UV coordinates
+                    FloatBuffer texCoordsBuffer = parMesh.tcoords(parMesh.npoints() * 2);
+                    this.uvs = new float[texCoordsBuffer.remaining()];
+                    texCoordsBuffer.get(this.uvs);
+
+                    // Extract indices
+                    IntBuffer indicesBuffer = parMesh.triangles(parMesh.ntriangles() * 3);
+                    this.indices = new int[indicesBuffer.remaining()];
+                    indicesBuffer.get(this.indices);
+
+                    ParShapes.par_shapes_free_mesh(parMesh);
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "CYLINDER" + slices + "-" + stacks;
+            }
+        };
     }
 
 }

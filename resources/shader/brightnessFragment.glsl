@@ -5,7 +5,8 @@ in vec2 fragUV;
 layout(location = 0) out vec4 color;
 
 uniform usampler2D texture1;
-uniform float brightnessThreshold;
+
+const float threshold = 0.75;
 
 void main() {
     uint value = texture(texture1, fragUV).r;
@@ -34,8 +35,8 @@ void main() {
         float brightness = dot(sceneColor.rgb, GRAYSCALE);
 
         // Extract bright areas with more aggressive scaling
-        if (brightness > brightnessThreshold) {
-            float bloomStrength = (brightness - brightnessThreshold) / (1.0 - brightnessThreshold);
+        if (brightness > threshold) {
+            float bloomStrength = (brightness - threshold) / (1.0 - threshold);
             // Boost the bloom strength significantly
             bloomStrength = pow(bloomStrength, 0.5) * 2.0;  // Power curve + multiplier for more dramatic effect
             color = vec4(sceneColor.rgb * bloomStrength, 1.0);

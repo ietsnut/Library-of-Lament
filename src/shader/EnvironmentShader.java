@@ -17,9 +17,6 @@ public class EnvironmentShader extends Shader<Scene> {
 
     public EnvironmentShader(Window window) {
         super(window, "env", "position", "uv");
-        start();
-        uniform("texture1", 0);
-        stop();
     }
 
     private void render(Entity entity) {

@@ -23,15 +23,9 @@ public class AABBShader extends Shader<Entity> {
         uniform("view",         Camera.view.buffer());
         uniform("time",         Manager.time());
         uniform("scale",        entity.mesh.collider.size);
-        glBindVertexArray(entity.mesh.collider.vao);
-        for (byte i = 0; i < attributes.length; i++) {
-            glEnableVertexAttribArray(i);
-        }
+        entity.mesh.collider.bind();
         glDrawElements(GL_LINES, entity.mesh.index, GL_UNSIGNED_INT, 0);
-        for (int i = 0; i < attributes.length; i++) {
-            glDisableVertexAttribArray(i);
-        }
-        glBindVertexArray(0);
+        entity.mesh.collider.unbind();
     }
 
 }
