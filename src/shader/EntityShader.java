@@ -1,6 +1,5 @@
 package shader;
 
-import engine.Console;
 import engine.Manager;
 import engine.Scene;
 import object.*;
