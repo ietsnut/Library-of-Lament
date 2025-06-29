@@ -1,8 +1,6 @@
 package engine;
 
-import resource.Calculation;
-import resource.Mesh;
-import resource.Mipmap;
+import resource.*;
 import shader.*;
 
 import org.lwjgl.Version;
@@ -11,7 +9,6 @@ import org.lwjgl.system.Callback;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import property.Machine;
-import resource.Resource;
 import window.*;
 
 import java.nio.*;
@@ -44,11 +41,10 @@ public class Manager {
             loop();
         } finally {
             close();
-            System.exit(0);
         }
     }
 
-    public static void open() {
+    private static void open() {
         Console.debug("Architecture", System.getProperty("os.arch"));
         Console.debug("Version", Version.getVersion());
 
@@ -153,7 +149,7 @@ public class Manager {
         }
     }
 
-    public static void close() {
+    private static void close() {
 
         Console.log("Closing...");
 
@@ -163,8 +159,8 @@ public class Manager {
 
         Control.clear();
         Machine.clear();
+        Material.shutdown();
         Resource.clear();
-        Calculation.shutdown();
         Shader.clear();
 
         for (int i = 0; i < windows.length; i++) {

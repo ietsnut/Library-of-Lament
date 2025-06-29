@@ -67,10 +67,10 @@ public class Entity {
 
     public void unbind() {
         for (Mesh mesh : meshes) {
-            mesh.unbind();
+            mesh.unlink();
         }
         for (Material material : materials) {
-            material.unbind();
+            material.unlink();
         }
     }
 

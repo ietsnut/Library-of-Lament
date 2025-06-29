@@ -68,7 +68,7 @@ public abstract class Shader<T> {
                 glUniform4f(uniform, v.x, v.y, v.z, v.w);
                 break;
             default:
-                Console.error("Unsupported type", data.getClass());
+                Console.error("Unsupported type", data.getClass().getSimpleName());
         }
     }
 

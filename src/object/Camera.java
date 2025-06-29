@@ -1,6 +1,5 @@
 package object;
 
-import engine.Console;
 import org.joml.*;
 import org.joml.Math;
 import property.*;
@@ -114,7 +113,7 @@ public class Camera implements Machine {
 
         if (Main.scene.terrain != null) {
             Terrain terrain = Main.scene.terrain;
-            if (terrain.meshes[0].loaded()) {
+            if (terrain.meshes[0].linked()) {
                 position = terrain.height(position, new Vector3f(movement));
             }
         }

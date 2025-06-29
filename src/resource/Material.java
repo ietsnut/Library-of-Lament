@@ -1,19 +1,34 @@
 package resource;
 
 import engine.Console;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL40;
+import org.lwjgl.system.MemoryStack;
 
 import javax.imageio.ImageIO;
 import java.awt.image.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.util.stream.Collectors;
 
+import static org.lwjgl.opencl.CL10.*;
 import static org.lwjgl.opengl.GL40.*;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.*;
 
 public class Material implements Resource {
+
+    private static long clContext;
+    private static long clDevice;
+    private static long clProgram;
+    private static long clKernel;
+    private static long clCommandQueue;
+    private static boolean clInitialized = false;
 
     private ByteBuffer[] mipBuffers;
     private int[] mipWidths;
@@ -23,7 +38,6 @@ public class Material implements Resource {
     private int colorMapSize;
 
     private IndexColorModel colorModel;
-    private final Mipmap mipmapper;
 
     public int id;
     public int width;
@@ -44,21 +58,23 @@ public class Material implements Resource {
 
     public static final int LINE = MIYAZAKI_16[0];
 
+    // Static initialization block for OpenCL
+    static {
+        initializeOpenCL();
+    }
+
     public Material() {
         this.file = null;
-        this.mipmapper = Mipmap.getInstance();
         this.queue();
     }
 
     public Material(String name) {
         this.file = "/resources/" + name + ".png";
-        this.mipmapper = Mipmap.getInstance();
         this.queue();
     }
 
     public Material(String type, String name) {
         this.file = "/resources/" + type + "/" + name + ".png";
-        this.mipmapper = Mipmap.getInstance();
         this.queue();
     }
 
@@ -116,7 +132,7 @@ public class Material implements Resource {
         int currentWidth = width;
         int currentHeight = height;
 
-        boolean usingOpenCL = mipmapper.isInitialized();
+        boolean usingOpenCL = clInitialized;
 
         for (int level = 0; level < mipLevels; level++) {
             mipPixels[level] = currentPixels.clone();
@@ -130,7 +146,7 @@ public class Material implements Resource {
                 // Try OpenCL first, fallback to CPU if it fails
                 byte[] nextLevelPixels = null;
                 if (usingOpenCL) {
-                    nextLevelPixels = mipmapper.generateMipLevel(
+                    nextLevelPixels = generateMipLevelOpenCL(
                             currentPixels, currentWidth, currentHeight,
                             nextWidth, nextHeight, palette, colorMapSize);
 
@@ -157,7 +173,209 @@ public class Material implements Resource {
         }
     }
 
-    // Fallback CPU implementation (original method)
+    private static void initializeOpenCL() {
+        try (MemoryStack stack = stackPush()) {
+            // Get platform
+            IntBuffer pi = stack.mallocInt(1);
+            checkCLError(clGetPlatformIDs(null, pi));
+            if (pi.get(0) == 0) {
+                Console.error("No OpenCL platforms found");
+                return;
+            }
+
+            PointerBuffer platforms = stack.mallocPointer(pi.get(0));
+            checkCLError(clGetPlatformIDs(platforms, (IntBuffer) null));
+            long platform = platforms.get(0);
+
+            // Get device - try GPU first, then CPU
+            checkCLError(clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, null, pi));
+            long deviceType = CL_DEVICE_TYPE_GPU;
+            if (pi.get(0) == 0) {
+                Console.warning("No GPU devices found, trying CPU");
+                checkCLError(clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, null, pi));
+                deviceType = CL_DEVICE_TYPE_CPU;
+                if (pi.get(0) == 0) {
+                    Console.error("No OpenCL devices found");
+                    return;
+                }
+            }
+
+            PointerBuffer devices = stack.mallocPointer(pi.get(0));
+            checkCLError(clGetDeviceIDs(platform, deviceType, devices, (IntBuffer) null));
+            clDevice = devices.get(0);
+
+            // Create context
+            PointerBuffer contextProps = stack.mallocPointer(3);
+            contextProps.put(CL_CONTEXT_PLATFORM).put(platform).put(0);
+            contextProps.flip();
+
+            clContext = clCreateContext(contextProps, clDevice, null, NULL, pi);
+            checkCLError(pi.get(0));
+
+            // Create command queue
+            clCommandQueue = clCreateCommandQueue(clContext, clDevice, 0, pi);
+            checkCLError(pi.get(0));
+
+            // Load and compile the mipmap kernel
+            if (!loadMipmapKernel()) {
+                shutdown();
+                return;
+            }
+
+            clInitialized = true;
+            Console.log("OpenCL:",
+                    (deviceType == CL_DEVICE_TYPE_GPU ? "GPU" : "CPU"));
+
+        } catch (Exception e) {
+            Console.error("Failed to initialize OpenCL", e.getMessage());
+            shutdown();
+        }
+    }
+
+    private static boolean loadMipmapKernel() {
+        try (MemoryStack stack = stackPush()) {
+            // Load kernel source from file
+            String source = loadKernelSource("/resources/calculation/mipmap.cl");
+            if (source == null) {
+                return false;
+            }
+
+            IntBuffer pi = stack.mallocInt(1);
+
+            // Create program
+            PointerBuffer strings = stack.mallocPointer(1);
+            PointerBuffer lengths = stack.mallocPointer(1);
+
+            ByteBuffer sourceBuffer = stack.UTF8(source);
+            strings.put(0, sourceBuffer);
+            lengths.put(0, sourceBuffer.remaining());
+
+            clProgram = clCreateProgramWithSource(clContext, strings, lengths, pi);
+            checkCLError(pi.get(0));
+
+            // Build program
+            int ret = clBuildProgram(clProgram, clDevice, "", null, NULL);
+            if (ret != CL_SUCCESS) {
+                // Get build log
+                PointerBuffer pp = stack.mallocPointer(1);
+                clGetProgramBuildInfo(clProgram, clDevice, CL_PROGRAM_BUILD_LOG, (ByteBuffer) null, pp);
+
+                int logSize = (int) pp.get(0);
+                ByteBuffer buffer = stack.malloc(logSize);
+                clGetProgramBuildInfo(clProgram, clDevice, CL_PROGRAM_BUILD_LOG, buffer, null);
+
+                String buildLog = memUTF8(buffer);
+                Console.error("OpenCL build failed", buildLog);
+                clReleaseProgram(clProgram);
+                clProgram = 0;
+                return false;
+            }
+
+            // Create kernel
+            clKernel = clCreateKernel(clProgram, "generate_mipmap", pi);
+            checkCLError(pi.get(0));
+
+            Console.log("Loaded OpenCL kernel.");
+            return true;
+
+        } catch (Exception e) {
+            Console.error("Failed to load mipmap kernel", e.getMessage());
+            return false;
+        }
+    }
+
+    private static String loadKernelSource(String filename) {
+        try (InputStream in = Material.class.getResourceAsStream(filename);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+
+            if (in == null) {
+                Console.error("Failed to load kernel file:", filename);
+                return null;
+            }
+
+            return reader.lines().collect(Collectors.joining("\n"));
+
+        } catch (IOException e) {
+            Console.error("Failed to read kernel file:", filename, e.getMessage());
+            return null;
+        }
+    }
+
+    private byte[] generateMipLevelOpenCL(byte[] sourcePixels, int sourceWidth, int sourceHeight,
+                                          int targetWidth, int targetHeight, int[] palette, int colorMapSize) {
+        if (!clInitialized) {
+            return null;
+        }
+
+        // Synchronize OpenCL operations to prevent mixing between textures
+        // This is necessary because the kernel arguments are set on a shared static kernel
+        // Without synchronization, concurrent mipmap generations could overwrite each other's arguments
+        synchronized (Material.class) {
+            try (MemoryStack stack = stackPush()) {
+                IntBuffer errcode_ret = stack.mallocInt(1);
+
+                // Create source buffer
+                ByteBuffer sourceByteBuffer = BufferUtils.createByteBuffer(sourcePixels.length);
+                sourceByteBuffer.put(sourcePixels).flip();
+                long sourceBuffer = clCreateBuffer(clContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sourceByteBuffer, errcode_ret);
+                checkCLError(errcode_ret.get(0));
+
+                // Create target buffer
+                long targetBuffer = clCreateBuffer(clContext, CL_MEM_WRITE_ONLY,
+                        (long)targetWidth * targetHeight, errcode_ret);
+                checkCLError(errcode_ret.get(0));
+
+                // Create palette buffer
+                IntBuffer paletteBuffer = BufferUtils.createIntBuffer(palette.length);
+                paletteBuffer.put(palette).flip();
+                long paletteBufferCL = clCreateBuffer(clContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        paletteBuffer, errcode_ret);
+                checkCLError(errcode_ret.get(0));
+
+                // Set kernel arguments
+                clSetKernelArg1p(clKernel, 0, sourceBuffer);
+                clSetKernelArg1p(clKernel, 1, targetBuffer);
+                clSetKernelArg1p(clKernel, 2, paletteBufferCL);
+                clSetKernelArg1i(clKernel, 3, sourceWidth);
+                clSetKernelArg1i(clKernel, 4, sourceHeight);
+                clSetKernelArg1i(clKernel, 5, targetWidth);
+                clSetKernelArg1i(clKernel, 6, targetHeight);
+                clSetKernelArg1i(clKernel, 7, colorMapSize);
+
+                // Execute kernel
+                PointerBuffer globalWS = stack.mallocPointer(2);
+                globalWS.put(0, targetWidth);
+                globalWS.put(1, targetHeight);
+
+                checkCLError(clEnqueueNDRangeKernel(clCommandQueue, clKernel, 2, null, globalWS, null, null, null));
+
+                // Wait for completion
+                clFinish(clCommandQueue);
+
+                // Read result
+                ByteBuffer resultBuffer = BufferUtils.createByteBuffer(targetWidth * targetHeight);
+                checkCLError(clEnqueueReadBuffer(clCommandQueue, targetBuffer, true, 0L, resultBuffer, null, null));
+
+                // Convert ByteBuffer to byte array
+                byte[] result = new byte[targetWidth * targetHeight];
+                resultBuffer.get(result);
+
+                // Cleanup buffers
+                clReleaseMemObject(sourceBuffer);
+                clReleaseMemObject(targetBuffer);
+                clReleaseMemObject(paletteBufferCL);
+
+                return result;
+
+            } catch (Exception e) {
+                Console.error("OpenCL mipmap generation failed:", e.getMessage());
+                return null;
+            }
+        } // end synchronized block
+    }
+
+    // Fallback CPU implementation
     private byte[] generateMipLevelCPU(byte[] sourcePixels, int sourceWidth, int sourceHeight,
                                        int targetWidth, int targetHeight, int[] palette) {
         byte[] targetPixels = new byte[targetWidth * targetHeight];
@@ -238,17 +456,12 @@ public class Material implements Resource {
     }
 
     @Override
-    public boolean loaded() {
-        return mipPixels != null;
-    }
-
-    @Override
-    public boolean binded() {
+    public boolean linked() {
         return this.id != 0;
     }
 
     @Override
-    public void bind() {
+    public void link() {
         if (mipBuffers == null) {
             Console.warning("No buffers", file);
             return;
@@ -293,7 +506,7 @@ public class Material implements Resource {
     }
 
     @Override
-    public void unbind() {
+    public void unlink() {
         if (id != 0) {
             glDeleteTextures(id);
             id = 0;
@@ -301,7 +514,46 @@ public class Material implements Resource {
     }
 
     @Override
+    public void bind() {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, id);
+    }
+
+    @Override
+    public void unbind() {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof Material material && this.file.equals(material.file);
+    }
+
+    private static void checkCLError(int error) {
+        if (error != CL_SUCCESS) {
+            throw new RuntimeException("OpenCL error " + error);
+        }
+    }
+
+    // Call this when shutting down the application
+    public static synchronized void shutdown() {
+        if (clKernel != 0) {
+            clReleaseKernel(clKernel);
+            clKernel = 0;
+        }
+        if (clProgram != 0) {
+            clReleaseProgram(clProgram);
+            clProgram = 0;
+        }
+        if (clCommandQueue != 0) {
+            clReleaseCommandQueue(clCommandQueue);
+            clCommandQueue = 0;
+        }
+        if (clContext != 0) {
+            clReleaseContext(clContext);
+            clContext = 0;
+        }
+        clInitialized = false;
     }
 }

@@ -2,30 +2,29 @@ package resource;
 
 import engine.Console;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public interface Resource extends Runnable {
+public interface Resource extends Runnable, Serializable {
 
     ConcurrentLinkedQueue<Resource> LOADED = new ConcurrentLinkedQueue<>();
-    List<Resource> BINDED = new ArrayList<>();
-    ExecutorService THREADS = Executors.newVirtualThreadPerTaskExecutor();
+    ExecutorService                 LOADER = Executors.newVirtualThreadPerTaskExecutor();
+    List<Resource>                  LINKED = new ArrayList<>();
 
     void load();
-
+    void buffer();
     void unload();
 
-    void bind();
+    void link();
+    void unlink();
 
+    void bind();
     void unbind();
 
-    void buffer();
-
-    boolean loaded();
-
-    boolean binded();
+    boolean linked();
 
     default void run() {
         try {
@@ -44,25 +43,26 @@ public interface Resource extends Runnable {
             this.load();
             this.buffer();
             this.unload();
-            this.bind();
-            BINDED.add(this);
+            this.link();
+            LINKED.add(this);
         } catch (Exception e) {
             Console.error(e);
         }
         return this;
     }
 
-    default void queue() {
-        THREADS.submit(this);
+    default Resource queue() {
+        LOADER.submit(this);
+        return this;
     }
 
     static void process() {
         Resource loaded;
         while ((loaded = LOADED.poll()) != null) {
             try {
-                Console.log("Binding", loaded.toString());
-                loaded.bind();
-                BINDED.add(loaded);
+                Console.log("Linking", loaded.toString());
+                loaded.link();
+                LINKED.add(loaded);
                 System.gc();
             } catch (Exception e) {
                 Console.error(e);
@@ -71,14 +71,10 @@ public interface Resource extends Runnable {
     }
 
     static void clear() {
-        THREADS.shutdown();
+        LOADER.shutdown();
         LOADED.clear();
-        for (Resource resource : BINDED) {
-            Console.log("Unbinding", resource.toString());
-            resource.unbind();
-        }
-        BINDED.forEach(Resource::unbind);
-        BINDED.clear();
+        LINKED.forEach(Resource::unlink);
+        LINKED.clear();
     }
 
 }

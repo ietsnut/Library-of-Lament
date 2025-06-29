@@ -151,6 +151,7 @@ public class Mesh implements Resource {
 
     @Override
     public void load() {
+        // TODO: check if a binary encoded file is present, if yes, decode and load it, if not, load the model and encode it for next time
         if (file == null) {
             return;
         }
@@ -172,6 +173,7 @@ public class Mesh implements Resource {
             this.vertices[i] = (byte) vertices[i];
         }
         this.uvs        = ObjData.getTexCoordsArray(obj, 2, true);
+
     }
 
     @Override
@@ -189,12 +191,7 @@ public class Mesh implements Resource {
     }
 
     @Override
-    public boolean loaded() {
-        return index != 0;
-    }
-
-    @Override
-    public boolean binded() {
+    public boolean linked() {
         return vao != 0;
     }
 
@@ -203,7 +200,7 @@ public class Mesh implements Resource {
     }
 
     @Override
-    public void bind() {
+    public void link() {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
         if (indicesBuffer != null && indicesBuffer.hasRemaining()) {
@@ -249,12 +246,34 @@ public class Mesh implements Resource {
     }
 
     @Override
-    public void unbind() {
+    public void unlink() {
         glDeleteVertexArrays(vao);
         glDeleteBuffers(ebo);
         for (int id : vbo) {
             glDeleteBuffers(id);
         }
+    }
+
+    @Override
+    public void bind() {
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+    }
+
+    @Override
+    public void unbind() {
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glBindVertexArray(0);
+    }
+
+    public void encode() {
+        //TODO: save the mesh data as bytes to a file next to the model, which will be used next time to load it if available
+    }
+
+    public void decode() {
+        //TODO: decode the available mesh data straight from a binary file
     }
 
     public class Collider extends Mesh {

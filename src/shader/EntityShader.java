@@ -16,18 +16,11 @@ public class EntityShader extends Shader<Scene> {
 
     private void render(Entity entity) {
         uniform("model", entity.model.buffer());
-        glBindVertexArray(entity.meshes[entity.state].vao);
-        for (byte i = 0; i < attributes.length; i++) {
-            glEnableVertexAttribArray(i);
-        }
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, entity.materials[entity.state].id);
+        entity.meshes[entity.state].bind();
+        entity.materials[entity.state].bind();
         glDrawElements(GL_TRIANGLES, entity.meshes[entity.state].index, GL_UNSIGNED_INT, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        for (int i = 0; i < attributes.length; i++) {
-            glDisableVertexAttribArray(i);
-        }
-        glBindVertexArray(0);
+        entity.materials[entity.state].unbind();
+        entity.meshes[entity.state].unbind();
     }
 
     @Override
@@ -37,7 +30,7 @@ public class EntityShader extends Shader<Scene> {
         uniform("time",                 Manager.time());
         uniform("texture1",             0);
         for (Entity entity : scene.foreground) {
-            if (entity.meshes[entity.state].binded() && entity.materials[entity.state].binded()) {
+            if (entity.meshes[entity.state].linked() && entity.materials[entity.state].linked()) {
                 render(entity);
             }
         }

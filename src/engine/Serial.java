@@ -5,7 +5,6 @@ import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import static resource.Resource.THREADS;
 
 public class Serial implements Runnable {
 

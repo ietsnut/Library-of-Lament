@@ -37,7 +37,7 @@ public class FBO implements Resource {
     }
 
     @Override
-    public void bind() {
+    public void link() {
 
         this.framebuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, this.framebuffer);
@@ -75,10 +75,21 @@ public class FBO implements Resource {
     }
 
     @Override
-    public void unbind() {
+    public void unlink() {
         glDeleteTextures(this.textures);
         glDeleteFramebuffers(this.framebuffer);
         glDeleteBuffers(this.buffers);
+    }
+
+    @Override
+    public void bind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, this.framebuffer);
+        glViewport(0, 0, width, height);
+    }
+
+    @Override
+    public void unbind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     @Override
@@ -87,12 +98,7 @@ public class FBO implements Resource {
     }
 
     @Override
-    public boolean loaded() {
-        return true;
-    }
-
-    @Override
-    public boolean binded() {
+    public boolean linked() {
         return framebuffer != 0 &&
                 java.util.Arrays.stream(textures).allMatch(t -> t != 0) &&
                 java.util.Arrays.stream(buffers).allMatch(b -> b != 0);

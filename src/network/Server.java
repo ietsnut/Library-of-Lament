@@ -12,8 +12,8 @@ public class Server extends Thread {
 
     public static List<Node> nodes = new ArrayList<>();
 
-    public static void listen() {
-        new Server().start();
+    public Server() {
+        start();
     }
 
     @Override

@@ -73,7 +73,6 @@ public class Node {
         @Override
         public void turn() {
             if (!socket.isClosed()) {
-                System.out.println("NODE OUT:\tHello from the big server!");
                 try {
                     byte[] message = "Hello from the big server!".getBytes();
                     out.write(message);

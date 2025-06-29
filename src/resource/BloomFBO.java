@@ -29,7 +29,7 @@ public class BloomFBO implements Resource {
     }
 
     @Override
-    public void bind() {
+    public void link() {
         this.framebuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, this.framebuffer);
 
@@ -57,7 +57,7 @@ public class BloomFBO implements Resource {
     }
 
     @Override
-    public void unbind() {
+    public void unlink() {
         if (colorTexture != 0) {
             glDeleteTextures(colorTexture);
         }
@@ -67,17 +67,22 @@ public class BloomFBO implements Resource {
     }
 
     @Override
+    public void bind() {
+
+    }
+
+    @Override
+    public void unbind() {
+
+    }
+
+    @Override
     public void buffer() {
 
     }
 
     @Override
-    public boolean loaded() {
-        return true;
-    }
-
-    @Override
-    public boolean binded() {
+    public boolean linked() {
         return framebuffer != 0 && colorTexture != 0;
     }
 

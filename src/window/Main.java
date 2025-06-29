@@ -1,24 +1,17 @@
 package window;
 
-import engine.Console;
 import engine.Control;
 import engine.Manager;
 import engine.Scene;
 import object.Camera;
 import org.joml.Vector2f;
-import resource.BloomFBO;
+import resource.*;
 import property.GUI;
-import resource.FBO;
 import org.lwjgl.opengl.GL;
-import resource.Material;
-import resource.Mesh;
-import resource.Resource;
-import scene.Dungeon;
 import scene.Forest;
 import shader.*;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL40.*;
 
 public class Main extends Window {
 
@@ -85,6 +78,12 @@ public class Main extends Window {
         gui     = new GUI(new Material("ui"), new Vector2f(0.5f, 0.5f), new Vector2f(0.5f, 0.5f), 0);
 
         scene   = new Forest();
+
+        NewFBO newFBO = (NewFBO) new NewFBO(width, height)
+                .attach(1, 8, false, false, false)
+                .depth(32, false, true, true)
+                .queue();
+
         Resource.process();
         Camera.listen();
     }
@@ -96,7 +95,7 @@ public class Main extends Window {
         if (Camera.intersecting != null &&
                 Camera.intersecting.meshes[Camera.intersecting.state] != null &&
                 Camera.intersecting.meshes[Camera.intersecting.state].collider != null &&
-                Camera.intersecting.meshes[Camera.intersecting.state].collider.binded()) {
+                Camera.intersecting.meshes[Camera.intersecting.state].collider.linked()) {
             aabbShader.render(Camera.intersecting);
         }
         environmentShader.render(scene);
@@ -130,11 +129,10 @@ public class Main extends Window {
 
     @Override
     public void clear() {
-        scene.terrain.cleanup();
-        fbo.unbind();
-        if (brightnessFBO != null) brightnessFBO.unbind();
-        if (pingPongFBO1 != null) pingPongFBO1.unbind();
-        if (pingPongFBO2 != null) pingPongFBO2.unbind();
+        fbo.unlink();
+        if (brightnessFBO != null) brightnessFBO.unlink();
+        if (pingPongFBO1 != null) pingPongFBO1.unlink();
+        if (pingPongFBO2 != null) pingPongFBO2.unlink();
     }
 
     // Utility methods for runtime bloom control

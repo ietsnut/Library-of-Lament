@@ -1,6 +1,5 @@
 package shader;
 
-import engine.Console;
 import engine.Scene;
 import object.Camera;
 import property.Entity;
@@ -49,12 +48,12 @@ public class EnvironmentShader extends Shader<Scene> {
         uniform("fogGradient", 1.5f);
         uniform("texture1", 0);
         for (Entity entity : scene.background) {
-            if (entity.meshes[entity.state].binded() && entity.materials[entity.state].binded()) {
+            if (entity.meshes[entity.state].linked() && entity.materials[entity.state].linked()) {
                 render(entity);
             }
         }
-        if (scene.terrain != null && scene.terrain.meshes[scene.terrain.state].binded()
-                && scene.terrain.materials[scene.terrain.state].binded()) {
+        if (scene.terrain != null && scene.terrain.meshes[scene.terrain.state].linked()
+                && scene.terrain.materials[scene.terrain.state].linked()) {
             render(scene.terrain);
         }
     }

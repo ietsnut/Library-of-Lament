@@ -20,7 +20,6 @@ public abstract class Scene {
         }
         foreground.clear();
         background.clear();
-        terrain.cleanup();
         terrain.unbind();
         terrain = null;
         System.gc();
