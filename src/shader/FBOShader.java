@@ -1,18 +1,14 @@
 package shader;
 
-import engine.Console;
-import engine.Manager;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL40;
-import resource.FBO;
-import resource.Mesh;
+import resource.Framebuffer;
 import window.Window;
 
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public class FBOShader extends Shader<FBO> {
+public class FBOShader extends Shader<Framebuffer> {
 
     private final IntBuffer oldViewport = BufferUtils.createIntBuffer(4);
 
@@ -25,10 +21,8 @@ public class FBOShader extends Shader<FBO> {
         super(window, "fbo", "position");
     }
 
-    public void bind(FBO fbo) {
-        glGetIntegerv(GL_VIEWPORT, oldViewport);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo.framebuffer);
-        glViewport(0, 0, fbo.width, fbo.height);
+    public void bind(Framebuffer framebuffer) {
+        framebuffer.bind();
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // glEnable(GL_MULTISAMPLE);
@@ -38,12 +32,6 @@ public class FBOShader extends Shader<FBO> {
         glDisable(GL_BLEND);
         glDepthFunc(GL_LESS);
         glDepthMask(true);
-    }
-
-    public void unbind(FBO fbo) {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, oldViewport.get(2), oldViewport.get(3));
-        // glEnable(GL_MULTISAMPLE);
     }
 
     public void setBloomTexture(int texture) {
@@ -56,28 +44,28 @@ public class FBOShader extends Shader<FBO> {
     }
 
     @Override
-    protected void shader(FBO fbo) {
+    protected void shader(Framebuffer framebuffer) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
-        uniform("width", fbo.width);
-        uniform("height", fbo.height);
+        uniform("width", framebuffer.width);
+        uniform("height", framebuffer.height);
         uniform("enableBloom", enableBloom);
         uniform("bloomIntensity", bloomIntensity);
 
         glBindVertexArray(window.quad.vao);
         glEnableVertexAttribArray(0);
 
+
         // Bind FBO textures
-        for (int i = 0; i < fbo.textures.length; i++) {
+        for (int i = 0; i < framebuffer.textures.length; i++) {
             uniform("texture" + (i + 1), i);
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, fbo.textures[i]);
+            framebuffer.bindTexture(i, i);
         }
 
         // Bind bloom texture if enabled
         if (enableBloom && bloomTexture != 0) {
-            int bloomSlot = fbo.textures.length;
+            int bloomSlot = framebuffer.textures.length;
             uniform("bloomTexture", bloomSlot);
             glActiveTexture(GL_TEXTURE0 + bloomSlot);
             glBindTexture(GL_TEXTURE_2D, bloomTexture);
@@ -86,12 +74,12 @@ public class FBOShader extends Shader<FBO> {
         glDrawElements(GL_TRIANGLES, window.quad.index, GL_UNSIGNED_INT, 0);
 
         // Cleanup textures
-        for (int i = 0; i < fbo.textures.length; i++) {
+        for (int i = 0; i < framebuffer.textures.length; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         if (enableBloom && bloomTexture != 0) {
-            glActiveTexture(GL_TEXTURE0 + fbo.textures.length);
+            glActiveTexture(GL_TEXTURE0 + framebuffer.textures.length);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 

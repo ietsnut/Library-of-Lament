@@ -31,8 +31,6 @@ public class Mesh implements Resource {
 
     public Collider collider;
 
-    private final String file;
-
     public static final Mesh QUAD = new Mesh() {
         @Override
         public void load() {
@@ -124,36 +122,39 @@ public class Mesh implements Resource {
         }
     };
 
+    private final String name;
+    private final String type;
+
     public Mesh() {
-        this.file = null;
-        if (dimensions() == 3) this.queue();
+        this(null, null);
     }
 
     public Mesh(String name) {
-        this.file = "/resources/" + name + ".obj";
-        this.queue();
+        this(name, null);
     }
 
-    public Mesh(String type, String name) {
-        this.file = "/resources/" + type + "/" + name + ".obj";
-        this.queue();
-    }
-
-    public Mesh(String type, String name, int state) {
-        this.file = "/resources/" + type + "/" + name + "_" + state + ".obj";
-        this.queue();
+    public Mesh(String name, String type) {
+        this.type = type;
+        this.name = name;
+        //
+        if (dimensions() == 3) this.queue();
     }
 
     @Override
     public String toString() {
-        return file.replace("/resources/", "");
+        return name;
     }
 
     @Override
     public void load() {
-        // TODO: check if a binary encoded file is present, if yes, decode and load it, if not, load the model and encode it for next time
-        if (file == null) {
+        if (name == null) {
             return;
+        }
+        String file;
+        if (type == null) {
+            file = "/resources/" + name + ".obj";
+        } else {
+            file = "/resources/" + type + "/" + name + ".obj";
         }
         Obj obj;
         try (InputStream in = getClass().getResourceAsStream(file)) {
@@ -235,7 +236,7 @@ public class Mesh implements Resource {
             uvsBuffer.clear();
             uvsBuffer = null;
         }
-        if (file != null && !(this instanceof Collider)) {
+        if (name != null && !(this instanceof Collider)) {
             this.collider = new Collider();
         }
     }
@@ -266,14 +267,6 @@ public class Mesh implements Resource {
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glBindVertexArray(0);
-    }
-
-    public void encode() {
-        //TODO: save the mesh data as bytes to a file next to the model, which will be used next time to load it if available
-    }
-
-    public void decode() {
-        //TODO: decode the available mesh data straight from a binary file
     }
 
     public class Collider extends Mesh {
@@ -310,7 +303,7 @@ public class Mesh implements Resource {
             indices     = null;
             vertices    = null;
             uvs         = null;
-            if (file.contains("terrain")) return;
+            if (type.equalsIgnoreCase("terrain")) return;
             Mesh.this.uvs         = null;
             Mesh.this.indices     = null;
             Mesh.this.vertices    = null;
@@ -318,14 +311,13 @@ public class Mesh implements Resource {
 
         @Override
         public String toString() {
-            return "collider " + Mesh.this.file;
+            return Mesh.this.name;
         }
-
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Mesh mesh && this.file.equals(mesh.file);
+        return obj instanceof Mesh mesh && this.name.equals(mesh.name);
     }
 
 }

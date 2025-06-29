@@ -42,8 +42,10 @@ public class Material implements Resource {
     public int id;
     public int width;
     public int height;
+    public int states;
 
-    private final String file;
+    private final String type;
+    private final String name;
     private byte[] pixels;
 
     private static final int MAX_MIP_LEVELS = 8;
@@ -58,33 +60,50 @@ public class Material implements Resource {
 
     public static final int LINE = MIYAZAKI_16[0];
 
-    // Static initialization block for OpenCL
     static {
         initializeOpenCL();
     }
 
     public Material() {
-        this.file = null;
-        this.queue();
+        this(null, null, 1);
     }
 
     public Material(String name) {
-        this.file = "/resources/" + name + ".png";
-        this.queue();
+        this(name, null, 1);
     }
 
-    public Material(String type, String name) {
-        this.file = "/resources/" + type + "/" + name + ".png";
+    public Material(String name, String type) {
+        this(name, type, 1);
+    }
+
+    public Material(String name, String type, int states) {
+        this.type = type;
+        this.name = name;
+        this.states = states;
         this.queue();
     }
 
     @Override
     public String toString() {
-        return file.replace("/resources/", "");
+        return name;
     }
 
     @Override
     public void load() {
+        if (states > 1) {
+            loadAtlas();
+        } else {
+            loadSingle();
+        }
+    }
+
+    private void loadSingle() {
+        String file;
+        if (type == null) {
+            file = "/resources/" + name + ".png";
+        } else {
+            file = "/resources/" + type + "/" + name + ".png";
+        }
         try (InputStream in = Material.class.getResourceAsStream(file)) {
             if (in == null) {
                 Console.warning("Failed to load", file);
@@ -108,6 +127,76 @@ public class Material implements Resource {
             generateMipLevels();
         } catch (IOException e) {
             Console.error("Failed to load", file);
+        }
+    }
+
+    private void loadAtlas() {
+        try {
+            BufferedImage[] stateImages = new BufferedImage[states];
+            int stateWidth = 0, stateHeight = 0;
+            IndexColorModel sharedColorModel = null;
+
+            // Load all state textures
+            for (int i = 0; i < states; i++) {
+                String stateFile = "/resources/" + type + "/" + name + i + ".png";
+                try (InputStream in = Material.class.getResourceAsStream(stateFile)) {
+                    if (in == null) {
+                        Console.warning("Failed to load state", stateFile);
+                        return;
+                    }
+                    BufferedImage image = ImageIO.read(in);
+                    if (image == null) {
+                        Console.warning("Failed to load state", stateFile);
+                        return;
+                    }
+
+                    if (i == 0) {
+                        stateWidth = image.getWidth();
+                        stateHeight = image.getHeight();
+                        if (!(image.getColorModel() instanceof IndexColorModel)) {
+                            Console.error("Unexpected format", stateFile);
+                            return;
+                        }
+                        sharedColorModel = (IndexColorModel) image.getColorModel();
+                    } else {
+                        // Verify all states have the same dimensions and color model
+                        if (image.getWidth() != stateWidth || image.getHeight() != stateHeight) {
+                            Console.error("State texture size mismatch", stateFile);
+                            return;
+                        }
+                    }
+
+                    stateImages[i] = image;
+                }
+            }
+
+            // Create atlas (horizontal arrangement)
+            this.width = stateWidth * states;
+            this.height = stateHeight;
+            this.colorModel = sharedColorModel;
+            this.colorMapSize = sharedColorModel.getMapSize();
+
+            // Combine all state textures into one atlas
+            pixels = new byte[width * height];
+
+            for (int state = 0; state < states; state++) {
+                WritableRaster raster = stateImages[state].getRaster();
+                byte[] statePixels = ((DataBufferByte) raster.getDataBuffer()).getData();
+
+                // Copy state texture to atlas
+                for (int y = 0; y < stateHeight; y++) {
+                    for (int x = 0; x < stateWidth; x++) {
+                        int srcIndex = y * stateWidth + x;
+                        int dstIndex = y * width + (state * stateWidth + x);
+                        pixels[dstIndex] = statePixels[srcIndex];
+                    }
+                }
+            }
+
+            generateMipLevels();
+
+        } catch (IOException e) {
+            Console.error("Failed to load atlas", name);
         }
     }
 
@@ -235,7 +324,7 @@ public class Material implements Resource {
     private static boolean loadMipmapKernel() {
         try (MemoryStack stack = stackPush()) {
             // Load kernel source from file
-            String source = loadKernelSource("/resources/calculation/mipmap.cl");
+            String source = loadKernelSource();
             if (source == null) {
                 return false;
             }
@@ -275,7 +364,6 @@ public class Material implements Resource {
             clKernel = clCreateKernel(clProgram, "generate_mipmap", pi);
             checkCLError(pi.get(0));
 
-            Console.log("Loaded OpenCL kernel.");
             return true;
 
         } catch (Exception e) {
@@ -284,19 +372,15 @@ public class Material implements Resource {
         }
     }
 
-    private static String loadKernelSource(String filename) {
-        try (InputStream in = Material.class.getResourceAsStream(filename);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+    private static String loadKernelSource() {
+        try (InputStream in = Material.class.getResourceAsStream("/resources/calculation/mipmap.cl")) {
+            assert in != null;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                return reader.lines().collect(Collectors.joining("\n"));
 
-            if (in == null) {
-                Console.error("Failed to load kernel file:", filename);
-                return null;
             }
-
-            return reader.lines().collect(Collectors.joining("\n"));
-
         } catch (IOException e) {
-            Console.error("Failed to read kernel file:", filename, e.getMessage());
+            Console.error("Failed to read kernel file:", "/resources/calculation/mipmap.cl", e.getMessage());
             return null;
         }
     }
@@ -444,7 +528,7 @@ public class Material implements Resource {
     @Override
     public void buffer() {
         if (mipPixels == null) {
-            Console.warning("No mipmaps", file);
+            Console.warning("No mipmaps", name);
             return;
         }
         mipBuffers = new ByteBuffer[mipLevels];
@@ -463,7 +547,7 @@ public class Material implements Resource {
     @Override
     public void link() {
         if (mipBuffers == null) {
-            Console.warning("No buffers", file);
+            Console.warning("No buffers", name);
             return;
         }
 
@@ -527,7 +611,7 @@ public class Material implements Resource {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Material material && this.file.equals(material.file);
+        return obj instanceof Material material && this.name.equals(material.name);
     }
 
     private static void checkCLError(int error) {

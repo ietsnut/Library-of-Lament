@@ -1,5 +1,6 @@
 package shader;
 
+import engine.Console;
 import engine.Scene;
 import object.Camera;
 import property.Entity;
@@ -23,18 +24,13 @@ public class EnvironmentShader extends Shader<Scene> {
 
     private void render(Entity entity) {
         uniform("model", entity.model.buffer());
-        glBindVertexArray(entity.meshes[entity.state].vao);
-        for (byte i = 0; i < attributes.length; i++) {
-            glEnableVertexAttribArray(i);
-        }
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, entity.materials[entity.state].id);
-        glDrawElements(GL_TRIANGLES, entity.meshes[entity.state].index, GL_UNSIGNED_INT, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        for (int i = 0; i < attributes.length; i++) {
-            glDisableVertexAttribArray(i);
-        }
-        glBindVertexArray(0);
+        uniform("state", entity.state);
+        uniform("states", entity.states);
+        entity.mesh.bind();
+        entity.material.bind();
+        glDrawElements(GL_TRIANGLES, entity.mesh.index, GL_UNSIGNED_INT, 0);
+        entity.material.unbind();
+        entity.mesh.unbind();
     }
 
     @Override
@@ -42,18 +38,15 @@ public class EnvironmentShader extends Shader<Scene> {
         glEnable(GL_DEPTH_TEST);
         uniform("projection", Camera.projection.buffer());
         uniform("view", Camera.view.buffer());
-        // uniform("fogDensity", 0.04f);
-        // uniform("fogGradient", 1.5f);
         uniform("fogDensity", 0.02f);
         uniform("fogGradient", 1.5f);
         uniform("texture1", 0);
         for (Entity entity : scene.background) {
-            if (entity.meshes[entity.state].linked() && entity.materials[entity.state].linked()) {
+            if (entity.mesh.linked() && entity.material.linked()) {
                 render(entity);
             }
         }
-        if (scene.terrain != null && scene.terrain.meshes[scene.terrain.state].linked()
-                && scene.terrain.materials[scene.terrain.state].linked()) {
+        if (scene.terrain != null && scene.terrain.mesh.linked() && scene.terrain.material.linked()) {
             render(scene.terrain);
         }
     }

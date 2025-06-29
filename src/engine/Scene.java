@@ -1,5 +1,6 @@
 package engine;
 
+import entity.Terrain;
 import property.*;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ public abstract class Scene {
 
     public Terrain terrain;
 
-    public void clear() {
+    public void unbind() {
         for (Entity entity : foreground) {
             entity.unbind();
         }

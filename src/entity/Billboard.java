@@ -1,14 +1,15 @@
-package property;
+package entity;
 
 
 import object.Camera;
+import property.Entity;
 import resource.Mesh;
 import org.joml.Vector3f;
 
 public class Billboard extends Entity {
 
     public Billboard(String name) {
-        super(Mesh.PLANE, name);
+        super(name, 1, Mesh.PLANE);
     }
 
     @Override

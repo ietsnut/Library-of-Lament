@@ -1,16 +1,13 @@
-package property;
+package entity;
 
 import object.Camera;
 import org.joml.Vector3f;
-import resource.Mesh;
+import property.Entity;
 
 public class Terrain extends Entity {
 
-    private final Mesh terrain;
-
     public Terrain(String name) {
-        super(name);
-        terrain = meshes[state];
+        super(name, 1);
         this.update();
     }
 
@@ -30,12 +27,12 @@ public class Terrain extends Entity {
     private final Vector3f faceNormal = new Vector3f();
 
     public float height(float xQuery, float zQuery) {
-        for (int t = 0; t < terrain.indices.length; t += 3) {
+        for (int t = 0; t < mesh.indices.length; t += 3) {
             for (int i = 0; i < 3; i++) {
-                idx[i] = terrain.indices[t + i] * 3;
-                x[i] = terrain.vertices[idx[i]];
-                y[i] = terrain.vertices[idx[i] + 1];
-                z[i] = terrain.vertices[idx[i] + 2];
+                idx[i] = mesh.indices[t + i] * 3;
+                x[i] = mesh.vertices[idx[i]];
+                y[i] = mesh.vertices[idx[i] + 1];
+                z[i] = mesh.vertices[idx[i] + 2];
             }
             bary(x[0], z[0], x[1], z[1], x[2], z[2], xQuery, zQuery, bary);
             if (inside(bary)) {
@@ -47,12 +44,12 @@ public class Terrain extends Entity {
 
     public Vector3f height(Vector3f origin, Vector3f movement) {
         tempPos.set(origin).add(movement);
-        for (int t = 0; t < terrain.indices.length; t += 3) {
+        for (int t = 0; t < mesh.indices.length; t += 3) {
             for (int i = 0; i < 3; i++) {
-                idx[i] = terrain.indices[t + i] * 3;
-                x[i] = terrain.vertices[idx[i]];
-                y[i] = terrain.vertices[idx[i] + 1];
-                z[i] = terrain.vertices[idx[i] + 2];
+                idx[i] = mesh.indices[t + i] * 3;
+                x[i] = mesh.vertices[idx[i]];
+                y[i] = mesh.vertices[idx[i] + 1];
+                z[i] = mesh.vertices[idx[i] + 2];
             }
 
             normal(x, y, z, faceNormal);
@@ -67,12 +64,12 @@ public class Terrain extends Entity {
             }
         }
 
-        for (int t = 0; t < terrain.indices.length; t += 3) {
+        for (int t = 0; t < mesh.indices.length; t += 3) {
             for (int i = 0; i < 3; i++) {
-                idx[i] = terrain.indices[t + i] * 3;
-                x[i] = terrain.vertices[idx[i]];
-                y[i] = terrain.vertices[idx[i] + 1];
-                z[i] = terrain.vertices[idx[i] + 2];
+                idx[i] = mesh.indices[t + i] * 3;
+                x[i] = mesh.vertices[idx[i]];
+                y[i] = mesh.vertices[idx[i] + 1];
+                z[i] = mesh.vertices[idx[i] + 2];
             }
 
             normal(x, y, z, faceNormal);

@@ -1,5 +1,6 @@
 package object;
 
+import entity.Terrain;
 import org.joml.*;
 import org.joml.Math;
 import property.*;
@@ -113,7 +114,7 @@ public class Camera implements Machine {
 
         if (Main.scene.terrain != null) {
             Terrain terrain = Main.scene.terrain;
-            if (terrain.meshes[0].linked()) {
+            if (terrain.mesh.linked()) {
                 position = terrain.height(position, new Vector3f(movement));
             }
         }
@@ -206,8 +207,8 @@ public class Camera implements Machine {
     private static final Vector3f rayDir = new Vector3f();
 
     public static double collision(Vector3f camera, Entity entity) {
-        Mesh mesh = entity.meshes[entity.state];
-        Mesh.Collider collider = mesh.collider;
+
+        Mesh.Collider collider = entity.mesh.collider;
 
         if (collider == null || collider.min == null || collider.max == null) {
             return -1.0f;

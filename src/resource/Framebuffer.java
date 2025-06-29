@@ -10,21 +10,21 @@ import java.util.*;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public final class NewFBO implements Resource {
+public final class Framebuffer implements Resource {
 
     private record Attachment(int internalFormat, int format, int type, boolean linear) {};
 
-    private final int width, height;
+    public final int width, height;
     private final List<Attachment> attachments = new ArrayList<>();
     private final IntBuffer viewport = BufferUtils.createIntBuffer(4);
     boolean depth = false;
 
-    public NewFBO(int width, int height) {
+    public Framebuffer(int width, int height) {
         this.width = width;
         this.height = height;
     }
 
-    public NewFBO attach(int channels, int bits, boolean signed, boolean floating, boolean linear) {
+    public Framebuffer attach(int channels, int bits, boolean signed, boolean floating, boolean linear) {
 
         int internalFormat = 0;
         int format = 0;
@@ -94,7 +94,7 @@ public final class NewFBO implements Resource {
 
     }
 
-    public NewFBO depth(int bits, boolean stencil, boolean floating, boolean linear) {
+    public Framebuffer depth(int bits, boolean stencil, boolean floating, boolean linear) {
 
         if (depth) {
             return this;
@@ -176,7 +176,7 @@ public final class NewFBO implements Resource {
     }
 
     int framebufferId;
-    int[] textures;
+    public int[] textures;
     int[] drawBuffers;
 
     @Override

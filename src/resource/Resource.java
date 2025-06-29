@@ -28,7 +28,7 @@ public interface Resource extends Runnable, Serializable {
 
     default void run() {
         try {
-            Console.log("Loading", this.toString());
+            Console.log("Loading", this.getClass().getSimpleName(), this.toString());
             this.load();
             this.buffer();
             this.unload();
@@ -38,7 +38,8 @@ public interface Resource extends Runnable, Serializable {
         }
     }
 
-    default Resource direct() {
+    @SuppressWarnings("unchecked")
+    default <T extends Resource> T direct() {
         try {
             this.load();
             this.buffer();
@@ -48,19 +49,20 @@ public interface Resource extends Runnable, Serializable {
         } catch (Exception e) {
             Console.error(e);
         }
-        return this;
+        return (T) this;
     }
 
-    default Resource queue() {
+    @SuppressWarnings("unchecked")
+    default <T extends Resource> T queue() {
         LOADER.submit(this);
-        return this;
+        return (T) this;
     }
 
     static void process() {
         Resource loaded;
         while ((loaded = LOADED.poll()) != null) {
             try {
-                Console.log("Linking", loaded.toString());
+                Console.log("Linking", loaded.getClass().getSimpleName(), loaded.toString());
                 loaded.link();
                 LINKED.add(loaded);
                 System.gc();

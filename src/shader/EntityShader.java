@@ -1,5 +1,6 @@
 package shader;
 
+import engine.Console;
 import engine.Manager;
 import engine.Scene;
 import object.*;
@@ -16,11 +17,13 @@ public class EntityShader extends Shader<Scene> {
 
     private void render(Entity entity) {
         uniform("model", entity.model.buffer());
-        entity.meshes[entity.state].bind();
-        entity.materials[entity.state].bind();
-        glDrawElements(GL_TRIANGLES, entity.meshes[entity.state].index, GL_UNSIGNED_INT, 0);
-        entity.materials[entity.state].unbind();
-        entity.meshes[entity.state].unbind();
+        uniform("state", entity.state);
+        uniform("states", entity.states);
+        entity.mesh.bind();
+        entity.material.bind();
+        glDrawElements(GL_TRIANGLES, entity.mesh.index, GL_UNSIGNED_INT, 0);
+        entity.material.unbind();
+        entity.mesh.unbind();
     }
 
     @Override
@@ -30,7 +33,7 @@ public class EntityShader extends Shader<Scene> {
         uniform("time",                 Manager.time());
         uniform("texture1",             0);
         for (Entity entity : scene.foreground) {
-            if (entity.meshes[entity.state].linked() && entity.materials[entity.state].linked()) {
+            if (entity.mesh.linked() && entity.material.linked()) {
                 render(entity);
             }
         }
