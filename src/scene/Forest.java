@@ -58,6 +58,7 @@ public class Forest extends Scene implements Machine {
         sun1.rotation.y += 0.1f;
         sun2.rotation.y -= 0.1f;
         tower.state = tower.state == 0 ? 1 : 0;
+        foreground.getFirst().rotation.add(1, 1, 1);
     }
 
 }
