@@ -177,6 +177,9 @@ public class Manager {
         }
 
         glfwTerminate();
+        
+        System.gc();
+
     }
 
     public static void stop() {
