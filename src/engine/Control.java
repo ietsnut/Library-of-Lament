@@ -6,6 +6,7 @@ import org.lwjgl.glfw.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Control {
+
     private static final boolean[] keys = new boolean[65536];
     private static float mouseX, mouseY, prevMouseX, prevMouseY, deltaMouseX, deltaMouseY, dWheel;
     private static boolean mouseLocked, firstMouse, holding;
